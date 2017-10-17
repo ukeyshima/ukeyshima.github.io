@@ -44,177 +44,27 @@ void main(void){
 }
 </script>
 <script src="main.js" type="text/javascript"></script>
+<link rel="stylesheet" href="../src/main.css">
 <style>
-        @keyframes fadeIn {
-            from {opacity: 0}
-            to {opacity: 0.7}
-        }
-        @keyframes fadeIn2 {
-            from {background:rgba(0,0,0,0.0)}
-            to {background:rgba(30,15,30,0.2)}
-        }
-        @font-face {
-            font-family:avenger;
-            src: url(../font/avenger.ttf);
-        }
-        body{
-            margin:0;
-            text-align:center;
-            overflow:hidden;
-        }
-        #canvas{
-            width:100vw;
-            height:100vh;
-            z-index:0;
-        }
-#title{
-    position: absolute;
-    bottom:5vh;
-    left:5vw;
-    margin: auto;
-    padding:0;
-    font-size:7vw;
-    font-family:avenger;
-    color:rgb(126,126,126);
-    z-index:1;
-}
-p{
-    margin:0;
-    padding:0;
-}
-
-#link{
-    position: absolute;
-    margin:0;
-    padding:0;
-    top:10px;
-    right:15px;
-    width:50px;
-    width:-webkit-calc(40px + (100vw - 150px) / 70);
-    width:-moz-calc(40px + (100vw - 150px) / 70);
-    width:calc(40px + (100vw - 150px) / 70);
-    height:35px;
-    height:-webkit-calc(25px + (100vw - 150px) / 70);
-    height:-moz-calc(25px + (100vw - 150px) / 70);
-    height:calc(25px + (100vw - 150px) / 70);
-    z-index:4;
-}
- .linkChild{
-    position:absolute;
-    margin:0;
-    padding:0;
-    right:20px;
-    bottom:0;
-    width:40px;
-    height:2px;
-    opacity:0.7;
-    background:rgb(126,126,126);
-    z-index:3;
-}
-#up{
-    top:17.66px;
-    top:-webkit-calc((40px + (100vw - 150px) / 70) / 3);
-    top:-moz-calc((40px + (100vw - 150px) / 70) / 3);
-    top:calc((40px + (100vw - 150px) / 70) / 3);
-}
-#middle{
-    top:26.49px;
-    top:-webkit-calc((40px + (100vw - 150px) / 70) / 2);
-    top:-moz-calc((40px + (100vw - 150px) / 70) / 2);
-    top:calc((40px + (100vw - 150px) / 70) / 2);
-}
-#low{
-    top:35.32px;
-    top:-webkit-calc((40px + (100vw - 150px) / 70) * 2 / 3);
-    top:-moz-calc((40px + (100vw - 150px) / 70) * 2 / 3);
-    top:calc((40px + (100vw - 150px) / 70) * 2 / 3);
-}
-#check{
-    visibility:hidden;
-}
-#check:checked ~ #middle{
-    transition-duration: 1s;
-    transform:rotate(90deg); 
-}
-#check:checked ~ #up{
-    transition-duration: 1s;
-    transform:translateY(8.83px);
-    transform:-webkit-translateY(-webkit-calc((40px + (100vw - 150px) / 70) / 6)); 
-    transform:-moz-translateY(-moz-calc((40px + (100vw - 150px) / 70) / 6)); 
-    transform:translateY(calc((40px + (100vw - 150px) / 70) / 6)); 
-}
-#check:checked ~ #low{
-    transition-duration: 1s;
-    transform:translateY(-8.83px);
-    transform:-webkit-translateY(-webkit-calc(-(40px + (100vw - 150px) / 70) / 6)); 
-    transform:-moz-translateY(-moz-calc(-(40px + (100vw - 150px) / 70) / 6)); 
-    transform:translateY(calc(-(40px + (100vw - 150px) / 70) / 6)); 
-}
-#linkDiv{
-    position:absolute;
-    top:0;
-    right: 0;
-    width:250px;
-    height:100vh;
-    overflow:scroll;
-    z-index:2;
-}
-#check:checked ~ #linkDiv{
-    animation:fadeIn2 1s ease 0s 1 normal forwards running;
-}
-#linkDiv div{
-    position:absolute;
-    width:80%;
-    height:120px;
-    left:10%;
-    opacity:0.0;
-    background-size: cover;
-    text-align:center;
-}
-#check:checked ~ #linkDiv div{
-    animation:fadeIn 1s ease 0s 1 normal forwards running;
-}
-#check:checked ~ #linkDiv div a{
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
 #img1{
-    top:100px;
-    background-position:center;
     background-image:url("../image/image0.png");
 }
 #img2{
-    top:250px;
-    background-position:center;
     background-image:url("../image/image1.png");
 }
 #img3{
-    top:400px;
-    background-position:center;
     background-image:url("../image/image2.png");
 }
 #img4{
-    top:550px;
-    background-position:center;
     background-image:url("../image/image3.png");
 }
 #img5{
-    top:700px;
-    background-position:center;
     background-image:url("../image/image4.png");
 }
 #img6{
-    top:850px;
-    background-position:center;
     background-image:url("../image/image5.png");
 }
 #img7{
-    top:1000px;
-    background-position:center;
     background-image:url("../image/image7.png");
 }
 </style>
