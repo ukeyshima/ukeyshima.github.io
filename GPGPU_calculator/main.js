@@ -1,10 +1,10 @@
 window.addEventListener("load", function () {
-    const r = document.getElementById("result");
-    r.width = window.innerWidth;
-    r.height = window.innerHeight * 0.2;
-    const ctx = r.getContext("2d");
+    const result = document.getElementById("result");
+    result.width = window.innerWidth;
+    result.height = window.innerHeight * 0.2;
+    const ctx = result.getContext("2d");
     ctx.fillStyle = "#113311";
-    ctx.fillRect(0, 0, r.width, r.height);
+    ctx.fillRect(0, 0, result.width, result.height);
     const c = document.getElementById("calculation");
     let cw = window.innerWidth;
     let ch = Math.floor(window.innerHeight * 0.8);
@@ -126,13 +126,13 @@ window.addEventListener("load", function () {
     let transformFeedback = gl2.createTransformFeedback();
     let usegpu=false;
     c.addEventListener("mousedown", function (e) {
-        gl.uniform2fv(uniLocation[1], [e.clientX, e.clientY-r.height]);
+        gl.uniform2fv(uniLocation[1], [e.clientX, e.clientY-result.height]);
         gl.uniform1i(uniLocation[2], true);
         gl.clear(gl.COLOR_BUFFER_BIT);
         gl.uniform2fv(uniLocation[0], [cw, ch]);
         gl.drawElements(gl.TRIANGLES, index.length, gl.UNSIGNED_SHORT, 0);
         gl.flush();
-        let keyNumber = Math.floor((ch - (e.clientY-r.height)) / (ch / 5.0)) * 4.0 + Math.floor((e.clientX) / (cw / 4.0));
+        let keyNumber = Math.floor((ch - (e.clientY-result.height)) / (ch / 5.0)) * 4.0 + Math.floor((e.clientX) / (cw / 4.0));
         let operator = "undifined";
         switch (keyNumber) {
             case 0:
@@ -187,7 +187,7 @@ window.addEventListener("load", function () {
                 keyBuffer = new Array();
                 script = "";
                 ctx.fillStyle = "#113311";
-                ctx.fillRect(0, 0, r.width, r.heights);
+                ctx.fillRect(0, 0, result.width, result.heights);
                 break;
             case 17:
                 usegpu=!usegpu;
@@ -285,15 +285,15 @@ window.addEventListener("load", function () {
                 script2 += ".0";
             }
         }
-        let fontSize = r.height*0.6;
-        if (script.length * fontSize*0.7 > r.width ) fontSize = r.width/ script.length/0.7;
+        let fontSize = result.height*0.6;
+        if (script.length * fontSize*0.7 > result.width ) fontSize = result.width/ script.length/0.7;
         ctx.font = fontSize + "px 'ＭＳ Ｐゴシック'";
         ctx.fillStyle = "#113311";
-        ctx.fillRect(0, 0, r.width, r.height);
+        ctx.fillRect(0, 0, result.width, result.height);
         ctx.fillStyle = "#bbbbbb";
         ctx.textBaseline = "middle";
         ctx.textAlign = "right";
-        ctx.fillText(script2, r.width, r.height / 2);
+        ctx.fillText(script2, result.width, result.height / 2);
     });
     c.addEventListener("mouseup", function (e) {
         gl.uniform1i(uniLocation[2], false);
