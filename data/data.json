@@ -1,0 +1,15 @@
+{
+    "webgl": [
+        {"name":"particleFlame"},
+        {"name":"glitch"}
+    ],
+    "webGL rayMarching": [
+        {"name":"reflectionBall"},
+        {"name":"cube"},
+        {"name":"mountain"},
+        {"name":"mandelBox"}
+    ],
+    "other": [
+        {"name":"gpgpu_calculator"}
+    ]
+}
