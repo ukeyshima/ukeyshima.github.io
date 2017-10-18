@@ -12,7 +12,7 @@ window.addEventListener("load",function(){
             data[key].forEach(function(i){
                 let div=document.createElement("div");
                 div.id=i.name;
-                div.style.backgroundImage="url(image/"+i.name+".png)"
+                div.style.backgroundImage="url(image/"+i.name+".png)";
                 works.appendChild(div);
                 let a=document.createElement("a");
                 a.href=i.name+"/";

@@ -1,10 +1,14 @@
 @keyframes fadeIn {
-    from {opacity: 0}
-    to {opacity: 0.7}
+    from {opacity: 0;
+            z-index:-1;}
+    to {opacity: 0.85;
+        z-index:2;}
 }
 @keyframes fadeIn2 {
-    from {background:rgba(0,0,0,0.0)}
-    to {background:rgba(30,15,30,0.2)}
+    from {background:rgba(0,0,0,0.0);
+        z-index:-1;}
+    to {background:rgba(30,15,30,0.2);
+    z-index:2;}
 }
  @font-face {
     font-family:avenger;
@@ -109,14 +113,14 @@ p{
     width: 250px;
     height:100vh;
     overflow:scroll;
-    z-index:2;
+    z-index:-1;
 }
 #check:checked ~ #linkDiv{
     animation:fadeIn2 1s ease 0s 1 normal forwards running;
 }
 #linkDiv div{
     position:absolute;
-    width:80%;
+    width:85%;
     height:120px;
     left:10%;
     opacity:0.0;

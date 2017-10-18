@@ -134,7 +134,6 @@ window.addEventListener("load", function () {
         var arrBuffer = new ArrayBuffer(particleNum*3 * Float32Array.BYTES_PER_ELEMENT);
         arrBuffer=new Float32Array(arrBuffer);
         gl.getBufferSubData(gl.ARRAY_BUFFER, 0, arrBuffer);
-        console.log(arrBuffer);
     });
 
     function create_shader(id) {

@@ -10,6 +10,6 @@
         {"name":"mandelBox"}
     ],
     "other": [
-        {"name":"gpgpu_calculator"}
+        {"name":"gpgpuCalculator"}
     ]
 }
