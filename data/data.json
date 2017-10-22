@@ -8,7 +8,7 @@
         {"name":"cube"},
         {"name":"mountain"},
         {"name":"mandelBox"},
-        {"name":"randomHeight"}
+        {"name":"randomizeHeight"}
     ],
     "other": [
         {"name":"gpgpuCalculator"}
