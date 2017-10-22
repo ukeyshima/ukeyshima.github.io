@@ -7,7 +7,8 @@
         {"name":"reflectionBall"},
         {"name":"cube"},
         {"name":"mountain"},
-        {"name":"mandelBox"}
+        {"name":"mandelBox"},
+        {"name":"randomHeight"}
     ],
     "other": [
         {"name":"gpgpuCalculator"}
