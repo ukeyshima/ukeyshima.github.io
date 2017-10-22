@@ -11,6 +11,6 @@
         {"name":"randomizeHeight"}
     ],
     "other": [
-        {"name":"gpgpuCalculator"}
+        {"name":"gpgpuCalculator","description":"<br> GPU上で計算ができる計算機です"}
     ]
 }

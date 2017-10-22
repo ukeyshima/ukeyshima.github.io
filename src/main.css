@@ -10,7 +10,7 @@
     to {background:rgba(30,15,30,0.2);
     z-index:2;}
 }
- @font-face {
+@font-face {
     font-family:avenger;
     src: url(../font/avenger.ttf);
 }
@@ -55,7 +55,7 @@ p{
     height:calc(25px + (100vw - 150px) / 70);
     z-index:4;
 }
- .linkChild{
+.linkChild{
     position:absolute;
     margin:0;
     padding:0;

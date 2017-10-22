@@ -17,6 +17,14 @@ window.addEventListener("load",()=>{
                 const a=document.createElement("a");
                 a.href=i.name+"/";
                 div.appendChild(a);
+                const title=document.createElement("p");
+                a.appendChild(title);
+                title.innerHTML=i.name;
+                if(i.description){
+                    const description=document.createElement("p");
+                    a.appendChild(description);
+                    description.innerHTML=i.description;
+                }
             });
         }
     });
