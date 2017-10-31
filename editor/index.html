@@ -1,103 +1,160 @@
 <!DOCTYPE html>
 <html lang="ja">
-    <head>
-        <meta charset="utf-8">
-        <script src="main.js"></script>
-        <script src="../src/link.js"></script>
-        <link rel="stylesheet" href="../src/main.css">
-        <script src="ace-builds-master/src/ace.js"></script>
-        <style>
-            body{
-                background:#ddd;
-                overflow:hidden;
-                margin:0;
-                text-align:left;
-            }
-            #menu{
-                background-color:#eee;
-            }
-            #menu button{
-                height:40px;
-                width:100px;
-                font-size:20px;
-                background-color:#eee;
-                border:none;
-                color:#444;
-                margin:0;
-                padding:0;
-                outline:0;
-            }
-            #menu :hover{
-                color:#e38;
-            }
-            #editor {
-			    width: 100vw;
-			    height: 90vh;
-                float:left;
-                overflow:visible
-		    }
-            #top button{
-                width:50px;
-                height:50px;
-                font-size:30px;
-                background-color:#eee;
-                border-radius: 100px;
-                border: none;
-                color:#e38;
-                outline:0;
-            }
-            #run{
-                margin:0 0 0 20px;
-            }
-            .dropdown{
-                width:100px;
-                height:60px;
-                position:absolute;
-                background-color:#fff;
-                z-index:5;
-                border-radius:10px;
-                visibility: hidden;
-                color:#444;
-            }
-            .dropdown button{
-                width:100px;
-                height:30px;
-                background-color:#fff;
-                border:none;
-                font-size:15px;
-                border-radius:10px;
-                outline:0;
-            }
-            #filemenu{
-                top:10px;
-                left:20px;
-            }
-            #modemenu{
-                top:10px;
-                left:150px;
-            }
-            #title{
-                z-index:-1;
-            }
-        </style>
-    </head>
-    <body>
-        <input type="file" id="selfile" hidden="true">
-        <div id="menu">
-            <button id="file">file</button>
-            <button id="mode">mode</button>
-        </div>
-        <div class="dropdown" id="filemenu">
-            <button id="save">save</button>
-            <button id="load">load</button>
-        </div>
-        <div class="dropdown" id="modemenu">
-            <button id="autoReflesh">autoReflesh</button>
-        </div>
-        <div id="top">
-                <button id="run">▶︎</button>
-                <button id="stop">■</button>
-        </div>
-        <div id="editor"></div>
-    </body>
+
+<head>
+    <meta charset="utf-8">
+    <script src="main.js"></script>
+    <script src="../src/link.js"></script>
+    <link rel="stylesheet" href="../src/main.css">
+    <script src="ace-builds-master/src/ace.js"></script>
+    <style>
+        body {
+            background: #ddd;
+            overflow: hidden;
+            margin: 0;
+            text-align: left;
+        }
+
+        #menu {
+            background-color: #eee;
+        }
+
+        #menu button {
+            height: 40px;
+            width: 100px;
+            font-size: 20px;
+            background-color: #eee;
+            border: none;
+            color: #444;
+            margin: 0;
+            padding: 0;
+            outline: 0;
+        }
+
+        #menu :hover {
+            color: #e38;
+        }
+
+        #top button {
+            width: 50px;
+            height: 50px;
+            font-size: 30px;
+            background-color: #eee;
+            border-radius: 100px;
+            border: none;
+            color: #e38;
+            outline: 0;
+        }
+
+        #run {
+            margin: 0 0 0 20px;
+        }
+
+        .dropdown {
+            position: absolute;
+            background-color: #fff;
+            z-index: 5;
+            border-radius: 10px;
+            visibility: hidden;
+            color: #444;
+        }
+
+        .dropdown button {
+            width: 130px;
+            height: 30px;
+            background-color: #fff;
+            border: none;
+            font-size: 15px;
+            border-radius: 10px;
+            outline: 0;
+        }
+
+        #filemenu {
+            top: 10px;
+            left: 20px;
+        }
+
+        #modemenu {
+            top: 10px;
+            left: 150px;
+        }
+        #addmenu{
+            top:100px;
+        }
+
+        #title {
+            z-index: -1;
+        }
+
+        #tab {
+            width: 100vw;
+            height: 30px;
+            background-color: #ccc;
+        }
+
+        #tab button {
+            margin: 0 2px;
+            padding:0 10px;
+            height: 30px;
+            font-size: 18px;
+            background-color:#ccc;
+            outline:0;
+            color:#444;
+            border-style: hidden double;
+            border-color:#888;
+            text-align: center;
+        }
+
+        .editor {
+            width: 100vw;
+            height: 90vh;
+            float: left;
+            position:absolute;
+            z-index:2;
+        }
+        iframe{
+            position:absolute;
+            left:70vw;
+            width:29vw;
+            height:100vh;
+            z-index:1;
+        }
+    #menu button:hover{
+        color:#e38;
+    }
+
+    </style>
+</head>
+
+<body>
+    <input type="file" id="selfile" hidden="true">
+    <div id="menu">
+        <button id="file">file</button>
+        <button id="mode">mode</button>
+    </div>
+    <div class="dropdown" id="filemenu">
+        <button id="save">save</button><br>
+        <button id="load">load</button>
+    </div>
+    <div class="dropdown" id="modemenu">
+        <button id="autoReflesh">autoReflesh</button>
+    </div>
+    <div id="top">
+        <button id="run">▶︎</button>
+        <button id="stop">■</button>
+    </div>
+    <div id="tab">
+        <button id="add">+</button>
+        <button id="view">view</button>
+    </div>
+    <div class="dropdown" id="addmenu">
+        <button id="html" class="html">html</button><br>
+        <button id="js" class="javascript">javascript</button><br>
+        <button id="vs" class="glsl">vertexShader</button><br>
+        <button id="fs" class="glsl">fragmentShader</button>
+    </div>
+    <div class="editor" id="viewEditor"></div>
+    <iframe id="iframe"></iframe>
+</body>
+
 </html>

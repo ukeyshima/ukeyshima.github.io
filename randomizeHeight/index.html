@@ -39,25 +39,7 @@
                 }
                 break;
             }
-            float t1=(1.0-fract(rPos.z))/ray.z;
-            vec3 d1=rPos+t1*ray;
-            float t2=(1.0-fract(rPos.x))/ray.x;
-            vec3 d2=rPos+t2*ray;
-            float t3=(-fract(rPos.x))/ray.x;
-            vec3 d3=rPos+t3*ray;
-            float t4=(-fract(rPos.z))/ray.z;
-            vec3 d4=rPos+t4*ray;
-            if(ray.z>0.0 && d1.x>=floor(rPos.x) && d1.x<=floor(rPos.x)+1.0 && abs(distance)>=length(t1*ray)){
-                rLen+=length(t1*ray)+0.01;
-            }else if(ray.x>0.0 && d2.z>=floor(rPos.z) && d2.z<=floor(rPos.z)+1.0 && abs(distance)>=length(t2*ray)){
-                rLen+=length(t2*ray)+0.01;
-            }else if(ray.x<0.0 && d3.z>=floor(rPos.z) && d3.z<=floor(rPos.z)+1.0 && abs(distance)>=length(t3*ray)){
-                rLen+=length(t3*ray)+0.01;
-            }else if(ray.z<0.0 && d4.x>=floor(rPos.x) && d4.x<=floor(rPos.x)+1.0 && abs(distance)>=length(t4*ray)){
-                rLen+=length(t4*ray)+0.01;
-            }else{
-                rLen+=distance;
-            }
+            rLen += min(min((step(0.0,ray.x)-fract(rPos.x))/ray.x, (step(0.0,ray.z)-fract(rPos.z))/ray.z)+0.01,distance);
             rPos=origin+rLen*ray;
             if(rLen>maxDist){
                 break;
