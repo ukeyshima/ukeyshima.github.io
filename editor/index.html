@@ -17,10 +17,12 @@
 
         #menu {
             background-color: #eee;
+            height:30px;
+            width:100vw;
         }
 
         #menu button {
-            height: 40px;
+            height: 30px;
             width: 100px;
             font-size: 20px;
             background-color: #eee;
@@ -29,12 +31,11 @@
             margin: 0;
             padding: 0;
             outline: 0;
+            position:absolute;
         }
-
-        #menu :hover {
-            color: #e38;
+        #mode{
+            left:100px;
         }
-
         #top button {
             width: 50px;
             height: 50px;
@@ -92,24 +93,33 @@
             background-color: #ccc;
         }
 
-        #tab button {
+        #tab button{
             margin: 0 2px;
             padding:0 10px;
-            height: 30px;
-            font-size: 18px;
-            background-color:#ccc;
+            height: 29px;
+            float:left;
+            font-size: 15px;
             outline:0;
-            color:#444;
-            border-style: hidden double;
+            border-style: hidden solid;
             border-color:#888;
+            border-width:1px;
             text-align: center;
+            vertical-align: middle;
         }
-
+        #view{
+            background-color:#e38;
+            color:#fff;
+        }
+        #add{
+            background-color:#ccc;
+            color:#000;
+        }
         .editor {
             width: 100vw;
-            height: 90vh;
+            height: calc(100vh - 100px);
             float: left;
             position:absolute;
+            top:110px;
             z-index:2;
         }
         iframe{
@@ -119,10 +129,17 @@
             height:100vh;
             z-index:1;
         }
-    #menu button:hover{
-        color:#e38;
-    }
-
+        #menu button:hover{
+            color:#e38;
+        }
+        .dropdown button:hover{
+            color:#e38;
+        }
+        #tab button p{
+            float:left;
+            margin:0 10px 0 0;
+            padding:0;
+        }
     </style>
 </head>
 
@@ -153,8 +170,7 @@
         <button id="vs" class="glsl">vertexShader</button><br>
         <button id="fs" class="glsl">fragmentShader</button>
     </div>
-    <div class="editor" id="viewEditor"></div>
-    <iframe id="iframe"></iframe>
+    <div class="editor" id="editor"></div>
 </body>
 
 </html>

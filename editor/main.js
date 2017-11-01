@@ -1,177 +1,187 @@
 window.addEventListener("load", function () {
-    let iframe = document.getElementById("iframe");
-    const viewEditor = ace.edit("viewEditor");
-    viewEditor.setTheme("ace/theme/dawn");
-    viewEditor.setFontSize(23);
-    viewEditor.getSession().setMode("ace/mode/html");
-    viewEditor.setValue(iframe.contentDocument.documentElement.outerHTML);
-    viewEditor.setReadOnly(true);
-    viewEditor.getDisplayIndentGuides();
-    const { HashHandler } = require('ace/keyboard/hash_handler');
-    const keyboardHandler = new HashHandler();
-    keyboardHandler.addCommand({
-        name: "run",
-        bindKey: { win: 'Ctrl+r', mac: 'Command+r' },
-        exec: () => {
-            const e = document.createEvent("MouseEvents");
-            e.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-            document.getElementById("run").dispatchEvent(e);
-        },
-        readOnly: true
-    });
-    keyboardHandler.addCommand({
-        name: "save-event",
-        bindKey: { win: 'Ctrl+s', mac: 'Command+s' },
-        exec: () => {
-            const e = document.createEvent("MouseEvents");
-            e.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-            document.getElementById("save").dispatchEvent(e);
-        },
-        readOnly: true
-    });
-
-    viewEditor.keyBinding.addKeyboardHandler(keyboardHandler);
-
+    const editor = ace.edit("editor");
+    editor.setTheme("ace/theme/dawn");
+    editor.setFontSize(23);
+    editor.getSession().setMode("ace/mode/html");
+    let htmlEditor = null;
+    let iframe = null;
+    let autoReflesh = false;
     let obj = new Array();
-    let htmlEditor=null;
-    let active={
-     type:"html",
-     button:document.getElementById("view"),
-     editorFrame:document.getElementById("viewEditor"),
-     editor:viewEditor 
+    let id = 0;
+    let active = {
+        id: id,
+        type: "html",
+        removed:false
     }
+    obj.push(active);
     document.addEventListener("mousedown", function () {
         document.getElementById("filemenu").style.visibility = event.target == document.getElementById("file") ? "visible" : "hidden";
         document.getElementById("modemenu").style.visibility = event.target == document.getElementById("mode") ? "visible" : "hidden";
         document.getElementById("addmenu").style.visibility = event.target == document.getElementById("add") ? "visible" : "hidden";
     });
-    let addEditor=document.getElementById("addmenu").getElementsByTagName("button");
-    for(let i=0;i<addEditor.length;i++){
-        addEditor[i].addEventListener("mousedown",function(){
-            let button = document.createElement("button");
-            document.getElementById("tab").appendChild(button);
+    let addEditor = document.getElementById("addmenu").getElementsByTagName("button");
+    for (let i = 0; i < addEditor.length; i++) {
+        addEditor[i].addEventListener("mousedown", function () {
+            id++;
+            if (this.className == "html") htmlEditor = id;
+
             let tab = document.getElementById("tab").getElementsByTagName("button");
-            for (let j = 0; j < tab.length; j++) {
-                tab[j].style.backgroundColor = "#ccc";
-                tab[j].style.color = "#000";
+            for (let i = 0; i < tab.length; i++) {
+                tab[i].style.backgroundColor = "#ccc";
+                let p=tab[i].getElementsByTagName("p");
+                if(tab[i]==document.getElementById("view"))tab[i].style.color="#000";
+                for(let j=0;j<p.length;j++){
+                    p[j].style.color="#000";
+                }
             }
+            let button = document.createElement("button");
+            button.id = id;
+            document.getElementById("tab").appendChild(button);
             button.style.backgroundColor = "#e38";
             button.style.color = "#eee";
-            button.innerHTML = this.textContent;
-            let editors = document.getElementsByClassName("editor");
-            for (let j = 0; j < editors.length; j++) {
-                editors[j].style.visibility = "hidden";
-            }
-            let editorFrame = document.createElement("div");
-            editorFrame.id = this==document.getElementById("html")?"htmlEditor" :"editor"+obj.length;
-            editorFrame.className = "editor";
-            editorFrame.style.visibility = "visible";
-            editorFrame.style.width = run ? "70vw" : "100vw";
-            document.body.appendChild(editorFrame);
-            let editor = ace.edit(this==document.getElementById("html")?"htmlEditor" :"editor"+obj.length);
-            editor.setTheme("ace/theme/dawn");
-            editor.setFontSize(23);
-            editor.getSession().setMode("ace/mode/"+(this==document.getElementById("html")?"html" :this.className));
-            editor.keyBinding.addKeyboardHandler(keyboardHandler);
-            if(this==document.getElementById("html"))htmlEditor=editor;
+            let close=document.createElement("p");
+            button.appendChild(close);
+            close.innerHTML="×";
+            let name=document.createElement("p");
+            button.appendChild(name);
+            name.innerHTML=this.textContent;
+            sessionStorage.setItem(active.id, editor.getValue());
+            editor.setValue("");
+            editor.getSession().setMode("ace/mode/" + this.className);
             obj.push({
-                type: this.className,
-                button: button,
-                editorFrame: editorFrame,
-                editor: editor
+                id: id,
+                type: this.textContent,
+                removed:false
             });
-            let object=obj[obj.length-1];
-            active=object;
+            let object = obj[obj.length - 1];
+            if (this.className == "html") {
+                this.disabled="disabled";
+                this.innerHTML="";
+            }
             button.addEventListener("mousedown", function () {
                 let tab = document.getElementById("tab").getElementsByTagName("button");
                 for (let i = 0; i < tab.length; i++) {
                     tab[i].style.backgroundColor = "#ccc";
-                    tab[i].style.color = "#000";
-                }
-                this.style.backgroundColor = "#e38";
-                this.style.color = "#eee";
-                for (let i = 0; i < editors.length; i++) {
-                    editors[i].style.visibility = "hidden";
-                }
-                editorFrame.style.visibility = "visible";
-                active=object;
-            });
- 
-            if(this==document.getElementById("html")){
-                document.getElementById("addmenu").removeChild(this);
-            }
-            editor.session.on("change",function(){
-                if(autoReflesh){
-                    try{
-                        iframe.contentWindow.location.reload(true);
-                        setTimeout(function () {
-                            iframe.contentDocument.open();
-                            if(!document.getElementById("html"))iframe.contentDocument.write(htmlEditor.getValue());
-                            iframe.contentDocument.close();
-                            for (let i = 0; i < obj.length; i++) {
-                                if(obj[i].type!="html"){
-                                let script = iframe.contentDocument.createElement("script");
-                                if(obj[i].type!="javascript")script.type=obj[i].type;
-                                iframe.contentDocument.head.appendChild(script);
-                                script.text = obj[i].editor.getValue();
-                                }
-                            }
-                        }, 1);
-                    }catch(e){
-    
+                    if(tab[i]==document.getElementById("view"))tab[i].style.color="#000";
+                    let p=tab[i].getElementsByTagName("p");
+                    for(let j=0;j<p.length;j++){
+                        p[j].style.color="#000";
                     }
                 }
+                this.style.backgroundColor = "#e38";
+                name.style.color = "#eee";
+                sessionStorage.setItem(active.id, editor.getValue());
+                editor.setValue(sessionStorage.getItem(this.id));
+                editor.getSession().setMode("ace/mode/" + object.type);
+                active = object;
             });
+            close.addEventListener("mousedown",function(){
+                if (this.parentElement.getElementsByTagName("p")[1].innerHTML == "html"){
+                    htmlEditor=null;
+                    document.getElementById("html").disabled="";
+                    document.getElementById("html").innerHTML="html";
+                }
+                document.getElementById("tab").removeChild(button);
+                object.removed=true;
+            });
+            button.addEventListener("mouseover", function () {
+                name.style.color = active.id == this.id ? "#000" : "#e38";
+                close.style.color = active.id == this.id ? event.target.innerHTML=="×"?"#fff":"#000" : event.target.innerHTML=="×"?"#000":"#e38";
+            });
+            button.addEventListener("mouseout", function () {
+                name.style.color = active.id == this.id ? "#fff" : "#000";
+                close.style.color = active.id == this.id ? event.target.innerHTML=="×"?"#000":"#fff" : event.target.innerHTML=="×"?"#fff":"#000";
+            });
+            active = object;
         });
     };
-    document.getElementById("run").addEventListener("mousedown", function () {
-        let editor = document.getElementsByClassName("editor");
-        for (let i = 0; i < editor.length; i++) {
-            editor[i].style.width = "70vw";
-        }
-        iframe.style.zIndex = 2;
-        for (let i = 0; i < editor.length; i++) {
-            editor[i].style.zIndex = 1;
-        }
-        iframe.contentWindow.location.reload(true);
-        setTimeout(function () {
-            iframe.contentDocument.open();
-            if(!document.getElementById("html"))iframe.contentDocument.write(htmlEditor.getValue());
-            iframe.contentDocument.close();
-            for (let i = 0; i < obj.length; i++) {
-            if(obj[i].type!="html"){
-                let script = iframe.contentDocument.createElement("script");
-                if(obj[i].type!="javascript")script.type=obj[i].type;
-                iframe.contentDocument.head.appendChild(script);
-                script.text = obj[i].editor.getValue();
+    editor.session.on("change", function () {
+        if (autoReflesh) {
+            try {
+                iframe.contentWindow.location.reload(true);
+                setTimeout(function () {                                
+                    sessionStorage.setItem(active.id, editor.getValue());
+                    iframe.contentDocument.open();
+                    if (htmlEditor) iframe.contentDocument.write(sessionStorage.getItem(htmlEditor));
+                    iframe.contentDocument.close();
+                    for (let i = 1; i < obj.length; i++) {
+                        if (obj[i].type != "html" && !obj[i].removed) {
+                            let script = iframe.contentDocument.createElement("script");
+                            if (obj[i].type != "javascript") script.type = obj[i].type;
+                            iframe.contentDocument.head.appendChild(script);
+                            script.text = sessionStorage.getItem(i);
+                        }
+                    }
+                }, 0);
+            } catch (e) {
+                console.log(e);
             }
-            }
-        }, 1);
+        }
     });
     document.getElementById("view").addEventListener("mousedown", function () {
-    active={
-     type:"html",
-     button:document.getElementById("view"),
-     editorFrame:document.getElementById("viewEditor"),
-     editor:viewEditor 
-    }
-        viewEditor.setValue(iframe.contentDocument.documentElement.outerHTML);
-        viewEditor.indent();
         let tab = document.getElementById("tab").getElementsByTagName("button");
         for (let i = 0; i < tab.length; i++) {
             tab[i].style.backgroundColor = "#ccc";
-            tab[i].style.color = "#000";
+            let p=tab[i].getElementsByTagName("p");
+            for(let j=0;j<p.length;j++){
+                p[j].style.color="#000";
+            }
         }
         this.style.backgroundColor = "#e38";
         this.style.color = "#eee";
-        let editor = document.getElementsByClassName("editor");
-        for (let i = 0; i < editor.length; i++) {
-            editor[i].style.visibility = "hidden";
+        editor.getSession().setMode("ace/mode/html");
+        active = {
+            id: 0,
+            type: "html"
         }
-        document.getElementById("viewEditor").style.visibility = "visible";
+        if (!iframe) {
+            iframe = document.createElement("iframe");
+            document.body.appendChild(iframe);
+        }
+        setTimeout(function () {
+            iframe.contentDocument.open();
+            if (htmlEditor) iframe.contentDocument.write(sessionStorage.getItem(htmlEditor));
+            iframe.contentDocument.close();
+            for (let i = 1; i < obj.length; i++) {
+                if (obj[i].type != "html" && !obj[i].removed) {
+                    let script = iframe.contentDocument.createElement("script");
+                    if (obj[i].type != "javascript") script.type = obj[i].type;
+                    iframe.contentDocument.head.appendChild(script);
+                    script.text = sessionStorage.getItem(i);
+                }
+            }
+            editor.setValue(iframe.contentDocument.documentElement.outerHTML);
+            if(!run){
+            document.body.removeChild(iframe);
+            iframe=null;
+            }
+        }, 1);
     });
     let run = false;
-
+    document.getElementById("run").addEventListener("mousedown", function () {
+        run = true;
+        this.style.backgroundColor = run ? "e38" : "#eee";
+        this.style.color = run ? "eee" : "#e38";
+        sessionStorage.setItem(active.id, editor.getValue());
+        document.getElementById("editor").style.width = "70vw";
+        if (!iframe) {
+            iframe = document.createElement("iframe");
+            document.body.appendChild(iframe);
+        }
+        setTimeout(function () {
+            iframe.contentDocument.open();
+            if (htmlEditor) iframe.contentDocument.write(sessionStorage.getItem(htmlEditor));
+            iframe.contentDocument.close();
+            for (let i = 1; i < obj.length; i++) {
+                if (obj[i].type != "html" && !obj[i].removed) {
+                    let script = iframe.contentDocument.createElement("script");
+                    if (obj[i].type != "javascript") script.type = obj[i].type;
+                    iframe.contentDocument.head.appendChild(script);
+                    script.text = sessionStorage.getItem(i);
+                }
+            }
+        }, 1);
+    });
     document.getElementById("run").addEventListener("mouseover", function () {
         this.style.backgroundColor = "#e38";
         this.style.color = "#eee";
@@ -180,78 +190,53 @@ window.addEventListener("load", function () {
         this.style.backgroundColor = run ? "#e38" : "#eee";
         this.style.color = run ? "#eee" : "#e38";
     });
-
-    let topButton = document.getElementById("top").getElementsByTagName("button");
-    for (let i = 0; i < topButton.length; i++) {
-        topButton[i].addEventListener("mouseover", function () {
-            this.style.backgroundColor = "#e38";
-            this.style.color = "#eee";
-        });
-        topButton[i].addEventListener("mouseout", function () {
-            this.style.backgroundColor = "#eee";
-            this.style.color = "#e38";
-        });
-    }
-    document.getElementById("run").addEventListener("mousedown", function () {
-        run = true;
+    document.getElementById("stop").addEventListener("mousedown", function () {
+        document.body.removeChild(iframe);
+        iframe = null;
+        run = false;
+        autoReflesh=false;
+        document.getElementById("autoReflesh").style.backgroundColor="#fff";
+        document.getElementById("autoReflesh").style.color="#000";
+        document.getElementById("run").style.backgroundColor = "#eee";
+        document.getElementById("run").style.color = "#e38";
+        document.getElementById("editor").style.width = "100vw";
+    });
+    document.getElementById("stop").addEventListener("mouseout", function () {
+        this.style.backgroundColor = "#eee";
+        this.style.color = "#e38";
+    });
+    document.getElementById("stop").addEventListener("mouseover", function () {
+        this.style.backgroundColor = "#e38";
+        this.style.color = "#eee";
+    });
+    document.getElementById("add").addEventListener("mouseover", function () {
+        this.style.color = "#e38";
+    });
+    document.getElementById("add").addEventListener("mouseout", function () {
+        this.style.color = "#000";
+    });
+    document.getElementById("view").addEventListener("mouseover", function () {
+        this.style.color = active.id == 0 ? "#000" : "#e38";
+    });
+    document.getElementById("view").addEventListener("mouseout", function () {
+        this.style.color = active.id == 0 ? "#fff" : "#000";
+    });
+    document.getElementById("autoReflesh").addEventListener("mousedown", function () {
+        autoReflesh = !autoReflesh;
+        run=true;
+        this.style.backgroundColor = !autoReflesh ? "#fff" : "#e38";
+        this.style.color = !autoReflesh ? "#000" : "#fff";
+        sessionStorage.setItem(active.id, editor.getValue());
+        document.getElementById("editor").style.width = "70vw";
+        if (!iframe) {
+            iframe = document.createElement("iframe");
+            document.body.appendChild(iframe);
+        }
         document.getElementById("run").style.backgroundColor = "#e38";
         document.getElementById("run").style.color = "#eee";
     });
-    document.getElementById("run").addEventListener("mousedown", function () {
-        this.style.backgroundColor = run ? "e38" : "#eee";
-        this.style.color = run ? "eee" : "#e38";
-    });
-    document.getElementById("stop").addEventListener("mousedown", function () {
-        run = false;
-        document.getElementById("run").style.backgroundColor = "#eee";
-        document.getElementById("run").style.color = "#e38";
-        iframe.style.zIndex = 1;
-        let editor = document.getElementsByClassName("editor");
-        for (let i = 0; i < editor.length; i++) {
-            editor[i].style.width = "100vw";
-            editor[i].style.zIndex = 2;
-        }
-    });
-    let dropdown = document.getElementsByClassName("dropdown");
-    for (let i = 0; i < dropdown.length; i++) {
-        let menu = dropdown[i].getElementsByTagName("button");
-        for (let j = 0; j < menu.length; j++) {
-            menu[j].addEventListener("mouseover", function () {
-                this.style.color = "#e38";
-            });
-            menu[j].addEventListener("mouseout", function () {
-                this.style.color = "#000";
-            });
-        }
-    }
-    let autoReflesh = false;
-    document.getElementById("autoReflesh").addEventListener("mouseover", function () {
-        if (!autoReflesh) {
-            this.style.color = "#e38";
-        } else {
-            this.style.color = "#fff";
-        }
-    });
-    document.getElementById("autoReflesh").addEventListener("mousedown", function () {
-        if (!autoReflesh) {
-            this.style.backgroundColor = "#e38";
-            autoReflesh = true;
-        } else {
-            this.style.backgroundColor = "#fff";
-            autoReflesh = false;
-        }
-    });
-    document.getElementById("autoReflesh").addEventListener("mouseout", function () {
-        if (!autoReflesh) {
-            this.style.backgroundColor = "#fff";
-            this.style.color = "#000";
-        } else {
-            this.style.backgroundColor = "#e38";
-            this.style.color = "#000";
-        }
-    });
-    document.getElementById("save").addEventListener("mousedown", function () {
-        const data = active.editor.getValue();
+    document.getElementById("save").addEventListener("mousedown",function(){
+        const data = editor.getValue();
         const e = document.createEvent("MouseEvents");
         e.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
         const a = document.createElement('a');
@@ -263,8 +248,11 @@ window.addEventListener("load", function () {
             case "javascript":
             a.download="main.js";
             break;
-            case "glsl":
-            a.download="main.glsl";
+            case "vertexShader":
+            a.download="vertexShader.glsl";
+            break;
+            case "fragmentShader":
+            a.download="fragmentShader.glsl";
             break;
             default:
             a.download="null.txt";
@@ -284,8 +272,7 @@ window.addEventListener("load", function () {
         let reader = new FileReader();
         reader.readAsText(file[0]);
         reader.onload = function () {
-            active.editor.setValue(reader.result);
+            editor.setValue(reader.result);
         }
-        eventType = "loadEnd";
     });
 });
