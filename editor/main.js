@@ -1,4 +1,5 @@
 window.addEventListener("load", function () {
+    sessionStorage.clear();
     const editor = ace.edit("editor");
     editor.setTheme("ace/theme/dawn");
     editor.setFontSize(23);
@@ -24,7 +25,6 @@ window.addEventListener("load", function () {
         addEditor[i].addEventListener("mousedown", function () {
             id++;
             if (this.className == "html") htmlEditor = id;
-
             let tab = document.getElementById("tab").getElementsByTagName("button");
             for (let i = 0; i < tab.length; i++) {
                 tab[i].style.backgroundColor = "#ccc";
@@ -130,6 +130,7 @@ window.addEventListener("load", function () {
         this.style.backgroundColor = "#e38";
         this.style.color = "#eee";
         editor.getSession().setMode("ace/mode/html");
+        sessionStorage.setItem(active.id, editor.getValue());
         active = {
             id: 0,
             type: "html"
