@@ -4,7 +4,31 @@ window.addEventListener("load", function () {
     editor.setTheme("ace/theme/dawn");
     editor.setFontSize(23);
     editor.getSession().setMode("ace/mode/html");
+    const { HashHandler } = require('ace/keyboard/hash_handler');
+    const keyboardHandler = new HashHandler();
+    keyboardHandler.addCommand({
+        name: "run",
+        bindKey: { win: 'Ctrl+r', mac: 'Command+r' },
+        exec: () => {
+            const e = document.createEvent("MouseEvents");
+            e.initEvent("mousedown", false,true);
+            run?document.getElementById("stop").dispatchEvent(e):document.getElementById("run").dispatchEvent(e);
+        },
+        readOnly: true
+    });
+    keyboardHandler.addCommand({
+        name: "save-event",
+        bindKey: { win: 'Ctrl+s', mac: 'Command+s' },
+        exec: () => {
+            const e = document.createEvent("MouseEvents");
+            e.initEvent("mousedown", false ,true);
+            document.getElementById("save").dispatchEvent(e);
+        },
+        readOnly: true
+    });
+    editor.keyBinding.addKeyboardHandler(keyboardHandler);
     let htmlEditor = null;
+    let run = false;
     let iframe = null;
     let autoReflesh = false;
     let obj = new Array();
@@ -158,11 +182,10 @@ window.addEventListener("load", function () {
             }
         }, 1);
     });
-    let run = false;
     document.getElementById("run").addEventListener("mousedown", function () {
         run = true;
-        this.style.backgroundColor = run ? "e38" : "#eee";
-        this.style.color = run ? "eee" : "#e38";
+        this.style.backgroundColor =  "#e38" ;
+        this.style.color =  "#eee" ;
         sessionStorage.setItem(active.id, editor.getValue());
         document.getElementById("editor").style.width = "70vw";
         if (!iframe) {
