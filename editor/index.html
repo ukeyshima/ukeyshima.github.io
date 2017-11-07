@@ -58,6 +58,7 @@
             border-radius: 10px;
             visibility: hidden;
             color: #444;
+            width:130px;
         }
 
         .dropdown button {
@@ -114,7 +115,7 @@
             background-color:#ccc;
             color:#000;
         }
-        .editor {
+        #editor {
             width: 100vw;
             height: calc(100vh - 100px);
             float: left;
@@ -122,11 +123,18 @@
             top:110px;
             z-index:2;
         }
+        #frame{
+            position:absolute;
+            width:3px;
+            visibility: hidden;
+            height:calc(100vh - 100px);
+            background-color:#e38;
+            z-index:2;
+        }
         iframe{
             position:absolute;
-            left:70vw;
             width:29vw;
-            height:100vh;
+            height:calc(100vh - 100px);
             z-index:1;
         }
         #menu button:hover{
@@ -140,6 +148,7 @@
             margin:0 10px 0 0;
             padding:0;
         }
+
     </style>
 </head>
 
@@ -155,6 +164,7 @@
     </div>
     <div class="dropdown" id="modemenu">
         <button id="autoReflesh">autoReflesh</button>
+        <button id="selectiveUndo">selectiveUndo</button>
     </div>
     <div id="top">
         <button id="run">▶︎</button>
@@ -170,7 +180,8 @@
         <button id="vs" class="glsl">vertexShader</button><br>
         <button id="fs" class="glsl">fragmentShader</button>
     </div>
-    <div class="editor" id="editor"></div>
+    <div id="editor"></div>
+    <div id="frame"></div>
 </body>
 
 </html>
