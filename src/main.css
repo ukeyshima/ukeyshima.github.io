@@ -87,6 +87,7 @@ p{
 }
 #check{
     visibility:hidden;
+    position:absolute;
 }
 #check:checked ~ #middle{
     transition-duration: 1s;
