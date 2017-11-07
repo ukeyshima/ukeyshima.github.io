@@ -31,6 +31,7 @@ window.addEventListener("load", function () {
     let run = false;
     let iframe = null;
     let iframeSizeChange = false;
+    let iframeFrame=null;
     let autoReflesh = false;
     let selectiveUndo = false;
     let selectiveUndoObject = new Array();
@@ -78,7 +79,8 @@ window.addEventListener("load", function () {
             editor.getSession().setMode("ace/mode/" + this.className);
             obj.push({
                 id: id,
-                type: this.textContent,
+                type: this.innerHTML,
+                mode:this.className,
                 removed: false
             });
             let object = obj[obj.length - 1];
@@ -100,7 +102,7 @@ window.addEventListener("load", function () {
                 name.style.color = "#eee";
                 sessionStorage.setItem(active.id, editor.getValue());
                 editor.setValue(sessionStorage.getItem(this.id));
-                editor.getSession().setMode("ace/mode/" + object.type);
+                editor.getSession().setMode("ace/mode/" + object.mode);
                 active = object;
             });
             close.addEventListener("mousedown", function () {
@@ -200,22 +202,23 @@ window.addEventListener("load", function () {
         this.style.color = "#eee";
         sessionStorage.setItem(active.id, editor.getValue());
         document.getElementById("editor").style.width = editorSize;
-        document.getElementById("frame").style.left=editorSize;
-        document.getElementById("frame").style.visibility="visible";
         if (!iframe) {
-            iframe = document.createElement("iframe");
-            iframe.style.left = parseInt(editorSize) + 1 + "px";
-            iframe.style.width = window.innerWidth - parseInt(editorSize) - 1 + "px";
-            document.getElementById("frame").addEventListener("mousedown", function (e) {
+            if(!iframeFrame){
+            iframeFrame=document.createElement("div");
+            document.body.appendChild(iframeFrame);
+            iframeFrame.className="frame";
+            iframeFrame.addEventListener("mousedown", function (e) {
                 iframeSizeChange = true;
             });
+            }
+            iframeFrame.style.visibility="visible";
+            iframe = document.createElement("iframe");
+            iframe.style.width = window.innerWidth - parseInt(editorSize) - 10 + "px";
             iframe.addEventListener("load", function () {
                 iframe.contentDocument.addEventListener("mousemove", function (e) {
                     if (iframeSizeChange) {
                         document.getElementById("editor").style.width = e.screenX + "px";
-                        document.getElementById("frame").style.left = e.screenX + "px";
-                        iframe.style.left = e.screenX + 1 + "px";
-                        iframe.style.width = window.innerWidth - e.screenX - 1 + "px";
+                        iframe.style.width = window.innerWidth - e.screenX - 10 + "px";
                     }
                 });
                 iframe.contentDocument.addEventListener("mouseup", function () {
@@ -259,7 +262,7 @@ window.addEventListener("load", function () {
         document.getElementById("run").style.backgroundColor = "#eee";
         document.getElementById("run").style.color = "#e38";
         document.getElementById("editor").style.width = "100vw";
-        document.getElementById("frame").style.visibility="hidden";
+        if(iframeFrame)iframeFrame.style.visibility="hidden";
     });
     document.getElementById("stop").addEventListener("mouseout", function () {
         this.style.backgroundColor = "#eee";
@@ -300,6 +303,9 @@ window.addEventListener("load", function () {
         selectiveUndo = !selectiveUndo;
         this.style.backgroundColor = !selectiveUndo ? "#fff" : "#e38";
         this.style.color = !selectiveUndo ? "#000" : "#fff";
+        let selectiveUndoFrame=document.createElement("div");
+        selectiveUndoFrame.id="selectiveUndoFrame";
+        document.body.appendChild(selectiveUndoFrame);
     });
     document.getElementById("save").addEventListener("mousedown", function () {
         const data = editor.getValue();
@@ -344,9 +350,7 @@ window.addEventListener("load", function () {
     document.addEventListener("mousemove", function (e) {
         if (iframeSizeChange) {
             document.getElementById("editor").style.width = e.screenX + "px";
-            document.getElementById("frame").style.left = e.screenX + "px";
-            iframe.style.left = e.screenX + 1 + "px";
-            iframe.style.width = window.innerWidth - e.screenX - 1 + "px";
+            iframe.style.width = window.innerWidth - e.screenX - 10 + "px";
         }
     });
     document.addEventListener("mouseup", function (e) {
@@ -354,5 +358,10 @@ window.addEventListener("load", function () {
             editorSize = e.screenX + "px";
         }
         iframeSizeChange = false;
+    });
+    window.addEventListener("resize",function(){
+        editorSize = window.innerWidth*0.7+"px";
+        document.getElementById("editor").style.width = iframe?editorSize:window.innerWidth;
+        if(iframe)iframe.style.width = window.innerWidth - parseInt(editorSize) - 10 + "px";
     });
 });

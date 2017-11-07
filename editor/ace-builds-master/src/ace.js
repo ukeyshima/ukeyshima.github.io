@@ -9426,7 +9426,6 @@ EditSession.$uid = 0;
         range.id = this.addMarker(range, clazz, "fullLine", inFront);
         return range;
     };
-    console.log(this);
     this.highlightMarkers = function(startRow,startColumn,endRow,endColumn,clazz,inFront){
         if (typeof endRow != "number") {
             clazz = endRow;

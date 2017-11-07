@@ -41,10 +41,11 @@
             height: 50px;
             font-size: 30px;
             background-color: #eee;
-            border-radius: 100px;
+            border-radius: 1000px;
             border: none;
             color: #e38;
             outline: 0;
+            text-align:center;
         }
 
         #run {
@@ -117,24 +118,24 @@
         }
         #editor {
             width: 100vw;
-            height: calc(100vh - 100px);
+            height: calc(100vh - 113px);
             float: left;
-            position:absolute;
-            top:110px;
             z-index:2;
         }
-        #frame{
-            position:absolute;
+        .frame{
             width:3px;
             visibility: hidden;
-            height:calc(100vh - 100px);
+            height:calc(100vh - 113px);
             background-color:#e38;
+            float:left;
             z-index:2;
+            padding:0;
+            margin:0;
         }
         iframe{
-            position:absolute;
-            width:29vw;
-            height:calc(100vh - 100px);
+            padding:0;
+            margin:0;
+            height:calc(100vh - 117px);
             z-index:1;
         }
         #menu button:hover{
@@ -148,7 +149,12 @@
             margin:0 10px 0 0;
             padding:0;
         }
-
+        #selectiveUndoFrame{
+            z-index: 5;
+            height:calc(100vh - 100px);
+            width:29vw;
+            background-color:#e38;
+        }
     </style>
 </head>
 
@@ -181,7 +187,6 @@
         <button id="fs" class="glsl">fragmentShader</button>
     </div>
     <div id="editor"></div>
-    <div id="frame"></div>
 </body>
 
 </html>
