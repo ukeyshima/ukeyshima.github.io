@@ -86,7 +86,7 @@
         }
 
         #title {
-            visibility: hidden;
+            z-index: -1;
         }
 
         #tab {
@@ -117,14 +117,13 @@
             color:#000;
         }
         #editor {
-            width: 100vw;
+            width:100vw;
             height: calc(100vh - 113px);
             float: left;
             z-index:2;
         }
         .frame{
             width:3px;
-            visibility: hidden;
             height:calc(100vh - 113px);
             background-color:#e38;
             float:left;
@@ -137,6 +136,7 @@
             margin:0;
             height:calc(100vh - 117px);
             z-index:1;
+            float:left;
         }
         #menu button:hover{
             color:#e38;
@@ -154,6 +154,17 @@
             height:calc(100vh - 100px);
             width:29vw;
             background-color:#e38;
+        }
+        .option{
+            height:calc(100vh - 100px);
+            float :left;
+        }
+        .selectiveUndoObj{
+            color:#ddd;
+            text-align:center;
+        }
+        .selectiveUndoObj:hover{
+            color:#e38;
         }
     </style>
 </head>

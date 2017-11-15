@@ -9,7 +9,8 @@
         {"name":"cube"},
         {"name":"mountain"},
         {"name":"mandelBox"},
-        {"name":"randomizeHeight"}
+        {"name":"randomizeHeight"},
+        {"name":"riverRipple"}
     ],
     "other": [
         {"name":"editor"}
