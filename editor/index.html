@@ -6,7 +6,7 @@
     <script src="main.js"></script>
     <script src="../src/link.js"></script>
     <link rel="stylesheet" href="../src/main.css">
-    <script src="ace-builds-master/src/ace.js"></script>
+    <script src="src/ace.js"></script>
     <style>
         body {
             background: #ddd;
@@ -59,17 +59,17 @@
             border-radius: 10px;
             visibility: hidden;
             color: #444;
-            width:130px;
+            width:160px;
         }
 
         .dropdown button {
-            width: 130px;
+            width: 160px;
             height: 30px;
             background-color: #fff;
             border: none;
             font-size: 15px;
             border-radius: 10px;
-            outline: 0;
+            outline: 0;            
         }
 
         #filemenu {
@@ -149,7 +149,7 @@
             margin:0 10px 0 0;
             padding:0;
         }
-        #selectiveUndoFrame{
+        #selectiveCodeReturnFrame{
             z-index: 5;
             height:calc(100vh - 100px);
             width:29vw;
@@ -159,11 +159,11 @@
             height:calc(100vh - 100px);
             float :left;
         }
-        .selectiveUndoObj{
+        .selectiveCodeReturnObj{
             color:#ddd;
             text-align:center;
         }
-        .selectiveUndoObj:hover{
+        .selectiveCodeReturnObj:hover{
             color:#e38;
         }
     </style>
@@ -181,7 +181,8 @@
     </div>
     <div class="dropdown" id="modemenu">
         <button id="autoReflesh">autoReflesh</button>
-        <button id="selectiveUndo">selectiveUndo</button>
+        <button id="selectiveCodeReturn">selectiveCodeReturn</button>
+        <!--<button id="returnOnlyUndo">returnOnlyUndo</button>-->
     </div>
     <div id="top">
         <button id="run">▶︎</button>

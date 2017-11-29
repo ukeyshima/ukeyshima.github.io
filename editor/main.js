@@ -8,7 +8,7 @@ window.addEventListener("load", function () {
     const { HashHandler } = require('ace/keyboard/hash_handler');
     const keyboardHandler = new HashHandler();
     keyboardHandler.addCommand({
-        name: "run",
+        name: "run-event",
         bindKey: { win: 'Ctrl+r', mac: 'Command+r' },
         exec: () => {
             const e = document.createEvent("MouseEvents");
@@ -27,6 +27,22 @@ window.addEventListener("load", function () {
         },
         readOnly: true
     });
+    keyboardHandler.addCommand({
+        name: "undo-event",
+        bindKey: { win: 'Ctrl+z', mac: 'Command+z' },
+        exec: () => {
+            editor.undo();
+        },
+        readOnly: true
+    });
+    keyboardHandler.addCommand({
+        name: "redo-event",
+        bindKey: { win: 'Ctrl+Shift+z', mac: 'Command+Shift+z' },
+        exec: () => {
+            editor.redo();
+        },
+        readOnly: true
+    });
     editor.keyBinding.addKeyboardHandler(keyboardHandler);
     let windowWidth = window.innerWidth;
     let htmlEditor = null;
@@ -34,14 +50,21 @@ window.addEventListener("load", function () {
     let option = new Array();
     let iframe = null;
     let autoReflesh = false;
-    let selectiveUndo = null;
-    let selectiveUndoObject = new Array();
+    let selectiveCodeReturn = null;
+    let selectiveCodeReturnObjects = new Array();
     let obj = new Array();
     let id = 0;
+    let tabChangeEvent = false;
     let active = {
         id: id,
         type: "html",
         removed: false
+    }
+    let Range = function (startRow, startColumn, endRow, endColumn) {
+        return {
+            start: { row: startRow, column: startColumn },
+            end: { row: endRow, column: endColumn }
+        };
     }
     option.push({
         type: "editor",
@@ -97,6 +120,7 @@ window.addEventListener("load", function () {
                 this.innerHTML = "";
             }
             button.addEventListener("mousedown", function () {
+                tabChangeEvent = true;
                 let tab = document.getElementById("tab").getElementsByTagName("button");
                 for (let i = 0; i < tab.length; i++) {
                     tab[i].style.backgroundColor = "#ccc";
@@ -109,14 +133,15 @@ window.addEventListener("load", function () {
                 this.style.backgroundColor = "#e38";
                 name.style.color = "#eee";
                 sessionStorage.setItem(active.id, editor.getValue());
-                let autoRefleshEvent=false;
-                if(autoReflesh)autoRefleshEvent=true;
-                autoReflesh=false;
+                let autoRefleshEvent = false;
+                if (autoReflesh) autoRefleshEvent = true;
+                autoReflesh = false;
                 editor.setValue(sessionStorage.getItem(this.id));
                 editor.getSession().setMode("ace/mode/" + object.mode);
                 editor.setReadOnly(false);
                 active = object;
-                if(autoRefleshEvent)autoReflesh=true;
+                if (autoRefleshEvent) autoReflesh = true;
+                tabChangeEvent = false;
             });
             close.addEventListener("mousedown", function () {
                 if (this.parentElement.getElementsByTagName("p")[1].innerHTML == "html") {
@@ -138,12 +163,24 @@ window.addEventListener("load", function () {
             active = object;
         });
     };
+    let beforeRemoveTime = new Date().getTime();
+    let beforeAction=null;
     editor.session.on("change", function (e) {
         try {
-            for (let i = 0; i < e.lines.length; i++) {
-                selectiveUndoObject.push({ id: active.id, type: e.action, key: e.lines[i], row: e.end.row, column: e.end.column });
+            if (!tabChangeEvent) {
+                console.log(new Date().getTime() - beforeRemoveTime);
+                if (e.action == "remove") {
+                    if (new Date().getTime() - beforeRemoveTime > 2000 || beforeAction!="remove") {
+                        selectiveCodeReturnObjects.push({ id: active.id, type: e.action, key: "", startRow: e.start.row, startColumn: e.start.column, endRow: e.end.row, endColumn: e.end.column, undo: false });
+                    }
+                    for (let i = 0; i < e.lines.length; i++) {
+                        selectiveCodeReturnObjects[selectiveCodeReturnObjects.length - 1].key += e.lines[i];
+                    }
+                    beforeRemoveTime = new Date().getTime();                    
+                }
+                beforeAction=e.action;
             }
-            if (autoReflesh) {                
+            if (autoReflesh) {
                 iframe.element.contentWindow.location.reload(true);
                 setTimeout(function () {
                     sessionStorage.setItem(active.id, editor.getValue());
@@ -160,14 +197,42 @@ window.addEventListener("load", function () {
                     }
                 }, 0);
             }
-            if (selectiveUndo) {
-                selectiveUndoObject.forEach(function (e,i,a) {
-                    if(e.id==active.id){
-                        let selectiveUndoObj=document.createElement("div");
-                        selectiveUndoObj.innerHTML=e.type+",\""+e.key+"\"";
-                        selectiveUndoObj.className="selectiveUndoObj";
-                        selectiveUndo.element.appendChild(selectiveUndoObj);
+            if (selectiveCodeReturn) {
+                while (selectiveCodeReturn.element.firstChild) {
+                    selectiveCodeReturn.element.removeChild(selectiveCodeReturn.element.firstChild);
+                }
+                let selectiveCodeReturnObject = new Array();
+                selectiveCodeReturnObjects.forEach(function (e, i, a) {
+                    if (e.id == active.id) {
+                        selectiveCodeReturnObject.push(e);
                     }
+                });
+                selectiveCodeReturnObject.forEach(function (e, i, a) {
+                    let selectiveCodeReturnObj = document.createElement("div");
+                    selectiveCodeReturnObj.innerHTML = e.key;
+                    selectiveCodeReturnObj.className = "selectiveCodeReturnObj";
+                    selectiveCodeReturnObj.style.textDecoration = e.undo ? "line-through" : "none";
+                    selectiveCodeReturn.element.appendChild(selectiveCodeReturnObj);
+                    selectiveCodeReturnObj.addEventListener("mousedown", function () {
+                        let elements = selectiveCodeReturn.element.children;
+                        let target = selectiveCodeReturnObject[[].slice.call(elements).indexOf(this)];
+                        editor.session.replace(new Range(editor.getCursorPosition().row, editor.getCursorPosition().column, editor.getCursorPosition().row, editor.getCursorPosition().column), target.key);
+                        /*if (!target.undo) {
+                            target.undo = true;
+                            if (target.type == "insert") {
+                                editor.session.replace(new Range(target.startRow, target.startColumn, target.endRow, target.endColumn), "");
+                            } else if (target.type == "remove") {
+                                editor.session.replace(new Range(target.startRow, target.startColumn, target.startRow, target.startColumn), target.key);
+                            }                            
+                        } else {
+                            target.undo = false;
+                            if (target.type == "insert") {
+                                editor.session.replace(new Range(target.startRow, target.startColumn, target.startRow, target.startColumn), target.key);
+                            } else if (target.type == "remove") {
+                                editor.session.replace(new Range(target.startRow, target.startColumn, target.endRow, target.endColumn), "");
+                            }                                                          
+                        }*/
+                    });
                 });
             }
         } catch (e) {
@@ -278,12 +343,12 @@ window.addEventListener("load", function () {
             for (let i = 0; i < option.length; i++) {
                 if (option[i].type == "iframe") {
                     option[i - 1].element.style.width = option[i - 1].element.clientWidth + iframeWidth + 3 + "px";
-                    if(option.length>i+1){
-                    option[i + 1].frontElement = option[i - 1].element;
-                    option[i + 1].element.removeEventListener("mousemove", thisElementMousemove(option[i + 1]));
-                    option[i + 1].frontElement.removeEventListener("mousemove", frontElementMousemove(option[i + 1]));
-                    option[i + 1].element.addEventListener("mousemove", thisElementMousemove(option[i + 1]));
-                    option[i + 1].frontElement.addEventListener("mousemove", frontElementMousemove(option[i + 1]));
+                    if (option.length > i + 1) {
+                        option[i + 1].frontElement = option[i - 1].element;
+                        option[i + 1].element.removeEventListener("mousemove", thisElementMousemove(option[i + 1]));
+                        option[i + 1].frontElement.removeEventListener("mousemove", frontElementMousemove(option[i + 1]));
+                        option[i + 1].element.addEventListener("mousemove", thisElementMousemove(option[i + 1]));
+                        option[i + 1].frontElement.addEventListener("mousemove", frontElementMousemove(option[i + 1]));
                     }
                     option.splice(i, 1);
                     break;
@@ -333,70 +398,70 @@ window.addEventListener("load", function () {
             run = false;
         }
     });
-    document.getElementById("autoReflesh").addEventListener("mouseover",function(){
-        this.style.color= autoReflesh?"#000":"#e38";        
+    document.getElementById("autoReflesh").addEventListener("mouseover", function () {
+        this.style.color = autoReflesh ? "#000" : "#e38";
     });
-    document.getElementById("autoReflesh").addEventListener("mouseout",function(){
-        this.style.color=autoReflesh?"#fff":"#000";
+    document.getElementById("autoReflesh").addEventListener("mouseout", function () {
+        this.style.color = autoReflesh ? "#fff" : "#000";
     });
-    document.getElementById("selectiveUndo").addEventListener("mousedown", function () {
-        this.style.backgroundColor = selectiveUndo ? "#fff" : "#e38";
-        this.style.color = selectiveUndo ? "#000" : "#fff";
-        if (!selectiveUndo) {
+    document.getElementById("selectiveCodeReturn").addEventListener("mousedown", function () {
+        this.style.backgroundColor = selectiveCodeReturn ? "#fff" : "#e38";
+        this.style.color = selectiveCodeReturn ? "#000" : "#fff";
+        if (!selectiveCodeReturn) {
             let frontElement = option[option.length - 1].element;
             option.push({
-                type: "selectiveUndo",
+                type: "selectiveCodeReturn",
                 element: document.createElement("div"),
                 frontElement: frontElement,
                 frontFrame: document.createElement("div"),
                 sizeChange: false
             });
-            selectiveUndo = option[option.length - 1];
-            selectiveUndo.frontElement.style.width = selectiveUndo.frontElement.clientWidth * 7 / 10 + "px";
-            document.body.appendChild(selectiveUndo.frontFrame);
-            selectiveUndo.frontFrame.className = "frame";
-            selectiveUndo.frontFrame.addEventListener("mousedown", mousedown(selectiveUndo));
-            document.body.appendChild(selectiveUndo.element);
-            selectiveUndo.element.style.overflow="auto";
-            selectiveUndo.element.className = "option";
-            selectiveUndo.element.style.backgroundColor = "#222";
-            selectiveUndo.element.style.width = windowWidth - (selectiveUndo.frontElement.getBoundingClientRect().right) - 10 + "px";
-            selectiveUndo.element.addEventListener("mousemove", thisElementMousemove(selectiveUndo));
-            selectiveUndo.element.addEventListener("mouseup", mouseup(selectiveUndo));
-            if (selectiveUndo.frontElement.tagName == "IFRAME") {
-                selectiveUndo.frontElement.contentDocument.addEventListener("mousemove", frontElementMousemove(selectiveUndo));
-                selectiveUndo.frontElement.contentDocument.addEventListener("mouseup", mouseup(selectiveUndo));
+            selectiveCodeReturn = option[option.length - 1];
+            selectiveCodeReturn.frontElement.style.width = selectiveCodeReturn.frontElement.clientWidth * 7 / 10 + "px";
+            document.body.appendChild(selectiveCodeReturn.frontFrame);
+            selectiveCodeReturn.frontFrame.className = "frame";
+            selectiveCodeReturn.frontFrame.addEventListener("mousedown", mousedown(selectiveCodeReturn));
+            document.body.appendChild(selectiveCodeReturn.element);
+            selectiveCodeReturn.element.style.overflow = "auto";
+            selectiveCodeReturn.element.className = "option";
+            selectiveCodeReturn.element.style.backgroundColor = "#222";
+            selectiveCodeReturn.element.style.width = windowWidth - (selectiveCodeReturn.frontElement.getBoundingClientRect().right) - 10 + "px";
+            selectiveCodeReturn.element.addEventListener("mousemove", thisElementMousemove(selectiveCodeReturn));
+            selectiveCodeReturn.element.addEventListener("mouseup", mouseup(selectiveCodeReturn));
+            if (selectiveCodeReturn.frontElement.tagName == "IFRAME") {
+                selectiveCodeReturn.frontElement.contentDocument.addEventListener("mousemove", frontElementMousemove(selectiveCodeReturn));
+                selectiveCodeReturn.frontElement.contentDocument.addEventListener("mouseup", mouseup(selectiveCodeReturn));
             } else {
-                selectiveUndo.frontElement.addEventListener("mousemove", frontElementMousemove(selectiveUndo));
-                selectiveUndo.frontElement.addEventListener("mouseup", mouseup(selectiveUndo));
+                selectiveCodeReturn.frontElement.addEventListener("mousemove", frontElementMousemove(selectiveCodeReturn));
+                selectiveCodeReturn.frontElement.addEventListener("mouseup", mouseup(selectiveCodeReturn));
             }
-            document.addEventListener("mouseup", mouseup(selectiveUndo));
+            document.addEventListener("mouseup", mouseup(selectiveCodeReturn));
         } else {
-                let selectiveUndoWidth = selectiveUndo.element.clientWidth;
-                document.body.removeChild(selectiveUndo.element);
-                document.body.removeChild(selectiveUndo.frontFrame);
-                for (let i = 0; i < option.length; i++) {
-                    if (option[i].type == "selectiveUndo") {
-                        option[i - 1].element.style.width = option[i - 1].element.clientWidth + selectiveUndoWidth + 3 + "px";
-                        if(option.length>i+1){
+            let selectiveCodeReturnWidth = selectiveCodeReturn.element.clientWidth;
+            document.body.removeChild(selectiveCodeReturn.element);
+            document.body.removeChild(selectiveCodeReturn.frontFrame);
+            for (let i = 0; i < option.length; i++) {
+                if (option[i].type == "selectiveCodeReturn") {
+                    option[i - 1].element.style.width = option[i - 1].element.clientWidth + selectiveCodeReturnWidth + 3 + "px";
+                    if (option.length > i + 1) {
                         option[i + 1].frontElement = option[i - 1].element;
                         option[i + 1].element.removeEventListener("mousemove", thisElementMousemove(option[i + 1]));
                         option[i + 1].frontElement.removeEventListener("mousemove", frontElementMousemove(option[i + 1]));
                         option[i + 1].element.addEventListener("mousemove", thisElementMousemove(option[i + 1]));
                         option[i + 1].frontElement.addEventListener("mousemove", frontElementMousemove(option[i + 1]));
-                        }
-                        option.splice(i, 1);
-                        break;
                     }
+                    option.splice(i, 1);
+                    break;
                 }
-                selectiveUndo = null;
             }
+            selectiveCodeReturn = null;
+        }
     });
-    document.getElementById("selectiveUndo").addEventListener("mouseover",function(){
-        this.style.color= selectiveUndo?"#000":"#e38";
+    document.getElementById("selectiveCodeReturn").addEventListener("mouseover", function () {
+        this.style.color = selectiveCodeReturn ? "#000" : "#e38";
     });
-    document.getElementById("selectiveUndo").addEventListener("mouseout",function(){
-        this.style.color=selectiveUndo?"#fff":"#000";
+    document.getElementById("selectiveCodeReturn").addEventListener("mouseout", function () {
+        this.style.color = selectiveCodeReturn ? "#fff" : "#000";
     });
     const mousedown = function (option) {
         return function (e) {
