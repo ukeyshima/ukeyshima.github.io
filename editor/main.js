@@ -174,7 +174,7 @@ window.addEventListener("load", function () {
                         selectiveCodeReturnObjects.push({ id: active.id, type: e.action, key: "", startRow: e.start.row, startColumn: e.start.column, endRow: e.end.row, endColumn: e.end.column, undo: false });
                     }
                     for (let i = 0; i < e.lines.length; i++) {
-                        selectiveCodeReturnObjects[selectiveCodeReturnObjects.length - 1].key += e.lines[i];
+                        selectiveCodeReturnObjects[selectiveCodeReturnObjects.length - 1].key = e.lines[i]+selectiveCodeReturnObjects[selectiveCodeReturnObjects.length - 1].key;
                     }
                     beforeRemoveTime = new Date().getTime();                    
                 }
