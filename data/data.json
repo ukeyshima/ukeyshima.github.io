@@ -2,8 +2,9 @@
     "webgl": [
         {"name":"particleFlame"},
         {"name":"glitch"},
-        {"name":"gpgpuCalculator"},
-        {"name":"cameraGlitch"}
+        {"name":"cameraGlitch"},
+        {"name":"cubeMapping"},
+        {"name":"gpgpuCalculator"}
     ],
     "webGL rayMarching": [
         {"name":"reflectionBall"},

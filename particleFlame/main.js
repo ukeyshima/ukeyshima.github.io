@@ -100,7 +100,7 @@ window.addEventListener("load", function () {
         gl.uniform1f(uniLocation[0], 10+(cw-150)/50);
         gl.uniform1f(uniLocation[1], frame);
         gl.uniform2fv(uniLocation[2], [cw, ch]);
-        //      gl.uniform1i(uniLocation[3], 0);
+        //gl.uniform1i(uniLocation[3], 0);
         gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, vTransformFeedback[0]);
         gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 1, vTransformFeedback[1]);
         gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 2, vTransformFeedback[2]);
