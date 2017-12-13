@@ -318,8 +318,7 @@ window.addEventListener("load", function () {
                 for (let j = 0; j < obj.length; j++) {
                     if (obj[j].type == "css" && !obj[j].removed) {                        
                         if (link[i].href.split("/")[link[i].href.split("/").length - 1] == obj[j].fileName) {                            
-                            if (link[i].rel == "stylesheet") {
-                                console.log("css");
+                            if (link[i].rel == "stylesheet") {                
                                 let blob = new Blob([sessionStorage.getItem(j)], { type: 'text/css' });
                                 link[i].href = URL.createObjectURL(blob);
                             }
