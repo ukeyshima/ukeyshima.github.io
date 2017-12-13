@@ -98,8 +98,7 @@ window.addEventListener("load", function () {
         if (autoReflesh) autoRefleshEvent = true;
         autoReflesh = false;
         editor.setValue(sessionStorage.getItem(htmlEditor));
-        if (autoRefleshEvent) autoReflesh = true;         
-        console.log(sessionStorage);
+        if (autoRefleshEvent) autoReflesh = true;
         active = {
             id: 0,
             type: "html",
@@ -137,13 +136,13 @@ window.addEventListener("load", function () {
         close.innerHTML = "×";
         let name = document.createElement("p");
         button.appendChild(name);
-        name.innerHTML = fileName + "." + extension.value;        
+        name.innerHTML = fileName + "." + extension.value;
         sessionStorage.setItem(active.id, editor.getValue());
         let autoRefleshEvent = false;
         if (autoReflesh) autoRefleshEvent = true;
         autoReflesh = false;
         editor.setValue("");
-        if (autoRefleshEvent) autoReflesh = true;            
+        if (autoRefleshEvent) autoReflesh = true;
         editor.getSession().setMode("ace/mode/" + extension.className);
         obj.push({
             id: id,
@@ -286,8 +285,6 @@ window.addEventListener("load", function () {
         codeExecution();
     });
     function codeExecution() {
-        console.log(iframe.element.src);
-        iframe.element.removeEventListener("load", codeExecution);
         let domParser = new DOMParser();
         let document_obj = null;
         try {
@@ -300,19 +297,31 @@ window.addEventListener("load", function () {
         }
         if (document_obj) {
             let script = document_obj.getElementsByTagName("script");
+            let link = document_obj.getElementsByTagName("link");
             for (let i = 0; i < script.length; i++) {
                 for (let j = 0; j < obj.length; j++) {
-                    if (obj[j].type != "html" && !obj[j].removed) {
-                        if (script[i]) {
-                            if (script[i].src) {
-                                if (script[i].src.split("/")[script[i].src.split("/").length - 1] == obj[j].fileName) {
-                                    let blob = new Blob([sessionStorage.getItem(j)], { type: 'application/javascript' });
-                                    script[i].src = URL.createObjectURL(blob);
-                                }
-                            } else {
-                                if (script[i].type == obj[j].fileName) {
-                                    script[i].text = sessionStorage.getItem(j);
-                                }
+                    if (obj[j].type != "html" && obj[j].type != "css" && !obj[j].removed) {
+                        if (script[i].src) {
+                            if (script[i].src.split("/")[script[i].src.split("/").length - 1] == obj[j].fileName) {
+                                let blob = new Blob([sessionStorage.getItem(j)], { type: 'application/javascript' });
+                                script[i].src = URL.createObjectURL(blob);
+                            }
+                        } else {
+                            if (script[i].type == obj[j].fileName) {
+                                script[i].text = sessionStorage.getItem(j);
+                            }
+                        }
+                    }
+                }
+            }
+            for (let i = 0; i < link.length; i++) {
+                for (let j = 0; j < obj.length; j++) {
+                    if (obj[j].type == "css" && !obj[j].removed) {                        
+                        if (link[i].href.split("/")[link[i].href.split("/").length - 1] == obj[j].fileName) {                            
+                            if (link[i].rel == "stylesheet") {
+                                console.log("css");
+                                let blob = new Blob([sessionStorage.getItem(j)], { type: 'text/css' });
+                                link[i].href = URL.createObjectURL(blob);
                             }
                         }
                     }
@@ -489,7 +498,36 @@ window.addEventListener("load", function () {
         }
     }
     document.getElementById("save").addEventListener("mousedown", function () {
-        const data = editor.getValue();
+        let data = editor.getValue();
+        if (active.id == htmlEditor) {
+            let domParser = new DOMParser();
+            let document_obj = null;
+            try {
+                document_obj = domParser.parseFromString(sessionStorage.getItem(htmlEditor), "text/html");
+                if (document_obj.getElementsByTagName("parsererror").length) {
+                    document_obj = null;
+                }
+            } catch (e) {
+                console.log(e);
+            }
+            if (document_obj) {
+                let script = document_obj.getElementsByTagName("script");
+                for (let i = 0; i < script.length; i++) {
+                    for (let j = 0; j < obj.length; j++) {
+                        if (obj[j].type != "html" && obj[j].type != "css" && !obj[j].removed) {
+                            if (script[i]) {
+                                if (!script[i].src) {
+                                    if (script[i].type == obj[j].fileName) {
+                                        script[i].text = sessionStorage.getItem(j);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                data = document_obj.documentElement.outerHTML;
+            }
+        }
         const e = document.createEvent("MouseEvents");
         e.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
         const a = document.createElement("a");
@@ -498,6 +536,16 @@ window.addEventListener("load", function () {
         a.href = window.URL.createObjectURL(new Blob([data], { type: 'text/plain' }));
         a.dataset.downloadurl = ['text/plain', a.download, a.href].join(':');
         a.dispatchEvent(e);
+    });
+    document.addEventListener("keydown",function(e){
+        if(document.getElementById("addmenu").style.visibility=="visible"){
+            if(e.key=="Enter"){
+                const e = document.createEvent("MouseEvents");
+                e.initEvent("mousedown", false, true);
+                document.getElementById("create").dispatchEvent(e);  
+                document.getElementById("addmenu").style.visibility="hidden";
+            }
+        }
     });
     document.getElementById("load").addEventListener("mousedown", function () {
         const e = document.createEvent("MouseEvents");
@@ -553,7 +601,6 @@ window.addEventListener("load", function () {
         return false;
     }
     document.getElementById("extension").addEventListener("change", function () {
-        console.log(this.getElementsByTagName("option")[this.selectedIndex]);
         document.getElementById("centerSelect").innerHTML = this.getElementsByTagName("option")[this.selectedIndex].innerHTML + "  ▽";
     });
     document.getElementById("extension").addEventListener("mouseover", function () {
