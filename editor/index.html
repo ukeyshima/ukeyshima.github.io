@@ -83,6 +83,7 @@
         }
         #addmenu{
             top:100px;
+            text-align:center;
         }
 
         #title {
@@ -108,23 +109,20 @@
             text-align: center;
             vertical-align: middle;
         }
-        #view{
-            background-color:#e38;
-            color:#fff;
-        }
         #add{
             background-color:#ccc;
             color:#000;
+            width:50px;
         }
         #editor {
             width:100vw;
-            height: calc(100vh - 113px);
+            height: calc(100vh - 110px);
             float: left;
             z-index:2;
         }
         .frame{
             width:3px;
-            height:calc(100vh - 113px);
+            height:calc(100vh - 110px);
             background-color:#e38;
             float:left;
             z-index:2;
@@ -134,7 +132,7 @@
         iframe{
             padding:0;
             margin:0;
-            height:calc(100vh - 117px);
+            height:calc(100vh - 114px);
             z-index:1;
             float:left;
         }
@@ -190,13 +188,17 @@
     </div>
     <div id="tab">
         <button id="add">+</button>
-        <button id="view">view</button>
     </div>
     <div class="dropdown" id="addmenu">
-        <button id="html" class="html">html</button><br>
-        <button id="js" class="javascript">javascript</button><br>
-        <button id="vs" class="glsl">vertexShader</button><br>
-        <button id="fs" class="glsl">fragmentShader</button>
+        
+        <input type="text" id="fileName">
+        <select id="extension">
+            <option value="js" class="javascript">javascript</option>
+            <option value="vs" class="glsl">vertexShader</option>
+            <option value="fs" class="glsl">fragmentShader</option>
+            <option value="html" class="html">html</option>
+        </select>
+        <button id="create">create</button>
     </div>
     <div id="editor"></div>
 </body>
