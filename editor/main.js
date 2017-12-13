@@ -44,7 +44,6 @@ window.addEventListener("load", function () {
     });
     editor.keyBinding.addKeyboardHandler(keyboardHandler);
     let windowWidth = window.innerWidth;
-    let htmlEditor = null;
     let run = false;
     let option = new Array();
     let iframe = null;
@@ -52,9 +51,17 @@ window.addEventListener("load", function () {
     let selectiveCodeReturn = null;
     let selectiveCodeReturnObjects = new Array();
     let obj = new Array();
-    let id = -1;
+    let id = 0;
+    let htmlEditor = id;
     let tabChangeEvent = false;
-    let active = null;
+    let active = {
+        id: id,
+        type: "html",
+        fileName: "index.html",
+        mode: "html",
+        removed: false
+    };
+    obj.push(active);
     let Range = function (startRow, startColumn, endRow, endColumn) {
         return {
             start: { row: startRow, column: startColumn },
@@ -73,17 +80,49 @@ window.addEventListener("load", function () {
         document.getElementById("modemenu").style.visibility = event.target == document.getElementById("mode") ? "visible" : "hidden";
         document.getElementById("addmenu").style.visibility = event.target == document.getElementById("add") || event.target == document.getElementById("fileName") || event.target == document.getElementById("extension") ? "visible" : "hidden";
     });
+
+    document.getElementById("html").addEventListener("mousedown", function () {
+        let tab = document.getElementById("tab").getElementsByTagName("button");
+        for (let i = 0; i < tab.length; i++) {
+            tab[i].style.backgroundColor = "#ccc";
+            let p = tab[i].getElementsByTagName("p");
+            for (let j = 0; j < p.length; j++) {
+                p[j].style.color = "#000";
+            }
+        }
+        this.style.backgroundColor = "#e38";
+        this.style.color = "#eee";
+        editor.getSession().setMode("ace/mode/html");
+        sessionStorage.setItem(active.id, editor.getValue());
+        let autoRefleshEvent = false;
+        if (autoReflesh) autoRefleshEvent = true;
+        autoReflesh = false;
+        editor.setValue(sessionStorage.getItem(htmlEditor));
+        if (autoRefleshEvent) autoReflesh = true;         
+        console.log(sessionStorage);
+        active = {
+            id: 0,
+            type: "html",
+            fileName: "index.html",
+            mode: extension.className,
+            removed: false
+        }
+    });
+    document.getElementById("html").addEventListener("mouseover", function () {
+        this.getElementsByTagName("p")[0].style.color = active.id == 0 ? "#000" : "#e38";
+    });
+    document.getElementById("html").addEventListener("mouseout", function () {
+        this.getElementsByTagName("p")[0].style.color = active.id == 0 ? "#fff" : "#000";
+    });
     document.getElementById("create").addEventListener("mousedown", function () {
         let fileName = document.getElementById("fileName").value;
         let num = document.getElementById("extension").selectedIndex;
         let extension = document.getElementById("extension").getElementsByTagName("option")[num];
         id++;
-        if (extension.value == "html") htmlEditor = id;
         let tab = document.getElementById("tab").getElementsByTagName("button");
         for (let i = 0; i < tab.length; i++) {
             tab[i].style.backgroundColor = "#ccc";
             let p = tab[i].getElementsByTagName("p");
-            if (tab[i] == document.getElementById("view")) tab[i].style.color = "#000";
             for (let j = 0; j < p.length; j++) {
                 p[j].style.color = "#000";
             }
@@ -98,9 +137,13 @@ window.addEventListener("load", function () {
         close.innerHTML = "×";
         let name = document.createElement("p");
         button.appendChild(name);
-        name.innerHTML = fileName + "." + extension.value;
-        if (active) sessionStorage.setItem(active.id, editor.getValue());
+        name.innerHTML = fileName + "." + extension.value;        
+        sessionStorage.setItem(active.id, editor.getValue());
+        let autoRefleshEvent = false;
+        if (autoReflesh) autoRefleshEvent = true;
+        autoReflesh = false;
         editor.setValue("");
+        if (autoRefleshEvent) autoReflesh = true;            
         editor.getSession().setMode("ace/mode/" + extension.className);
         obj.push({
             id: id,
@@ -110,10 +153,6 @@ window.addEventListener("load", function () {
             removed: false
         });
         let object = obj[obj.length - 1];
-        active = object;
-        if (extension.innerHTML == "html") {
-            document.getElementById("extension").removeChild(extension);
-        }
         button.addEventListener("mousedown", function () {
             tabChangeEvent = true;
             let tab = document.getElementById("tab").getElementsByTagName("button");
@@ -139,14 +178,6 @@ window.addEventListener("load", function () {
             tabChangeEvent = false;
         });
         close.addEventListener("mousedown", function () {
-            if (this.parentElement.getElementsByTagName("p")[1].innerHTML.split(".")[this.parentElement.getElementsByTagName("p")[1].innerHTML.split(".").length - 1] == "html") {
-                htmlEditor = null;
-                let html = document.createElement("option");
-                html.value = "html";
-                html.className = "html";
-                html.innerHTML = "html";
-                document.getElementById("extension").appendChild(html);
-            }
             document.getElementById("tab").removeChild(button);
             object.removed = true;
         });
@@ -179,8 +210,7 @@ window.addEventListener("load", function () {
             }
             if (autoReflesh) {
                 sessionStorage.setItem(active.id, editor.getValue());
-                iframe.element.contentWindow.location.reload(true);
-                iframe.element.addEventListener("load", codeExecution);
+                codeExecution();
             }
             if (selectiveCodeReturn) {
                 while (selectiveCodeReturn.element.firstChild) {
@@ -228,7 +258,7 @@ window.addEventListener("load", function () {
         run = true;
         this.style.backgroundColor = "#e38";
         this.style.color = "#eee";
-        if (active) sessionStorage.setItem(active.id, editor.getValue());
+        sessionStorage.setItem(active.id, editor.getValue());
         if (!iframe) {
             let frontElement = option[option.length - 1].element;
             option.push({
@@ -253,10 +283,10 @@ window.addEventListener("load", function () {
             iframe.frontElement.addEventListener("mouseup", mouseup(iframe));
             document.addEventListener("mouseup", mouseup(iframe));
         }
-        iframe.element.contentWindow.location.reload(true);
-        iframe.element.addEventListener("load", codeExecution);
+        codeExecution();
     });
     function codeExecution() {
+        console.log(iframe.element.src);
         iframe.element.removeEventListener("load", codeExecution);
         let domParser = new DOMParser();
         let document_obj = null;
@@ -269,7 +299,7 @@ window.addEventListener("load", function () {
             console.log(e);
         }
         if (document_obj) {
-            let script = document_obj.getElementsByTagName("script");            
+            let script = document_obj.getElementsByTagName("script");
             for (let i = 0; i < script.length; i++) {
                 for (let j = 0; j < obj.length; j++) {
                     if (obj[j].type != "html" && !obj[j].removed) {
@@ -287,9 +317,9 @@ window.addEventListener("load", function () {
                         }
                     }
                 }
-            }            
-                blob = new Blob([document_obj.documentElement.outerHTML], { type: 'text/html' });
-                iframe.element.src = URL.createObjectURL(blob);            
+            }
+            blob = new Blob([document_obj.documentElement.outerHTML], { type: 'text/html' });
+            iframe.element.contentWindow.location.replace(URL.createObjectURL(blob));
         }
     }
     document.getElementById("run").addEventListener("mouseover", function () {
@@ -522,6 +552,16 @@ window.addEventListener("load", function () {
             }
         return false;
     }
+    document.getElementById("extension").addEventListener("change", function () {
+        console.log(this.getElementsByTagName("option")[this.selectedIndex]);
+        document.getElementById("centerSelect").innerHTML = this.getElementsByTagName("option")[this.selectedIndex].innerHTML + "  ▽";
+    });
+    document.getElementById("extension").addEventListener("mouseover", function () {
+        document.getElementById("centerSelect").style.color = "#e38";
+    });
+    document.getElementById("extension").addEventListener("mouseout", function () {
+        document.getElementById("centerSelect").style.color = "#000";
+    });
     document.addEventListener("keydown", function (e) {
         let pressKey;
         if (eval(e)) {

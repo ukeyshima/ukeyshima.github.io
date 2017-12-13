@@ -17,8 +17,8 @@
 
         #menu {
             background-color: #eee;
-            height:30px;
-            width:100vw;
+            height: 30px;
+            width: 100vw;
         }
 
         #menu button {
@@ -31,11 +31,13 @@
             margin: 0;
             padding: 0;
             outline: 0;
-            position:absolute;
+            position: absolute;
         }
-        #mode{
-            left:100px;
+
+        #mode {
+            left: 100px;
         }
+
         #top button {
             width: 50px;
             height: 50px;
@@ -45,7 +47,7 @@
             border: none;
             color: #e38;
             outline: 0;
-            text-align:center;
+            text-align: center;
         }
 
         #run {
@@ -59,7 +61,7 @@
             border-radius: 10px;
             visibility: hidden;
             color: #444;
-            width:160px;
+            width: 160px;
         }
 
         .dropdown button {
@@ -69,21 +71,26 @@
             border: none;
             font-size: 15px;
             border-radius: 10px;
-            outline: 0;            
+            outline: 0;
         }
 
         #filemenu {
             top: 10px;
             left: 20px;
+            width:80px;
+        }
+        #filemenu button{
+            width:80px;
         }
 
         #modemenu {
             top: 10px;
             left: 150px;
         }
-        #addmenu{
-            top:100px;
-            text-align:center;
+
+        #addmenu {
+            top: 70px;
+            text-align: center;
         }
 
         #title {
@@ -96,73 +103,131 @@
             background-color: #ccc;
         }
 
-        #tab button{
+        #tab button {
             margin: 0 2px;
-            padding:0 10px;
+            padding: 0 10px;
             height: 29px;
-            float:left;
+            float: left;
             font-size: 15px;
-            outline:0;
+            outline: 0;
             border-style: hidden solid;
-            border-color:#888;
-            border-width:1px;
+            border-color: #888;
+            border-width: 1px;
             text-align: center;
             vertical-align: middle;
         }
-        #add{
-            background-color:#ccc;
-            color:#000;
-            width:50px;
+
+        #add {
+            background-color: #ccc;
+            color: #000;
+            width: 30px;
         }
+
         #editor {
-            width:100vw;
+            width: 100vw;
             height: calc(100vh - 110px);
             float: left;
-            z-index:2;
+            z-index: 2;
         }
-        .frame{
-            width:3px;
-            height:calc(100vh - 110px);
-            background-color:#e38;
-            float:left;
-            z-index:2;
-            padding:0;
-            margin:0;
+
+        .frame {
+            width: 3px;
+            height: calc(100vh - 110px);
+            background-color: #e38;
+            float: left;
+            z-index: 2;
+            padding: 0;
+            margin: 0;
         }
-        iframe{
-            padding:0;
-            margin:0;
-            height:calc(100vh - 114px);
-            z-index:1;
-            float:left;
+
+        iframe {
+            padding: 0;
+            margin: 0;
+            height: calc(100vh - 114px);
+            z-index: 1;
+            float: left;
         }
-        #menu button:hover{
-            color:#e38;
+
+        #menu button:hover {
+            color: #e38;
         }
-        .dropdown button:hover{
-            color:#e38;
+
+        .dropdown button:hover {
+            color: #e38;
         }
-        #tab button p{
-            float:left;
-            margin:0 10px 0 0;
-            padding:0;
+
+        #tab button p {
+            float: left;
+            margin: 0 10px 0 0;
+            padding: 0;
         }
-        #selectiveCodeReturnFrame{
+
+        #selectiveCodeReturnFrame {
             z-index: 5;
-            height:calc(100vh - 100px);
-            width:29vw;
-            background-color:#e38;
+            height: calc(100vh - 100px);
+            width: 29vw;
+            background-color: #e38;
         }
-        .option{
-            height:calc(100vh - 100px);
-            float :left;
+
+        .option {
+            height: calc(100vh - 100px);
+            float: left;
         }
-        .selectiveCodeReturnObj{
-            color:#ddd;
+
+        .selectiveCodeReturnObj {
+            color: #ddd;
+            text-align: center;
+        }
+
+        .selectiveCodeReturnObj:hover {
+            color: #e38;
+        }
+
+        input[type="text"] {
+            width: 80%;
+            outline: 0;      
+            border: none;
+            border-bottom-style: solid;
+            text-align: center;
+            font-size: 15px;
+            border-bottom-width: 2px;
+        }
+
+        select {
+            outline: 0;
+            border-radius: 0;
+            border: 0;
+            margin: 0;
+            padding: 0;
+            background: none transparent;
+            vertical-align: middle;
+            font-size: inherit;
+            box-sizing: content-box;
+        }
+        #extension{
+            z-index:2;
+            opacity:0;
+            display: block;
+            width:100%;
+            position:relative;
+        }
+        #centerSelect{
+            z-index:1;
+            position:absolute;
+            width:100%;
+            font-size:15px;
+            color:#000;
+        }
+        #create {
+            width: 60px;
+        }
+        #html{
             text-align:center;
+            background-color:#e38;           
         }
-        .selectiveCodeReturnObj:hover{
-            color:#e38;
+        #html p{
+            text-align:center;
+            color:#eee;
         }
     </style>
 </head>
@@ -174,13 +239,13 @@
         <button id="mode">mode</button>
     </div>
     <div class="dropdown" id="filemenu">
-        <button id="save">save</button><br>
+        <button id="save">save</button>
+        <br>
         <button id="load">load</button>
     </div>
     <div class="dropdown" id="modemenu">
         <button id="autoReflesh">autoReflesh</button>
         <button id="selectiveCodeReturn">selectiveCodeReturn</button>
-        <!--<button id="returnOnlyUndo">returnOnlyUndo</button>-->
     </div>
     <div id="top">
         <button id="run">▶︎</button>
@@ -188,17 +253,19 @@
     </div>
     <div id="tab">
         <button id="add">+</button>
+        <button id="html"><p>html</p></button>
     </div>
     <div class="dropdown" id="addmenu">
-        
-        <input type="text" id="fileName">
+        <input type="text" id="fileName">    
+        <div>    
+        <p id="centerSelect">javascript  ▽</p>
         <select id="extension">
-            <option value="js" class="javascript">javascript</option>
-            <option value="vs" class="glsl">vertexShader</option>
-            <option value="fs" class="glsl">fragmentShader</option>
-            <option value="html" class="html">html</option>
+            <option value="js" class="javascript"><p>javascript</p></option>
+            <option value="glsl" class="glsl"><p>glsl</p></option>            
+     <!--       <option value="html" class="html"><p>html</p></option> -->
         </select>
-        <button id="create">create</button>
+        </div>
+        <button id="create">create</button>        
     </div>
     <div id="editor"></div>
 </body>
