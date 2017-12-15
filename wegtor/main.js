@@ -75,10 +75,10 @@ window.addEventListener("load", function () {
         frontFrame: null,
         sizeChange: false
     });
-    document.addEventListener("mousedown", function () {
-        document.getElementById("filemenu").style.visibility = event.target == document.getElementById("file") ? "visible" : "hidden";
-        document.getElementById("modemenu").style.visibility = event.target == document.getElementById("mode") ? "visible" : "hidden";
-        document.getElementById("addmenu").style.visibility = event.target == document.getElementById("add") || event.target == document.getElementById("fileName") || event.target == document.getElementById("extension") ? "visible" : "hidden";
+    document.addEventListener("mousedown", function (e) {
+        document.getElementById("filemenu").style.visibility = e.target == document.getElementById("file") ? "visible" : "hidden";
+        document.getElementById("modemenu").style.visibility = e.target == document.getElementById("mode") ? "visible" : "hidden";
+        document.getElementById("addmenu").style.visibility = e.target == document.getElementById("add") || e.target == document.getElementById("fileName") || e.target == document.getElementById("extension") ? "visible" : "hidden";
     });
 
     document.getElementById("html").addEventListener("mousedown", function () {
@@ -318,8 +318,7 @@ window.addEventListener("load", function () {
                 for (let j = 0; j < obj.length; j++) {
                     if (obj[j].type == "css" && !obj[j].removed) {                        
                         if (link[i].href.split("/")[link[i].href.split("/").length - 1] == obj[j].fileName) {                            
-                            if (link[i].rel == "stylesheet") {
-                                console.log("css");
+                            if (link[i].rel == "stylesheet") {                                
                                 let blob = new Blob([sessionStorage.getItem(j)], { type: 'text/css' });
                                 link[i].href = URL.createObjectURL(blob);
                             }
