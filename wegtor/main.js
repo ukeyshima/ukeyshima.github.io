@@ -318,7 +318,11 @@ window.addEventListener("load", function () {
                 for (let j = 0; j < obj.length; j++) {
                     if (obj[j].type == "css" && !obj[j].removed) {                        
                         if (link[i].href.split("/")[link[i].href.split("/").length - 1] == obj[j].fileName) {                            
+<<<<<<< HEAD:wegtor/main.js
                             if (link[i].rel == "stylesheet") {                                
+=======
+                            if (link[i].rel == "stylesheet") {                
+>>>>>>> c7ab15eeff08f1c630366e27affe8e38e54f5063:editor/main.js
                                 let blob = new Blob([sessionStorage.getItem(j)], { type: 'text/css' });
                                 link[i].href = URL.createObjectURL(blob);
                             }
