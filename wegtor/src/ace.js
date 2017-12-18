@@ -12296,10 +12296,9 @@ Editor.$uid = 0;
         }
     };
     this.$mergeableCommands = ["backspace", "del", "insertstring"];
-    this.$historyTracker = function(e) {
+    this.$historyTracker = function(e) {        
         if (!this.$mergeUndoDeltas)
             return;
-
         var prev = this.prevOp;
         var mergeableCommands = this.$mergeableCommands;
         var shouldMerge = prev.command && (e.command.name == prev.command.name);

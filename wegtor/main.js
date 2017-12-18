@@ -1,6 +1,101 @@
 window.addEventListener("load", function () {
+    let windowWidth = window.innerWidth;
+    let run = false;
+    let option = new Array();
+    let iframe = null;
+    let autoReflesh = false;
+    let selectiveCodeReturn = null;
+    let selectiveCodeReturnObjects = new Array();
+    let obj = new Array();
+    let id = 0;
+    let htmlEditor = id;    
+    let tabEvent = false;        
+    let beforeRemoveTime = new Date().getTime();
+    let beforeAction = null;
+    let active = {
+        id: id,
+        type: "html",
+        fileName: "index.html",
+        mode: "html",
+        removed: false
+    };
+    obj.push(active);
+    let Range = function (startRow, startColumn, endRow, endColumn) {
+        return {
+            start: { row: startRow, column: startColumn },
+            end: { row: endRow, column: endColumn }
+        };
+    }
+    option.push({
+        type: "editor",
+        element: document.getElementById("editor"),
+        frontElement: null,
+        frontFrame: null,
+        sizeChange: false
+    });
     sessionStorage.clear();
     const editor = ace.edit("editor");
+    //rewrite ace.js undoManager       
+    editor.session.getUndoManager().execute = (function (options) {
+        if (!tabEvent) {
+            var deltaSets = options.args[0];
+            this.$doc = options.args[1];
+            if (options.merge && this.hasUndo()) {
+                this.dirtyCounter[active.id]--;
+                deltaSets = this.$undoStack[active.id].pop().concat(deltaSets);
+            }
+            this.$undoStack[active.id].push(deltaSets);
+            this.$redoStack[active.id] = [];
+            if (this.dirtyCounter[active.id] < 0) {
+                this.dirtyCounter[active.id] = NaN;
+            }
+            this.dirtyCounter[active.id]++;
+        } else {
+            tabEvent = false;
+        }
+    });
+    editor.session.getUndoManager().undo = (function (dontSelect) {
+        var deltaSets = this.$undoStack[active.id].pop();
+        var undoSelectionRange = null;
+        if (deltaSets) {
+            undoSelectionRange = this.$doc.undoChanges(deltaSets, dontSelect);
+            this.$redoStack[active.id].push(deltaSets);
+            this.dirtyCounter[active.id]--;
+        }
+        return undoSelectionRange;
+    });
+    editor.session.getUndoManager().redo = (function (dontSelect) {
+        var deltaSets = this.$redoStack[active.id].pop();
+        var redoSelectionRange = null;
+        if (deltaSets) {
+            redoSelectionRange =
+                this.$doc.redoChanges(this.$deserializeDeltas(deltaSets), dontSelect);
+            this.$undoStack[active.id].push(deltaSets);
+            this.dirtyCounter[active.id]++;
+        }
+        return redoSelectionRange;
+    });
+    editor.session.getUndoManager().reset = (function () {
+        this.$undoStack = [];
+        this.$redoStack = [];
+        this.$undoStack[active.id] = [];
+        this.$redoStack[active.id] = [];
+        this.dirtyCounter[active.id] = 0;
+    });
+    editor.session.getUndoManager().hasUndo = (function () {
+        return this.$undoStack[active.id].length > 0;
+    });
+    editor.session.getUndoManager().hasRedo = (function () {
+        return this.$redoStack[active.id].length > 0;
+    });
+    editor.session.getUndoManager().markClean = (function () {
+        this.dirtyCounter[active.id] = 0;
+    });
+    editor.session.getUndoManager().isClean = (function () {
+        return this.dirtyCounter[active.id] === 0;
+    });
+    //            
+    editor.session.getUndoManager().reset();
     editor.setTheme("ace/theme/dawn");
     editor.setFontSize(23);
     editor.getSession().setMode("ace/mode/html");
@@ -30,7 +125,11 @@ window.addEventListener("load", function () {
         name: "undo-event",
         bindKey: { win: 'Ctrl+z', mac: 'Command+z' },
         exec: () => {
-            editor.undo();
+            try {
+                editor.undo();
+            } catch (e) {
+
+            }
         },
         readOnly: true
     });
@@ -38,50 +137,23 @@ window.addEventListener("load", function () {
         name: "redo-event",
         bindKey: { win: 'Ctrl+Shift+z', mac: 'Command+Shift+z' },
         exec: () => {
-            editor.redo();
+            try {
+                editor.redo();
+            } catch (e) {
+
+            }
         },
         readOnly: true
     });
     editor.keyBinding.addKeyboardHandler(keyboardHandler);
-    let windowWidth = window.innerWidth;
-    let run = false;
-    let option = new Array();
-    let iframe = null;
-    let autoReflesh = false;
-    let selectiveCodeReturn = null;
-    let selectiveCodeReturnObjects = new Array();
-    let obj = new Array();
-    let id = 0;
-    let htmlEditor = id;
-    let tabChangeEvent = false;
-    let active = {
-        id: id,
-        type: "html",
-        fileName: "index.html",
-        mode: "html",
-        removed: false
-    };
-    obj.push(active);
-    let Range = function (startRow, startColumn, endRow, endColumn) {
-        return {
-            start: { row: startRow, column: startColumn },
-            end: { row: endRow, column: endColumn }
-        };
-    }
-    option.push({
-        type: "editor",
-        element: document.getElementById("editor"),
-        frontElement: null,
-        frontFrame: null,
-        sizeChange: false
-    });
+
     document.addEventListener("mousedown", function (e) {
         document.getElementById("filemenu").style.visibility = e.target == document.getElementById("file") ? "visible" : "hidden";
         document.getElementById("modemenu").style.visibility = e.target == document.getElementById("mode") ? "visible" : "hidden";
         document.getElementById("addmenu").style.visibility = e.target == document.getElementById("add") || e.target == document.getElementById("fileName") || e.target == document.getElementById("extension") ? "visible" : "hidden";
     });
-
     document.getElementById("html").addEventListener("mousedown", function () {
+        tabEvent = true;
         let tab = document.getElementById("tab").getElementsByTagName("button");
         for (let i = 0; i < tab.length; i++) {
             tab[i].style.backgroundColor = "#ccc";
@@ -114,6 +186,7 @@ window.addEventListener("load", function () {
         this.getElementsByTagName("p")[0].style.color = active.id == 0 ? "#fff" : "#000";
     });
     document.getElementById("create").addEventListener("mousedown", function () {
+        tabEvent = true;
         let fileName = document.getElementById("fileName").value;
         let num = document.getElementById("extension").selectedIndex;
         let extension = document.getElementById("extension").getElementsByTagName("option")[num];
@@ -153,7 +226,7 @@ window.addEventListener("load", function () {
         });
         let object = obj[obj.length - 1];
         button.addEventListener("mousedown", function () {
-            tabChangeEvent = true;
+            tabEvent = true;
             let tab = document.getElementById("tab").getElementsByTagName("button");
             for (let i = 0; i < tab.length; i++) {
                 tab[i].style.backgroundColor = "#ccc";
@@ -174,7 +247,6 @@ window.addEventListener("load", function () {
             editor.setReadOnly(false);
             active = object;
             if (autoRefleshEvent) autoReflesh = true;
-            tabChangeEvent = false;
         });
         close.addEventListener("mousedown", function () {
             document.getElementById("tab").removeChild(button);
@@ -189,13 +261,13 @@ window.addEventListener("load", function () {
             close.style.color = active.id == this.id ? event.target.innerHTML == "×" ? "#000" : "#fff" : event.target.innerHTML == "×" ? "#fff" : "#000";
         });
         active = object;
+        editor.session.getUndoManager().$undoStack[active.id] = [];
+        editor.session.getUndoManager().$redoStack[active.id] = [];
+        editor.session.getUndoManager().dirtyCounter[active.id] = 0;
     });
-
-    let beforeRemoveTime = new Date().getTime();
-    let beforeAction = null;
     editor.session.on("change", function (e) {
         try {
-            if (!tabChangeEvent) {
+            if (!tabEvent) {
                 if (e.action == "remove") {
                     if (new Date().getTime() - beforeRemoveTime > 2000 || beforeAction != "remove") {
                         selectiveCodeReturnObjects.push({ id: active.id, type: e.action, key: "", startRow: e.start.row, startColumn: e.start.column, endRow: e.end.row, endColumn: e.end.column, undo: false });
@@ -206,6 +278,8 @@ window.addEventListener("load", function () {
                     beforeRemoveTime = new Date().getTime();
                 }
                 beforeAction = e.action;
+            } else {
+                tabEvent = true;
             }
             if (autoReflesh) {
                 sessionStorage.setItem(active.id, editor.getValue());
@@ -316,9 +390,9 @@ window.addEventListener("load", function () {
             }
             for (let i = 0; i < link.length; i++) {
                 for (let j = 0; j < obj.length; j++) {
-                    if (obj[j].type == "css" && !obj[j].removed) {                        
-                        if (link[i].href.split("/")[link[i].href.split("/").length - 1] == obj[j].fileName) {                            
-                            if (link[i].rel == "stylesheet") {                
+                    if (obj[j].type == "css" && !obj[j].removed) {
+                        if (link[i].href.split("/")[link[i].href.split("/").length - 1] == obj[j].fileName) {
+                            if (link[i].rel == "stylesheet") {
                                 let blob = new Blob([sessionStorage.getItem(j)], { type: 'text/css' });
                                 link[i].href = URL.createObjectURL(blob);
                             }
@@ -536,13 +610,13 @@ window.addEventListener("load", function () {
         a.dataset.downloadurl = ['text/plain', a.download, a.href].join(':');
         a.dispatchEvent(e);
     });
-    document.addEventListener("keydown",function(e){
-        if(document.getElementById("addmenu").style.visibility=="visible"){
-            if(e.key=="Enter"){
+    document.addEventListener("keydown", function (e) {
+        if (document.getElementById("addmenu").style.visibility == "visible") {
+            if (e.key == "Enter") {
                 const e = document.createEvent("MouseEvents");
                 e.initEvent("mousedown", false, true);
-                document.getElementById("create").dispatchEvent(e);  
-                document.getElementById("addmenu").style.visibility="hidden";
+                document.getElementById("create").dispatchEvent(e);
+                document.getElementById("addmenu").style.visibility = "hidden";
             }
         }
     });
