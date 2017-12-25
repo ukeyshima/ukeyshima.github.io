@@ -1,15 +1,15 @@
 window.addEventListener("load", function () {
     let windowWidth = window.innerWidth;
     let run = false;
-    let option = new Array();
+    let option = [];
     let iframe = null;
     let autoReflesh = false;
     let selectiveCodeReturn = null;
-    let selectiveCodeReturnObjects = new Array();
-    let obj = new Array();
+    let selectiveCodeReturnObjects = [];
+    let obj = [];
     let id = 0;
-    let htmlEditor = id;    
-    let tabEvent = false;        
+    let htmlEditor = id;
+    let tabEvent = false;
     let beforeRemoveTime = new Date().getTime();
     let beforeAction = null;
     let active = {
@@ -36,14 +36,36 @@ window.addEventListener("load", function () {
     sessionStorage.clear();
     const editor = ace.edit("editor");
     //rewrite ace.js undoManager       
+    let undoStem = [];
+    let undoBranch = [];
+    let lastUndoStem = [];
+    let lastUndoBranch = [];
+    let undoBranchNum = 0;
+    let branchedDirtyCounter = [];
     editor.session.getUndoManager().execute = (function (options) {
         if (!tabEvent) {
+            undoBranchNum = -1;
+            //
+            if (this.$redoStack[active.id].length > 0) {
+                undoStem[active.id].push([].concat(this.$undoStack[active.id]));
+                branchedDirtyCounter[active.id].push([].concat(this.dirtyCounter[active.id]));
+                undoBranch[active.id].push([].concat(this.$redoStack[active.id]));
+                lastUndoStem[active.id] = [].concat(undoStem[active.id][undoStem[active.id].length - 1]);
+                lastUndoBranch[active.id] = [].concat(undoBranch[active.id][undoBranch[active.id].length - 1]);
+            }else{
+                let undoBranchStack = [];
+                let redoBranchStack = [];
+                let lastUndoBranchStack = [];
+                let lastRedoBranchStack = [];
+            }
+            //
             var deltaSets = options.args[0];
             this.$doc = options.args[1];
             if (options.merge && this.hasUndo()) {
                 this.dirtyCounter[active.id]--;
                 deltaSets = this.$undoStack[active.id].pop().concat(deltaSets);
             }
+
             this.$undoStack[active.id].push(deltaSets);
             this.$redoStack[active.id] = [];
             if (this.dirtyCounter[active.id] < 0) {
@@ -55,6 +77,7 @@ window.addEventListener("load", function () {
         }
     });
     editor.session.getUndoManager().undo = (function (dontSelect) {
+        undoBranchNum = 0;
         var deltaSets = this.$undoStack[active.id].pop();
         var undoSelectionRange = null;
         if (deltaSets) {
@@ -68,11 +91,39 @@ window.addEventListener("load", function () {
         var deltaSets = this.$redoStack[active.id].pop();
         var redoSelectionRange = null;
         if (deltaSets) {
-            redoSelectionRange =
-                this.$doc.redoChanges(this.$deserializeDeltas(deltaSets), dontSelect);
+            redoSelectionRange = this.$doc.redoChanges(this.$deserializeDeltas(deltaSets), dontSelect);
             this.$undoStack[active.id].push(deltaSets);
             this.dirtyCounter[active.id]++;
+        } else {
+            let j = this.$undoStack[active.id].length - lastUndoStem[active.id].length;                                                     
+            if(undoBranchNum<0){                         
+                for(let i=undoStem[active.id].length-1;i>=0;i--){
+                    if(undoStem[active.id][i].length!=lastUndoStem[active.id].length){                 
+                        undoStem[active.id].splice(i,1);
+                        undoBranch[active.id].splice(i,1); 
+                    }
+                }            
+                undoStem[active.id].push([].concat(this.$undoStack[active.id].slice(0,this.$undoStack[active.id].length-j)));
+                undoBranch[active.id].push([].concat(this.$undoStack[active.id].slice(this.$undoStack[active.id].length-j)));                                
+                undoBranchNum=1;
+            }                           
+            for (let i = 0; i < j; i++) {
+                deltaSets = this.$undoStack[active.id].pop();
+                if (deltaSets) this.$doc.undoChanges(deltaSets, dontSelect);
+                this.dirtyCounter[active.id]--;
+            }
+            j = lastUndoBranch[active.id].length;            
+            for (let i = 0; i < j; i++) {
+                deltaSets = lastUndoBranch[active.id].pop();
+                redoSelectionRange = this.$doc.redoChanges(this.$deserializeDeltas(deltaSets), dontSelect);
+                this.$undoStack[active.id].push(deltaSets);
+                this.dirtyCounter[active.id]++;
+            }
         }
+        undoBranchNum++;        
+        undoBranchNum = undoStem[active.id].length == undoBranchNum ? 0 : undoBranchNum;
+        lastUndoStem[active.id] = [].concat(undoStem[active.id][undoStem[active.id].length - 1 - undoBranchNum]);
+        lastUndoBranch[active.id] = [].concat(undoBranch[active.id][undoBranch[active.id].length - 1 - undoBranchNum]);
         return redoSelectionRange;
     });
     editor.session.getUndoManager().reset = (function () {
@@ -80,6 +131,9 @@ window.addEventListener("load", function () {
         this.$redoStack = [];
         this.$undoStack[active.id] = [];
         this.$redoStack[active.id] = [];
+        undoStem[active.id] = [];
+        undoBranch[active.id] = [];
+        branchedDirtyCounter[active.id] = [];
         this.dirtyCounter[active.id] = 0;
     });
     editor.session.getUndoManager().hasUndo = (function () {
@@ -264,6 +318,9 @@ window.addEventListener("load", function () {
         editor.session.getUndoManager().$undoStack[active.id] = [];
         editor.session.getUndoManager().$redoStack[active.id] = [];
         editor.session.getUndoManager().dirtyCounter[active.id] = 0;
+        undoStem[active.id] = [];
+        undoBranch[active.id] = [];
+        branchedDirtyCounter[active.id] = [];
     });
     editor.session.on("change", function (e) {
         try {
@@ -289,7 +346,7 @@ window.addEventListener("load", function () {
                 while (selectiveCodeReturn.element.firstChild) {
                     selectiveCodeReturn.element.removeChild(selectiveCodeReturn.element.firstChild);
                 }
-                let selectiveCodeReturnObject = new Array();
+                let selectiveCodeReturnObject = [];
                 selectiveCodeReturnObjects.forEach(function (e, i, a) {
                     if (e.id == active.id) {
                         selectiveCodeReturnObject.push(e);

@@ -89,15 +89,15 @@ window.addEventListener("load", function () {
     gl.enable(gl.BLEND);
     gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE);
 
-    gl.clearColor(242/255, 242/255, 242/255, 1.0);
+    gl.clearColor(242 / 255, 242 / 255, 242 / 255, 1.0);
 
-  //    new_canvas();
+    //    new_canvas();
     let frame = 0.0;
     (function () {
         gl.clear(gl.COLOR_BUFFER_BIT);
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.uniform1f(uniLocation[0], 10+(cw-150)/50);
+        gl.uniform1f(uniLocation[0], 10 + (cw - 150) / 50);
         gl.uniform1f(uniLocation[1], frame);
         gl.uniform2fv(uniLocation[2], [cw, ch]);
         //gl.uniform1i(uniLocation[3], 0);
@@ -108,6 +108,10 @@ window.addEventListener("load", function () {
         gl.beginTransformFeedback(gl.POINTS);
         gl.drawArrays(gl.POINTS, 0, particleNum);
         gl.endTransformFeedback();
+        var arrBuffer = new ArrayBuffer(particleNum * 3 * Float32Array.BYTES_PER_ELEMENT);
+        arrBuffer = new Float32Array(arrBuffer);
+        gl.getBufferSubData(gl.TRANSFORM_FEEDBACK_BUFFER, 0, arrBuffer);
+        console.log(arrBuffer);
         gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, null);
         gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 1, null);
         gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 2, null);
@@ -131,9 +135,10 @@ window.addEventListener("load", function () {
     })();
 
     document.addEventListener("mousedown", function () {
-        var arrBuffer = new ArrayBuffer(particleNum*3 * Float32Array.BYTES_PER_ELEMENT);
-        arrBuffer=new Float32Array(arrBuffer);
+        var arrBuffer = new ArrayBuffer(particleNum * 3 * Float32Array.BYTES_PER_ELEMENT);
+        arrBuffer = new Float32Array(arrBuffer);
         gl.getBufferSubData(gl.ARRAY_BUFFER, 0, arrBuffer);
+        console.log(arrBuffer);
     });
 
     function create_shader(id) {
@@ -229,31 +234,31 @@ window.addEventListener("load", function () {
         const ctx = canvas.getContext("2d");
         ctx.textAlign = "center";
         ctx.globalAlpha = 0.0;
-        let frameCount=0;
-        let titleTextAlpha=0.0;
-        let footerTextAlpha=0.0;
-        (function(){
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            titleTextAlpha+=titleTextAlpha>0.7 || frameCount<230?0.0:0.0025
-            ctx.globalAlpha=titleTextAlpha;
+        let frameCount = 0;
+        let titleTextAlpha = 0.0;
+        let footerTextAlpha = 0.0;
+        (function () {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            titleTextAlpha += titleTextAlpha > 0.7 || frameCount < 230 ? 0.0 : 0.0025
+            ctx.globalAlpha = titleTextAlpha;
             ctx.font = "50px 'Georgia'";
             ctx.fillStyle = "rgb(255,255,255)";
             ctx.fillText("webGL portfolio", canvas.width / 2, canvas.height / 2.5);
-            footerTextAlpha+=footerTextAlpha>0.7 || frameCount<270?0.0:0.0025
-            ctx.globalAlpha=footerTextAlpha;
+            footerTextAlpha += footerTextAlpha > 0.7 || frameCount < 270 ? 0.0 : 0.0025
+            ctx.globalAlpha = footerTextAlpha;
             ctx.font = "20px 'Georgia'";
             ctx.fillStyle = "rgb(255,255,255)";
-            ctx.fillText("@shimashimaotoko", canvas.width / 2, canvas.height *6/7);
+            ctx.fillText("@shimashimaotoko", canvas.width / 2, canvas.height * 6 / 7);
             frameCount++;
             requestAnimationFrame(arguments.callee);
         })();
     }
-    window.addEventListener("resize",function(e){
-        cw=e.target.innerWidth;
-        ch=e.target.innerHeight;
-        c.width=cw;
-        c.height=ch;
+    window.addEventListener("resize", function (e) {
+        cw = e.target.innerWidth;
+        ch = e.target.innerHeight;
+        c.width = cw;
+        c.height = ch;
         console.log(cw);
-        gl.viewport(0,0,cw,ch);
-     });
+        gl.viewport(0, 0, cw, ch);
+    });
 });
