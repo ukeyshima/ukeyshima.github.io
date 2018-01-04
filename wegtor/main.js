@@ -9,7 +9,7 @@ window.addEventListener("load", function () {
     let obj = [];
     let id = 0;
     let htmlEditor = id;
-    let exdoEvent = new Array();
+    let branchUndoEvent = new Array();
     let lastUndoBranchPoint = [];
     let undoBranchNum = [];
     let branchNum = [];
@@ -64,7 +64,7 @@ window.addEventListener("load", function () {
                 this.$undoStack[active.id][this.$undoStack[active.id].length - 1].branchPointId.push(undoBranchId[active.id]);
                 this.$undoStack[active.id][this.$undoStack[active.id].length - 1].isBranchPoint = true;
             }
-            exdoEvent[active.id] = false;
+            branchUndoEvent[active.id] = false;
             var deltaSets = options.args[0];
             this.$doc = options.args[1];
             if (options.merge && this.hasUndo()) {
@@ -82,21 +82,21 @@ window.addEventListener("load", function () {
         }
     });
     editor.session.getUndoManager().undo = (function (dontSelect) {
-        exdoEvent[active.id] = false;
-        if(this.$undoStack[active.id].length>1){
-        var stack = this.$undoStack[active.id].pop();
-        var deltaSets = stack.delta;
-        var undoSelectionRange = null;
-        if (deltaSets) {
-            undoSelectionRange = this.$doc.undoChanges(deltaSets, dontSelect);
-            this.$redoStack[active.id].push(new undoStackObj(deltaSets, stack.branchPointId, stack.isBranchPoint, stack.branchStack));
-            this.dirtyCounter[active.id]--;
+        branchUndoEvent[active.id] = false;
+        if (this.$undoStack[active.id].length > 1) {
+            var stack = this.$undoStack[active.id].pop();
+            var deltaSets = stack.delta;
+            var undoSelectionRange = null;
+            if (deltaSets) {
+                undoSelectionRange = this.$doc.undoChanges(deltaSets, dontSelect);
+                this.$redoStack[active.id].push(new undoStackObj(deltaSets, stack.branchPointId, stack.isBranchPoint, stack.branchStack));
+                this.dirtyCounter[active.id]--;
+            }
+            return undoSelectionRange;
         }
-        return undoSelectionRange;
-    }
     });
     editor.session.getUndoManager().redo = (function (dontSelect) {
-        exdoEvent[active.id] = false;
+        branchUndoEvent[active.id] = false;
         var stack = this.$redoStack[active.id].pop();
         var deltaSets = stack.delta;
         var redoSelectionRange = null;
@@ -108,11 +108,11 @@ window.addEventListener("load", function () {
         return redoSelectionRange;
     });
     editor.session.getUndoManager().reset = (function () {
-        exdoEvent[active.id] = false;
+        branchUndoEvent[active.id] = false;
         undoBranchId[active.id] = 0;
         this.$undoStack = [];
         this.$redoStack = [];
-        this.$undoStack[active.id] = [new undoStackObj([],[undoBranchId[active.id]],false,[])];
+        this.$undoStack[active.id] = [new undoStackObj([], [undoBranchId[active.id]], false, [])];
         this.$redoStack[active.id] = [];
         undoBranchNum[active.id] = 0;
         lastUndoBranchPoint[active.id] = null;
@@ -131,35 +131,35 @@ window.addEventListener("load", function () {
     editor.session.getUndoManager().isClean = (function () {
         return this.dirtyCounter[active.id] === 0;
     });
-    editor.session.getUndoManager().exdo = (function () {        
-        if (!exdoEvent[active.id]) {            
+    editor.session.getUndoManager().branchUndo = (function () {
+        if (!branchUndoEvent[active.id]) {
             branchNum[active.id] = 0;
             undoBranchNum[active.id] = this.$undoStack[active.id].indexOf(this.$undoStack[active.id].slice(0, this.$undoStack[active.id].length - 1).reverse(false).find(function (e, i, a) {
                 return e.isBranchPoint;
-            }));            
+            }));
             this.$undoStack[active.id][undoBranchNum[active.id]].branchStack.push(this.$undoStack[active.id].slice(undoBranchNum[active.id] + 1, this.$undoStack[active.id].length).reverse(false));
-            lastUndoBranchPoint[active.id] = this.$undoStack[active.id][undoBranchNum[active.id]];            
-            exdoEvent[active.id] = true;
+            lastUndoBranchPoint[active.id] = this.$undoStack[active.id][undoBranchNum[active.id]];
+            branchUndoEvent[active.id] = true;
         }
-        let j = this.$undoStack[active.id].length - (undoBranchNum[active.id] + 1);           
+        let j = this.$undoStack[active.id].length - (undoBranchNum[active.id] + 1);
         for (let i = 0; i < j; i++) {
             var stack = this.$undoStack[active.id].pop();
-            var deltaSets = stack.delta;            
+            var deltaSets = stack.delta;
             if (deltaSets) {
                 this.$doc.undoChanges(deltaSets, null);
                 this.dirtyCounter[active.id]--;
             }
-        }                
-        j = lastUndoBranchPoint[active.id].branchStack[lastUndoBranchPoint[active.id].branchPointId[branchNum[active.id]]].length;        
+        }
+        j = lastUndoBranchPoint[active.id].branchStack[lastUndoBranchPoint[active.id].branchPointId[branchNum[active.id]]].length;
         for (let i = 0; i < j; i++) {
             let stack = lastUndoBranchPoint[active.id].branchStack[lastUndoBranchPoint[active.id].branchPointId[branchNum[active.id]]][lastUndoBranchPoint[active.id].branchStack[lastUndoBranchPoint[active.id].branchPointId[branchNum[active.id]]].length - 1 - i];
-            let deltaSets = stack.delta;            
+            let deltaSets = stack.delta;
             this.$doc.redoChanges(this.$deserializeDeltas(deltaSets), null);
             this.$undoStack[active.id].push(new undoStackObj(deltaSets, stack.branchPointId, stack.isBranchPoint, stack.branchStack));
             this.dirtyCounter[active.id]++;
         }
         branchNum[active.id]++;
-        if (branchNum[active.id] > lastUndoBranchPoint[active.id].branchPointId.length - 1) branchNum[active.id] = 0; 
+        if (branchNum[active.id] > lastUndoBranchPoint[active.id].branchPointId.length - 1) branchNum[active.id] = 0;
     });
     //            
     editor.session.getUndoManager().reset();
@@ -213,11 +213,11 @@ window.addEventListener("load", function () {
         readOnly: true
     });
     keyboardHandler.addCommand({
-        name: "exdo-event",
+        name: "branchUndo-event",
         bindKey: { mac: 'Command+Ctrl+z' },
         exec: () => {
             try {
-                editor.session.getUndoManager().exdo();
+                editor.session.getUndoManager().branchUndo();
             } catch (e) {
 
             }
@@ -340,7 +340,7 @@ window.addEventListener("load", function () {
         });
         active = object;
         undoBranchId[active.id] = 0;
-        editor.session.getUndoManager().$undoStack[active.id] = [new undoStackObj([],[undoBranchId[active.id]],false,[])];
+        editor.session.getUndoManager().$undoStack[active.id] = [new undoStackObj([], [undoBranchId[active.id]], false, [])];
         editor.session.getUndoManager().$redoStack[active.id] = [];
         editor.session.getUndoManager().dirtyCounter[active.id] = 0;
     });
@@ -384,21 +384,6 @@ window.addEventListener("load", function () {
                         let elements = selectiveCodeReturn.element.children;
                         let target = selectiveCodeReturnObject[[].slice.call(elements).indexOf(this)];
                         editor.session.replace(new Range(editor.getCursorPosition().row, editor.getCursorPosition().column, editor.getCursorPosition().row, editor.getCursorPosition().column), target.key);
-                        /*if (!target.undo) {
-                            target.undo = true;
-                            if (target.type == "insert") {
-                                editor.session.replace(new Range(target.startRow, target.startColumn, target.endRow, target.endColumn), "");
-                            } else if (target.type == "remove") {
-                                editor.session.replace(new Range(target.startRow, target.startColumn, target.startRow, target.startColumn), target.key);
-                            }                            
-                        } else {
-                            target.undo = false;
-                            if (target.type == "insert") {
-                                editor.session.replace(new Range(target.startRow, target.startColumn, target.startRow, target.startColumn), target.key);
-                            } else if (target.type == "remove") {
-                                editor.session.replace(new Range(target.startRow, target.startColumn, target.endRow, target.endColumn), "");
-                            }                                                          
-                        }*/
                     });
                 });
             }
