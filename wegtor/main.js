@@ -9,6 +9,10 @@ window.addEventListener("load", function () {
     let obj = [];
     let id = 0;
     let htmlEditor = id;
+    let exdoEvent = new Array();
+    let lastUndoBranchPoint = [];
+    let undoBranchNum = [];
+    let branchNum = [];
     let tabEvent = false;
     let beforeRemoveTime = new Date().getTime();
     let beforeAction = null;
@@ -35,38 +39,39 @@ window.addEventListener("load", function () {
     });
     sessionStorage.clear();
     const editor = ace.edit("editor");
-    //rewrite ace.js undoManager       
-    let undoStem = [];
-    let undoBranch = [];
-    let lastUndoStem = [];
-    let lastUndoBranch = [];
-    let undoBranchNum = 0;
-    let branchedDirtyCounter = [];
+    //rewrite ace.js undoManager
+    let undoStackObj = function (delta, branchPointId, isBranchPoint, branchStack) {
+        this.delta = delta;
+        this.branchPointId = branchPointId;
+        this.isBranchPoint = isBranchPoint;
+        this.branchStack = branchStack;
+    }
+    let undoBranchId = [];
     editor.session.getUndoManager().execute = (function (options) {
         if (!tabEvent) {
-            undoBranchNum = -1;
-            //
-            if (this.$redoStack[active.id].length > 0) {
-                undoStem[active.id].push([].concat(this.$undoStack[active.id]));
-                branchedDirtyCounter[active.id].push([].concat(this.dirtyCounter[active.id]));
-                undoBranch[active.id].push([].concat(this.$redoStack[active.id]));
-                lastUndoStem[active.id] = [].concat(undoStem[active.id][undoStem[active.id].length - 1]);
-                lastUndoBranch[active.id] = [].concat(undoBranch[active.id][undoBranch[active.id].length - 1]);
-            }else{
-                let undoBranchStack = [];
-                let redoBranchStack = [];
-                let lastUndoBranchStack = [];
-                let lastRedoBranchStack = [];
+            if (this.hasRedo()) {
+                this.$undoStack[active.id][this.$undoStack[active.id].length - 1].branchPointId[this.$undoStack[active.id][this.$undoStack[active.id].length - 1].branchPointId.length - 1] = undoBranchId[active.id];
+                let num = this.$undoStack[active.id].indexOf(this.$undoStack[active.id].find(function (e, i, a) {
+                    return e.branchPointId.some(function (ele, ind, arr) { return ele == undoBranchId[active.id] }) && e.isBranchPoint;
+                }));
+                if (num >= 0) this.$undoStack[active.id][num].branchStack[undoBranchId[active.id]] = [].concat(this.$redoStack[active.id]).concat(this.$undoStack[active.id].slice(num + 1, this.$undoStack[active.id].length).reverse(false));
+                num = this.$redoStack[active.id].indexOf(this.$redoStack[active.id].find(function (e, i, a) {
+                    return e.branchPointId.some(function (ele, ind, arr) { return ele == undoBranchId[active.id] }) && e.isBranchPoint;
+                }));
+                if (num >= 0) this.$redoStack[active.id][num].branchStack[undoBranchId[active.id]] = [].concat(this.$redoStack[active.id]).slice(num, this.$redoStack[active.id].length);
+                this.$undoStack[active.id][this.$undoStack[active.id].length - 1].branchStack[undoBranchId[active.id]] = [].concat(this.$redoStack[active.id]);
+                undoBranchId[active.id]++;
+                this.$undoStack[active.id][this.$undoStack[active.id].length - 1].branchPointId.push(undoBranchId[active.id]);
+                this.$undoStack[active.id][this.$undoStack[active.id].length - 1].isBranchPoint = true;
             }
-            //
+            exdoEvent[active.id] = false;
             var deltaSets = options.args[0];
             this.$doc = options.args[1];
             if (options.merge && this.hasUndo()) {
                 this.dirtyCounter[active.id]--;
-                deltaSets = this.$undoStack[active.id].pop().concat(deltaSets);
+                deltaSets = this.$undoStack[active.id].pop().delta.concat(deltaSets);
             }
-
-            this.$undoStack[active.id].push(deltaSets);
+            this.$undoStack[active.id].push(new undoStackObj(deltaSets, [undoBranchId[active.id]], false, []));
             this.$redoStack[active.id] = [];
             if (this.dirtyCounter[active.id] < 0) {
                 this.dirtyCounter[active.id] = NaN;
@@ -77,63 +82,41 @@ window.addEventListener("load", function () {
         }
     });
     editor.session.getUndoManager().undo = (function (dontSelect) {
-        undoBranchNum = 0;
-        var deltaSets = this.$undoStack[active.id].pop();
+        exdoEvent[active.id] = false;
+        if(this.$undoStack[active.id].length>1){
+        var stack = this.$undoStack[active.id].pop();
+        var deltaSets = stack.delta;
         var undoSelectionRange = null;
         if (deltaSets) {
             undoSelectionRange = this.$doc.undoChanges(deltaSets, dontSelect);
-            this.$redoStack[active.id].push(deltaSets);
+            this.$redoStack[active.id].push(new undoStackObj(deltaSets, stack.branchPointId, stack.isBranchPoint, stack.branchStack));
             this.dirtyCounter[active.id]--;
         }
         return undoSelectionRange;
+    }
     });
     editor.session.getUndoManager().redo = (function (dontSelect) {
-        var deltaSets = this.$redoStack[active.id].pop();
+        exdoEvent[active.id] = false;
+        var stack = this.$redoStack[active.id].pop();
+        var deltaSets = stack.delta;
         var redoSelectionRange = null;
         if (deltaSets) {
             redoSelectionRange = this.$doc.redoChanges(this.$deserializeDeltas(deltaSets), dontSelect);
-            this.$undoStack[active.id].push(deltaSets);
+            this.$undoStack[active.id].push(new undoStackObj(deltaSets, stack.undoBranchId, stack.isBranchPoint, stack.branchStack));
             this.dirtyCounter[active.id]++;
-        } else {
-            let j = this.$undoStack[active.id].length - lastUndoStem[active.id].length;                                                     
-            if(undoBranchNum<0){                         
-                for(let i=undoStem[active.id].length-1;i>=0;i--){
-                    if(undoStem[active.id][i].length!=lastUndoStem[active.id].length){                 
-                        undoStem[active.id].splice(i,1);
-                        undoBranch[active.id].splice(i,1); 
-                    }
-                }            
-                undoStem[active.id].push([].concat(this.$undoStack[active.id].slice(0,this.$undoStack[active.id].length-j)));
-                undoBranch[active.id].push([].concat(this.$undoStack[active.id].slice(this.$undoStack[active.id].length-j)));                                
-                undoBranchNum=1;
-            }                           
-            for (let i = 0; i < j; i++) {
-                deltaSets = this.$undoStack[active.id].pop();
-                if (deltaSets) this.$doc.undoChanges(deltaSets, dontSelect);
-                this.dirtyCounter[active.id]--;
-            }
-            j = lastUndoBranch[active.id].length;            
-            for (let i = 0; i < j; i++) {
-                deltaSets = lastUndoBranch[active.id].pop();
-                redoSelectionRange = this.$doc.redoChanges(this.$deserializeDeltas(deltaSets), dontSelect);
-                this.$undoStack[active.id].push(deltaSets);
-                this.dirtyCounter[active.id]++;
-            }
         }
-        undoBranchNum++;        
-        undoBranchNum = undoStem[active.id].length == undoBranchNum ? 0 : undoBranchNum;
-        lastUndoStem[active.id] = [].concat(undoStem[active.id][undoStem[active.id].length - 1 - undoBranchNum]);
-        lastUndoBranch[active.id] = [].concat(undoBranch[active.id][undoBranch[active.id].length - 1 - undoBranchNum]);
         return redoSelectionRange;
     });
     editor.session.getUndoManager().reset = (function () {
+        exdoEvent[active.id] = false;
+        undoBranchId[active.id] = 0;
         this.$undoStack = [];
         this.$redoStack = [];
-        this.$undoStack[active.id] = [];
+        this.$undoStack[active.id] = [new undoStackObj([],[undoBranchId[active.id]],false,[])];
         this.$redoStack[active.id] = [];
-        undoStem[active.id] = [];
-        undoBranch[active.id] = [];
-        branchedDirtyCounter[active.id] = [];
+        undoBranchNum[active.id] = 0;
+        lastUndoBranchPoint[active.id] = null;
+        branchNum[active.id] = 0;
         this.dirtyCounter[active.id] = 0;
     });
     editor.session.getUndoManager().hasUndo = (function () {
@@ -147,6 +130,36 @@ window.addEventListener("load", function () {
     });
     editor.session.getUndoManager().isClean = (function () {
         return this.dirtyCounter[active.id] === 0;
+    });
+    editor.session.getUndoManager().exdo = (function () {        
+        if (!exdoEvent[active.id]) {            
+            branchNum[active.id] = 0;
+            undoBranchNum[active.id] = this.$undoStack[active.id].indexOf(this.$undoStack[active.id].slice(0, this.$undoStack[active.id].length - 1).reverse(false).find(function (e, i, a) {
+                return e.isBranchPoint;
+            }));            
+            this.$undoStack[active.id][undoBranchNum[active.id]].branchStack.push(this.$undoStack[active.id].slice(undoBranchNum[active.id] + 1, this.$undoStack[active.id].length).reverse(false));
+            lastUndoBranchPoint[active.id] = this.$undoStack[active.id][undoBranchNum[active.id]];            
+            exdoEvent[active.id] = true;
+        }
+        let j = this.$undoStack[active.id].length - (undoBranchNum[active.id] + 1);           
+        for (let i = 0; i < j; i++) {
+            var stack = this.$undoStack[active.id].pop();
+            var deltaSets = stack.delta;            
+            if (deltaSets) {
+                this.$doc.undoChanges(deltaSets, null);
+                this.dirtyCounter[active.id]--;
+            }
+        }                
+        j = lastUndoBranchPoint[active.id].branchStack[lastUndoBranchPoint[active.id].branchPointId[branchNum[active.id]]].length;        
+        for (let i = 0; i < j; i++) {
+            let stack = lastUndoBranchPoint[active.id].branchStack[lastUndoBranchPoint[active.id].branchPointId[branchNum[active.id]]][lastUndoBranchPoint[active.id].branchStack[lastUndoBranchPoint[active.id].branchPointId[branchNum[active.id]]].length - 1 - i];
+            let deltaSets = stack.delta;            
+            this.$doc.redoChanges(this.$deserializeDeltas(deltaSets), null);
+            this.$undoStack[active.id].push(new undoStackObj(deltaSets, stack.branchPointId, stack.isBranchPoint, stack.branchStack));
+            this.dirtyCounter[active.id]++;
+        }
+        branchNum[active.id]++;
+        if (branchNum[active.id] > lastUndoBranchPoint[active.id].branchPointId.length - 1) branchNum[active.id] = 0; 
     });
     //            
     editor.session.getUndoManager().reset();
@@ -199,6 +212,17 @@ window.addEventListener("load", function () {
         },
         readOnly: true
     });
+    keyboardHandler.addCommand({
+        name: "exdo-event",
+        bindKey: { mac: 'Command+Ctrl+z' },
+        exec: () => {
+            try {
+                editor.session.getUndoManager().exdo();
+            } catch (e) {
+
+            }
+        }
+    })
     editor.keyBinding.addKeyboardHandler(keyboardHandler);
 
     document.addEventListener("mousedown", function (e) {
@@ -315,12 +339,10 @@ window.addEventListener("load", function () {
             close.style.color = active.id == this.id ? event.target.innerHTML == "×" ? "#000" : "#fff" : event.target.innerHTML == "×" ? "#fff" : "#000";
         });
         active = object;
-        editor.session.getUndoManager().$undoStack[active.id] = [];
+        undoBranchId[active.id] = 0;
+        editor.session.getUndoManager().$undoStack[active.id] = [new undoStackObj([],[undoBranchId[active.id]],false,[])];
         editor.session.getUndoManager().$redoStack[active.id] = [];
         editor.session.getUndoManager().dirtyCounter[active.id] = 0;
-        undoStem[active.id] = [];
-        undoBranch[active.id] = [];
-        branchedDirtyCounter[active.id] = [];
     });
     editor.session.on("change", function (e) {
         try {
