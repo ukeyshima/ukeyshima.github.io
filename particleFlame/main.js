@@ -58,30 +58,26 @@ window.addEventListener("load", function () {
     vAttLocation[5] = gl.getAttribLocation(prg, "accel");
     vAttStride[5] = 3;
 
-    set_attribute([vPosition, vDoubleAccel, vNumber, vVelocity, vExistenceFrame, vAccel], vAttLocation, vAttStride);
-
     const vTransformFeedback = [gl.createBuffer(), gl.createBuffer(), gl.createBuffer(), gl.createBuffer()];
     const transformFeedback = [gl.createTransformFeedback(), gl.createTransformFeedback(), gl.createTransformFeedback(), gl.createTransformFeedback()];
 
     gl.bindBuffer(gl.ARRAY_BUFFER, vTransformFeedback[0]);
     gl.bufferData(gl.ARRAY_BUFFER, Float32Array.BYTES_PER_ELEMENT * 3 * particleNum, gl.DYNAMIC_COPY);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
-    gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback[0]);
+    
 
     gl.bindBuffer(gl.ARRAY_BUFFER, vTransformFeedback[1]);
     gl.bufferData(gl.ARRAY_BUFFER, Float32Array.BYTES_PER_ELEMENT * 3 * particleNum, gl.DYNAMIC_COPY);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
-    gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback[1]);
+    
 
     gl.bindBuffer(gl.ARRAY_BUFFER, vTransformFeedback[2]);
     gl.bufferData(gl.ARRAY_BUFFER, Float32Array.BYTES_PER_ELEMENT * particleNum, gl.DYNAMIC_COPY);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
-    gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback[2]);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, vTransformFeedback[3]);
     gl.bufferData(gl.ARRAY_BUFFER, Float32Array.BYTES_PER_ELEMENT * 3 * particleNum, gl.DYNAMIC_COPY);
-    gl.bindBuffer(gl.ARRAY_BUFFER, null);
-    gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback[3]);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);    
 
     let texture;
     create_texture();
@@ -101,6 +97,11 @@ window.addEventListener("load", function () {
         gl.uniform1f(uniLocation[1], frame);
         gl.uniform2fv(uniLocation[2], [cw, ch]);
         //gl.uniform1i(uniLocation[3], 0);
+        set_attribute([vPosition, vDoubleAccel, vNumber, vVelocity, vExistenceFrame, vAccel], vAttLocation, vAttStride);
+        gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback[0]);
+        gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback[1]);
+        gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback[2]);
+        gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback[3]);
         gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, vTransformFeedback[0]);
         gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 1, vTransformFeedback[1]);
         gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 2, vTransformFeedback[2]);
@@ -108,8 +109,7 @@ window.addEventListener("load", function () {
         gl.beginTransformFeedback(gl.POINTS);
         gl.drawArrays(gl.POINTS, 0, particleNum);
         gl.endTransformFeedback();
-        var arrBuffer = new ArrayBuffer(particleNum * 3 * Float32Array.BYTES_PER_ELEMENT);
-        arrBuffer = new Float32Array(arrBuffer);
+        var arrBuffer = new Float32Array(particleNum * 3);        
         gl.getBufferSubData(gl.TRANSFORM_FEEDBACK_BUFFER, 0, arrBuffer);
         console.log(arrBuffer);
         gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, null);
@@ -133,13 +133,6 @@ window.addEventListener("load", function () {
         frame++;
         requestAnimationFrame(arguments.callee);
     })();
-
-    document.addEventListener("mousedown", function () {
-        var arrBuffer = new ArrayBuffer(particleNum * 3 * Float32Array.BYTES_PER_ELEMENT);
-        arrBuffer = new Float32Array(arrBuffer);
-        gl.getBufferSubData(gl.ARRAY_BUFFER, 0, arrBuffer);
-        console.log(arrBuffer);
-    });
 
     function create_shader(id) {
         let shader;
