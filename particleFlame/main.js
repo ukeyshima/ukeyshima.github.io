@@ -85,7 +85,7 @@ window.addEventListener("load", function () {
     gl.enable(gl.BLEND);
     gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE);
 
-    gl.clearColor(242 / 255, 242 / 255, 242 / 255, 1.0);
+    gl.clearColor(242 / 255, 242 / 255, 232 / 255, 1.0);
 
     //    new_canvas();
     let frame = 0.0;
@@ -111,7 +111,7 @@ window.addEventListener("load", function () {
         gl.endTransformFeedback();
         var arrBuffer = new Float32Array(particleNum * 3);        
         gl.getBufferSubData(gl.TRANSFORM_FEEDBACK_BUFFER, 0, arrBuffer);
-        console.log(arrBuffer);
+        //console.log(arrBuffer);
         gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, null);
         gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 1, null);
         gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 2, null);
@@ -250,8 +250,7 @@ window.addEventListener("load", function () {
         cw = e.target.innerWidth;
         ch = e.target.innerHeight;
         c.width = cw;
-        c.height = ch;
-        console.log(cw);
+        c.height = ch;        
         gl.viewport(0, 0, cw, ch);
     });
 });

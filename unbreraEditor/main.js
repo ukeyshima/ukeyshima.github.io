@@ -7,13 +7,9 @@ window.addEventListener("load", function () {
     let obj = [];
     let id = 0;
     let htmlEditor = id;
-    let unbraEvent = new Array();
     let lastUnbraPoint = [];
     let unbraId = [];
-    let branchId = [];
     let tabEvent = false;
-    let beforeRemoveTime = new Date().getTime();
-    let beforeAction = null;
     let active = {
         id: id,
         type: "html",
@@ -37,9 +33,27 @@ window.addEventListener("load", function () {
     });
     sessionStorage.clear();
     const editor = ace.edit("editor");
-    document.onclick = function () {
-        console.log(editor.session.getUndoManager().$undoStack[active.id]);
-    }
+    document.getElementById("demo").addEventListener("mousedown", function () {
+        let e = document.createEvent("MouseEvents");
+        e.initEvent("mousedown", false, true);
+        document.getElementById("create").dispatchEvent(e);
+        e = document.createEvent("MouseEvents");
+        e.initEvent("mousedown", false, true);
+        document.getElementById("undoBranchGUI").dispatchEvent(e);
+        e = document.createEvent("MouseEvents");
+        e.initEvent("mousedown", false, true);
+        document.getElementById("autoReflesh").dispatchEvent(e);
+        let frontElementWidth = undoBranchGUI.frontElement.clientWidth;
+        let thisElementWidth = undoBranchGUI.element.clientWidth;
+        undoBranchGUI.frontElement.style.width = frontElementWidth - 450 + "px";
+        undoBranchGUI.element.style.width = thisElementWidth + 450 + "px";
+    });
+
+document.onclick=function(){
+    console.log(editor.session.getUndoManager().$undoStack[active.id]);
+}
+
+
     //rewrite ace.js undoManager
     let undoStackObj = function (delta, branchPointId, isBranchPoint, branchStack) {
         this.delta = delta;
@@ -52,13 +66,11 @@ window.addEventListener("load", function () {
     editor.session.getUndoManager().execute = (function (options) {
         if (!tabEvent) {
             if (this.hasRedo()) {
-                try {
-                    if (this.$undoStack[active.id][this.$undoStack[active.id].length - 1].branchStack.length == 0) {
-                        if (!this.$redoStack[active.id].some(function (e, i, a) { return e.isBranchPoint })) {
-                            lastUnbraPoint[active.id].branchStack[unbraId[active.id]].shift();
-                        }
+                if (this.$undoStack[active.id][this.$undoStack[active.id].length - 1].branchStack.length == 0) {
+                    if (!this.$redoStack[active.id].some(function (e, i, a) { return e.isBranchPoint })) {
+                        lastUnbraPoint[active.id].branchStack[unbraId[active.id]].shift();
                     }
-                } catch (e) { console.log(e); }
+                }
                 lastUnbraNum[active.id] = this.$undoStack[active.id].length - 1;
                 lastUnbraPoint[active.id] = this.$undoStack[active.id][lastUnbraNum[active.id]];
                 lastUnbraPoint[active.id].isBranchPoint = true;
@@ -89,17 +101,13 @@ window.addEventListener("load", function () {
             if (this.dirtyCounter[active.id] < 0) {
                 this.dirtyCounter[active.id] = NaN;
             }
-            try {
-                lastUnbraPoint[active.id].branchStack[unbraId[active.id]] = this.$undoStack[active.id].slice(lastUnbraNum[active.id] + 1, this.$undoStack[active.id].length).reverse(false);
-            } catch (e) {
-                console.log(e);
-            };
+            lastUnbraPoint[active.id].branchStack[unbraId[active.id]] = this.$undoStack[active.id].slice(lastUnbraNum[active.id] + 1, this.$undoStack[active.id].length).reverse(false);
             this.dirtyCounter[active.id]++;
             if (undoBranchGUI) {
                 let stack = this.$undoStack[active.id];
                 let context = undoBranchGUIContext;
                 context.fillStyle = "#222";
-                context.fillRect(0, 0, undoBranchGUI.element.width, undoBranchGUI.element.height);
+                context.fillRect(0, 0, undoBranchGUICanvas.width, undoBranchGUICanvas.height);
                 createUndoBranchGUI(stack, 50, 50, 0);
             }
         } else {
@@ -139,7 +147,7 @@ window.addEventListener("load", function () {
         unbraId[active.id] = 0;
         this.$undoStack[active.id] = [new undoStackObj([], 0, false, [])];
         this.$redoStack[active.id] = [];
-        lastUnbraPoint[active.id] = null;
+        lastUnbraPoint[active.id] = this.$undoStack[active.id][0];
         lastUnbraNum[active.id] = 0;
         this.dirtyCounter[active.id] = 0;
     });
@@ -217,8 +225,6 @@ window.addEventListener("load", function () {
             targetBranchId = [].concat(currentId).reverse(false)[i] + 1;
             return e.branchStack.length > [].concat(currentId).reverse(false)[i] + 1;
         });
-
-        console.log(nextBranchPoint);
         let nextBranchPointIndex = nextBranchPoint.indexNum;
         let j = this.$undoStack[active.id].length - (nextBranchPointIndex + 1);
         for (let i = 0; i < j; i++) {
@@ -227,7 +233,6 @@ window.addEventListener("load", function () {
             this.$doc.undoChanges(deltaSets, null);
             this.dirtyCounter[active.id]--;
         }
-
         (function (stack) {
             j = stack.length;
             for (let i = 0; i < j; i++) {
@@ -254,6 +259,9 @@ window.addEventListener("load", function () {
     editor.setTheme("ace/theme/dawn");
     editor.setFontSize(23);
     editor.getSession().setMode("ace/mode/html");
+    editor.$blockScrolling = Infinity;
+    editor.setValue("<!DOCTYPE html>" + "\n" + "<html>" + "\n\t" + "<head>" + "\n\t\t" + "<link rel=\"stylesheet\" href=\"main.css\">" + "\n\t" + "</head>" + "\n\t" + "<body>" + "\n\t\t" + "hello world!" + "\n\t" + "</body>" + "\n" + "</html>");
+    editor.selection.clearSelection(); 
     const { HashHandler } = require('ace/keyboard/hash_handler');
     const keyboardHandler = new HashHandler();
     keyboardHandler.addCommand({
@@ -278,10 +286,11 @@ window.addEventListener("load", function () {
     });
     keyboardHandler.addCommand({
         name: "undo-event",
-        bindKey: { mac: 'Command+z' },
+        bindKey: { win: 'Ctrl+z', mac: 'Command+z' },
         exec: () => {
             try {
                 editor.undo();
+                editor.selection.clearSelection(); 
             } catch (e) {
 
             }
@@ -290,10 +299,11 @@ window.addEventListener("load", function () {
     });
     keyboardHandler.addCommand({
         name: "redo-event",
-        bindKey: { mac: 'Command+Shift+z' },
+        bindKey: { win: 'Ctrl+Shift+z', mac: 'Command+Shift+z' },
         exec: () => {
             try {
                 editor.redo();
+                editor.selection.clearSelection(); 
             } catch (e) {
 
             }
@@ -302,10 +312,11 @@ window.addEventListener("load", function () {
     });
     keyboardHandler.addCommand({
         name: "unbra-event",
-        bindKey: { mac: 'Ctrl+z' },
+        bindKey: { win: 'Alt+z', mac: 'Option+z' },
         exec: () => {
             try {
                 editor.session.getUndoManager().unbra();
+                editor.selection.clearSelection(); 
             } catch (e) {
 
             }
@@ -313,10 +324,11 @@ window.addEventListener("load", function () {
     })
     keyboardHandler.addCommand({
         name: "rebra-event",
-        bindKey: { mac: 'Ctrl+Shift+z' },
+        bindKey: { win: 'Alt+Shift+z', mac: 'Option+Shift+z' },
         exec: () => {
             try {
                 editor.session.getUndoManager().rebra();
+                editor.selection.clearSelection(); 
             } catch (e) {
 
             }
@@ -421,7 +433,6 @@ window.addEventListener("load", function () {
             autoReflesh = false;
             editor.setValue(sessionStorage.getItem(this.id));
             editor.getSession().setMode("ace/mode/" + object.mode);
-            editor.setReadOnly(false);
             active = object;
             if (autoRefleshEvent) autoReflesh = true;
         });
@@ -451,42 +462,76 @@ window.addEventListener("load", function () {
         }
     });
 
-    function undoBranchLength(stack){
-        let length=0;
-        (function(s,l){
+    function undoBranchLength(stack) {
+        let length = 0;
+        (function (s, l) {
 
 
             aruguments.callee();
-        })(stack,length);
+        })(stack, length);
         return length;
     }
 
     function createUndoBranchGUI(stack, x, y, i) {
-        let context = undoBranchGUIContext;        
+        let context = undoBranchGUIContext;
         context.font = "18px 'ＭＳ Ｐゴシック'";
         context.textAlign = "center";
         for (let i = 0; i < stack.length; i++) {
-            context.fillStyle = "#e38";
-            context.beginPath();
-            context.arc(x + i * 50, y, 20, 0, Math.PI * 2, false);
-            context.fill();
-            let text = stack[i].branchPointId;
+            let text = "";
+            let removeEvent = false;
             for (let t = 0; t < stack[i].delta.length; t++) {
                 for (let k = 0; k < stack[i].delta[t].deltas.length; k++) {
                     for (let h = 0; h < stack[i].delta[t].deltas[k].lines.length; h++) {
                         text += stack[i].delta[t].deltas[k].lines[h];
+                        if (stack[i].delta[t].deltas[k].action == "remove") removeEvent = true;
                     }
                 }
             }
+            if (i < stack.length - 1) {
+                context.strokeStyle = "#38e";
+                context.lineWidth = 5;
+                context.beginPath();
+                context.moveTo(x + i * 50, y);
+                context.lineTo(x + (i + 1) * 50, y);
+                context.stroke();
+            }
+            if (removeEvent) {
+                text = text.split("").reverse(false).join("");
+                context.fillStyle = "#3e8"
+            } else {
+                context.fillStyle = "#e38";
+            }
+            context.beginPath();
+            context.arc(x + i * 50, y, 20, 0, Math.PI * 2, false);
+            context.fill();
             context.fillStyle = "#fff";
             context.fillText(text, x + i * 50, y, 40);
             if (stack[i].isBranchPoint) {
                 for (let j = 0; j < stack[i].branchStack.length; j++) {
-                    createUndoBranchGUI([].concat(stack[i].branchStack[j]).reverse(false), x + (i + 1) * 50, y + 50 * j, i+j);
+                    context.strokeStyle = "#38e";
+                    context.lineWidth = 5;
+                    context.beginPath();
+                    context.moveTo(x + i * 50, y);
+                    context.lineTo(x + (i + 1) * 50, y + 50 * j);
+                    context.stroke();
+                    if (removeEvent) {
+                        text = text.split("").reverse(false).join("");
+                        context.fillStyle = "#3e8"
+                    } else {
+                        context.fillStyle = "#e38";
+                    }
+                    context.strokeStyle = "#38e";
+                    context.lineWidth = 0;
+                    context.beginPath();
+                    context.arc(x + i * 50, y, 20, 0, Math.PI * 2, false);
+                    context.fill();
+                    context.fillStyle = "#fff";
+                    context.fillText(text, x + i * 50, y, 40);
+                    createUndoBranchGUI([].concat(stack[i].branchStack[j]).reverse(false), x + (i + 1) * 50, y + 50 * j, i + j);
                 }
                 break;
             }
-        }        
+        }
     }
 
     document.getElementById("run").addEventListener("mousedown", function () {
@@ -638,9 +683,9 @@ window.addEventListener("load", function () {
         this.style.color = autoReflesh ? "#fff" : "#000";
     });
     let undoBranchGUI = false;
-    let undoBranchGUICanvas=null;
+    let undoBranchGUICanvas = null;
     let undoBranchGUIContext = null;
-    
+
     document.getElementById("undoBranchGUI").addEventListener("mousedown", function () {
         this.style.backgroundColor = undoBranchGUI ? "#fff" : "#e38";
         this.style.color = undoBranchGUI ? "#000" : "#fff";
@@ -659,11 +704,11 @@ window.addEventListener("load", function () {
             undoBranchGUI.frontFrame.className = "frame";
             undoBranchGUI.frontFrame.addEventListener("mousedown", mousedown(undoBranchGUI));
             document.body.appendChild(undoBranchGUI.element);
-            undoBranchGUICanvas=document.createElement("canvas");
+            undoBranchGUICanvas = document.createElement("canvas");
             undoBranchGUI.element.appendChild(undoBranchGUICanvas);
-            undoBranchGUICanvas.width=10000;
-            undoBranchGUICanvas.height= Math.floor(undoBranchGUI.element.clientHeight);
-            undoBranchGUIContext = undoBranchGUICanvas.getContext("2d");            
+            undoBranchGUICanvas.width = 10000;
+            undoBranchGUICanvas.height = 1000;
+            undoBranchGUIContext = undoBranchGUICanvas.getContext("2d");
             undoBranchGUI.element.style.overflow = "auto";
             undoBranchGUI.element.className = "option";
             undoBranchGUI.element.style.backgroundColor = "#222";
@@ -682,8 +727,8 @@ window.addEventListener("load", function () {
             document.addEventListener("mouseup", mouseup(undoBranchGUI));
         } else {
             let undoBranchGUIWidth = undoBranchGUI.element.clientWidth;
+            undoBranchGUI.element.removeChild(undoBranchGUICanvas);
             document.body.removeChild(undoBranchGUI.element);
-            document.body.removeChild(undoBranchGUICanvas);
             document.body.removeChild(undoBranchGUI.frontFrame);
             for (let i = 0; i < option.length; i++) {
                 if (option[i].type == "undoBranchGUI") {

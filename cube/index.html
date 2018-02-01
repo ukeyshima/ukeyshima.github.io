@@ -160,7 +160,7 @@ vec3 pixelColor(vec2 p,float t){
         alpha*=0.6;
         if(!hit)break;
     }
-    color=color.r>0.99?vec3(242.0/255.0):color;
+    color=color.r>0.99?vec3(242.0/255.0,242.0/255.0,232.0/255.0):color;
    return color;
 }
 

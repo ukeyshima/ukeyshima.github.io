@@ -60,5 +60,4 @@ window.addEventListener("load",()=>{
         }
     });
     httpObj.send(null);
-
 });

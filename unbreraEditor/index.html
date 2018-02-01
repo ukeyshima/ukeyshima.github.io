@@ -77,10 +77,11 @@
         #filemenu {
             top: 10px;
             left: 20px;
-            width:80px;
+            width: 80px;
         }
-        #filemenu button{
-            width:80px;
+
+        #filemenu button {
+            width: 80px;
         }
 
         #modemenu {
@@ -95,6 +96,7 @@
 
         #title {
             z-index: -1;
+            visibility: hidden;
         }
 
         #tab {
@@ -169,7 +171,7 @@
 
         input[type="text"] {
             width: 80%;
-            outline: 0;      
+            outline: 0;
             border: none;
             border-bottom-style: solid;
             text-align: center;
@@ -188,31 +190,36 @@
             font-size: inherit;
             box-sizing: content-box;
         }
-        #extension{
-            z-index:2;
-            opacity:0;
+
+        #extension {
+            z-index: 2;
+            opacity: 0;
             display: block;
-            width:100%;
-            position:relative;
+            width: 100%;
+            position: relative;
         }
-        #centerSelect{
-            z-index:1;
-            position:absolute;
-            width:100%;
-            font-size:15px;
-            color:#000;
-            margin:0;
+
+        #centerSelect {
+            z-index: 1;
+            position: absolute;
+            width: 100%;
+            font-size: 15px;
+            color: #000;
+            margin: 0;
         }
+
         #create {
             width: 60px;
         }
-        #html{
-            text-align:center;
-            background-color:#e38;           
+
+        #html {
+            text-align: center;
+            background-color: #e38;
         }
-        #html p{
-            text-align:center;
-            color:#eee;
+
+        #html p {
+            text-align: center;
+            color: #eee;
         }
     </style>
 </head>
@@ -230,7 +237,8 @@
     </div>
     <div class="dropdown" id="modemenu">
         <button id="autoReflesh">autoReflesh</button>
-        <button id="undoBranchGUI">undoBranchGUI</button>        
+        <button id="undoBranchGUI">undoBranchGUI</button>
+        <button id="demo">demo</button>
     </div>
     <div id="top">
         <button id="run">▶︎</button>
@@ -238,19 +246,21 @@
     </div>
     <div id="tab">
         <button id="add">+</button>
-        <button id="html"><p style="margin:0;">index.html</p></button>
+        <button id="html">
+            <p style="margin:0;">index.html</p>
+        </button>
     </div>
     <div class="dropdown" id="addmenu">
-        <input type="text" id="fileName">    
-        <div>    
-        <p id="centerSelect">javascript  ▽</p>
-        <select id="extension">
-            <option value="js" class="javascript"><p>javascript</p></option>
-            <option value="glsl" class="glsl"><p>glsl</p></option>    
-            <option value="css" class="css"><p>css</p></option>             
-        </select>
+        <input type="text" id="fileName" value="main">
+        <div>
+            <p id="centerSelect">css ▽</p>
+            <select id="extension">
+                <option value="css" class="css">css</option>
+                <option value="js" class="javascript">javascript</option>
+                <option value="glsl" class="glsl">glsl</option>
+            </select>
         </div>
-        <button id="create">create</button>        
+        <button id="create">create</button>
     </div>
     <div id="editor"></div>
 </body>

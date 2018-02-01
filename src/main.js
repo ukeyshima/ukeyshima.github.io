@@ -5,10 +5,10 @@ window.addEventListener("load",()=>{
         const data=JSON.parse(this.responseText);
         const works=document.getElementById("works");
         for(key in data){
-            const title=document.createElement("h2");
-            title.className="title";
-            works.appendChild(title);
-            title.innerHTML="#"+key;
+          //  const title=document.createElement("h2");
+           // title.className="title";
+           // works.appendChild(title);
+           // title.innerHTML="#"+key;
             data[key].forEach((i)=>{
                 const div=document.createElement("div");
                 div.id=i.name;
