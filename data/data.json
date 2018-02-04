@@ -15,6 +15,7 @@
         {"name":"riverRipple"}
     ],
     "other": [
-        {"name":"unbreraEditor"}
+        {"name":"unbreraEditor"},
+        {"name":"rotationCharacter"}
     ]
 }

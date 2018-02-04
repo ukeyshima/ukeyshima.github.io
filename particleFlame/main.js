@@ -22,13 +22,13 @@ window.addEventListener("load", function () {
         position[i] = 0.0;
         velocity[i] = 0.0;
         accel[i] = 0.0;
-    }
+    } 
     for (let i = 0; i < particleNum; i++) {
         number[i] = i;
         existenceFrame[i] = 0;
-        doubleAccel[i * 3] = Math.random() > 0.5 ? 0.0000258 - (Math.random()) * 0.00001 : -0.0000258 + (Math.random()) * 0.00001;
+        doubleAccel[i * 3] = Math.random() > 0.5 ? 0.0000258 - (Math.random()) * 0.000001 : -0.0000258 + (Math.random()) * 0.000001;
         doubleAccel[i * 3 + 1] = 0.00005 * Math.random();
-        doubleAccel[i * 3 + 2] = Math.random() > 0.5 ? 0.0000258 - (Math.random()) * 0.00001 : -0.0000258 + (Math.random()) * 0.00001;
+        doubleAccel[i * 3 + 2] = Math.random() > 0.5 ? 0.0000258 - (Math.random()) * 0.000001 : -0.0000258 + (Math.random()) * 0.000001;
     }
 
     const vAttLocation = new Array();
@@ -61,16 +61,19 @@ window.addEventListener("load", function () {
     const vTransformFeedback = [gl.createBuffer(), gl.createBuffer(), gl.createBuffer(), gl.createBuffer()];
     const transformFeedback = [gl.createTransformFeedback(), gl.createTransformFeedback(), gl.createTransformFeedback(), gl.createTransformFeedback()];
 
+    gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback[0]);
+    gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback[1]);
+    gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback[2]);
+    gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback[3]);
+
     gl.bindBuffer(gl.ARRAY_BUFFER, vTransformFeedback[0]);
     gl.bufferData(gl.ARRAY_BUFFER, Float32Array.BYTES_PER_ELEMENT * 3 * particleNum, gl.DYNAMIC_COPY);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     
-
     gl.bindBuffer(gl.ARRAY_BUFFER, vTransformFeedback[1]);
     gl.bufferData(gl.ARRAY_BUFFER, Float32Array.BYTES_PER_ELEMENT * 3 * particleNum, gl.DYNAMIC_COPY);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     
-
     gl.bindBuffer(gl.ARRAY_BUFFER, vTransformFeedback[2]);
     gl.bufferData(gl.ARRAY_BUFFER, Float32Array.BYTES_PER_ELEMENT * particleNum, gl.DYNAMIC_COPY);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
@@ -98,10 +101,6 @@ window.addEventListener("load", function () {
         gl.uniform2fv(uniLocation[2], [cw, ch]);
         //gl.uniform1i(uniLocation[3], 0);
         set_attribute([vPosition, vDoubleAccel, vNumber, vVelocity, vExistenceFrame, vAccel], vAttLocation, vAttStride);
-        gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback[0]);
-        gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback[1]);
-        gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback[2]);
-        gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback[3]);
         gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, vTransformFeedback[0]);
         gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 1, vTransformFeedback[1]);
         gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 2, vTransformFeedback[2]);

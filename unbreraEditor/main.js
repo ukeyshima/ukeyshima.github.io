@@ -34,6 +34,7 @@ window.addEventListener("load", function () {
     sessionStorage.clear();
     const editor = ace.edit("editor");
     document.getElementById("demo").addEventListener("mousedown", function () {
+        editor.setValue("<!DOCTYPE html>" + "\n" + "<html>" + "\n\t" + "<head>" + "\n\t\t" + "<link rel=\"stylesheet\" href=\"main.css\">" + "\n\t" + "</head>" + "\n\t" + "<body>" + "\n\t\t" + "hello world!" + "\n\t" + "</body>" + "\n" + "</html>");
         let e = document.createEvent("MouseEvents");
         e.initEvent("mousedown", false, true);
         document.getElementById("create").dispatchEvent(e);
@@ -259,8 +260,7 @@ document.onclick=function(){
     editor.setTheme("ace/theme/dawn");
     editor.setFontSize(23);
     editor.getSession().setMode("ace/mode/html");
-    editor.$blockScrolling = Infinity;
-    editor.setValue("<!DOCTYPE html>" + "\n" + "<html>" + "\n\t" + "<head>" + "\n\t\t" + "<link rel=\"stylesheet\" href=\"main.css\">" + "\n\t" + "</head>" + "\n\t" + "<body>" + "\n\t\t" + "hello world!" + "\n\t" + "</body>" + "\n" + "</html>");
+    editor.$blockScrolling = Infinity;    
     editor.selection.clearSelection(); 
     const { HashHandler } = require('ace/keyboard/hash_handler');
     const keyboardHandler = new HashHandler();
