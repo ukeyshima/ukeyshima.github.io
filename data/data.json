@@ -4,7 +4,9 @@
         {"name":"glitch"},
         {"name":"cameraGlitch"},
         {"name":"cubeMapping"},
-        {"name":"gpgpuCalculator"}
+        {"name":"gpgpuCalculator"},
+        {"name":"rotationCharacter"},
+        {"name":"autumn"}
     ],
     "webGL rayMarching": [
         {"name":"reflectionBall"},
@@ -15,7 +17,6 @@
         {"name":"riverRipple"}
     ],
     "other": [
-        {"name":"unbreraEditor"},
-        {"name":"rotationCharacter"}
+        {"name":"unbreraEditor"}        
     ]
 }
