@@ -15,11 +15,11 @@ window.addEventListener("load", function () {
         var particleNum = 30;
         var position = new Array(particleNum * 3).fill(0).map(function(e,i,a){
             if (i % 3 == 0) {
-                return 10.0+(Math.random()) * 10.0;
+                return 20.0+(Math.random()) * 10.0;
             } else if (i % 3 == 1) {
                 return 5.0+(Math.random()) * 5.0;
             } else {
-                return 0 ;
+                return (Math.random())*2.0-1.0 ;
             }
         });
         gpgpuAttLocation[0] = gl.getAttribLocation(gpgpuProgram, "position");
@@ -51,7 +51,7 @@ window.addEventListener("load", function () {
         gl.enableVertexAttribArray(gpgpuAttLocation[0]);
         gl.vertexAttribPointer(gpgpuAttLocation[0], gpgpuAttStride[0], gl.FLOAT, false, 0, 0);
         gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback[0]);
-        gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, feedback[0]);
+        
 
         gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vboList[1]), gl.STATIC_DRAW);
@@ -74,7 +74,6 @@ window.addEventListener("load", function () {
         gl.enableVertexAttribArray(gpgpuAttLocation[0]);
         gl.vertexAttribPointer(gpgpuAttLocation[0], gpgpuAttStride[0], gl.FLOAT, false, 0, 0);
         gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback[1]);
-        gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, feedback[1]);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vboList[1]), gl.STATIC_DRAW);
@@ -105,10 +104,8 @@ window.addEventListener("load", function () {
         }
         mainAttLocation[0] = gl.getAttribLocation(mainProgram, "position");
         mainAttStride[0] = 3;
-        mainAttLocation[1] = gl.getAttribLocation(mainProgram, "normal");
+        mainAttLocation[1] = gl.getAttribLocation(mainProgram, "offset");
         mainAttStride[1] = 3;
-        mainAttLocation[2] = gl.getAttribLocation(mainProgram, "offset");
-        mainAttStride[2] = 3;
 
         var mainInputVao = gl.createVertexArray();
         gl.bindVertexArray(mainInputVao);
@@ -118,15 +115,10 @@ window.addEventListener("load", function () {
         gl.enableVertexAttribArray(mainAttLocation[0]);
         gl.vertexAttribPointer(mainAttLocation[0], mainAttStride[0], gl.FLOAT, false, 0, 0);
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(obj.normal), gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, feedback[0]);
         gl.enableVertexAttribArray(mainAttLocation[1]);
         gl.vertexAttribPointer(mainAttLocation[1], mainAttStride[1], gl.FLOAT, false, 0, 0);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, feedback[0]);
-        gl.enableVertexAttribArray(mainAttLocation[2]);
-        gl.vertexAttribPointer(mainAttLocation[2], mainAttStride[2], gl.FLOAT, false, 0, 0);
-        gl.vertexAttribDivisor(mainAttLocation[2], 1);
+        gl.vertexAttribDivisor(mainAttLocation[1], 1);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Int16Array(obj.index), gl.STATIC_DRAW);
 
@@ -142,15 +134,10 @@ window.addEventListener("load", function () {
         gl.enableVertexAttribArray(mainAttLocation[0]);
         gl.vertexAttribPointer(mainAttLocation[0], mainAttStride[0], gl.FLOAT, false, 0, 0);
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(obj.normal), gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, feedback[1]);
         gl.enableVertexAttribArray(mainAttLocation[1]);
         gl.vertexAttribPointer(mainAttLocation[1], mainAttStride[1], gl.FLOAT, false, 0, 0);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, feedback[1]);
-        gl.enableVertexAttribArray(mainAttLocation[2]);
-        gl.vertexAttribPointer(mainAttLocation[2], mainAttStride[2], gl.FLOAT, false, 0, 0);
-        gl.vertexAttribDivisor(mainAttLocation[2], 1);
+        gl.vertexAttribDivisor(mainAttLocation[1], 1);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Int16Array(obj.index), gl.STATIC_DRAW);
 

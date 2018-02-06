@@ -8,7 +8,7 @@
     from {background:rgba(0,0,0,0.0);
         z-index:-1;}
     to {background:rgba(30,15,30,0.2);
-    z-index:2;}
+    z-index:299;}
 }
 @font-face {
     font-family:avenger;
@@ -53,7 +53,7 @@ p{
     height:-webkit-calc(25px + (100vw - 150px) / 70);
     height:-moz-calc(25px + (100vw - 150px) / 70);
     height:calc(25px + (100vw - 150px) / 70);
-    z-index:4;
+    z-index:301;
 }
 .linkChild{
     position:absolute;
@@ -65,7 +65,7 @@ p{
     height:2px;
     opacity:0.7;
     background:rgb(126,126,126);
-    z-index:3;
+    z-index:300;
 }
 #up{
     top:17.66px;

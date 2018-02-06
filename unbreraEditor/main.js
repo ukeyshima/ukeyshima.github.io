@@ -50,12 +50,12 @@ window.addEventListener("load", function () {
         undoBranchGUI.element.style.width = thisElementWidth + 450 + "px";
     });
 
-document.onclick=function(){
-    console.log(editor.session.getUndoManager().$undoStack[active.id]);
-}
+    document.onclick = function () {
+        console.log(editor.session.getUndoManager().$undoStack[active.id]);
+    }
 
+    //rewrite ace.js undoManager            
 
-    //rewrite ace.js undoManager
     let undoStackObj = function (delta, branchPointId, isBranchPoint, branchStack) {
         this.delta = delta;
         this.branchPointId = branchPointId;
@@ -69,18 +69,20 @@ document.onclick=function(){
             if (this.hasRedo()) {
                 if (this.$undoStack[active.id][this.$undoStack[active.id].length - 1].branchStack.length == 0) {
                     if (!this.$redoStack[active.id].some(function (e, i, a) { return e.isBranchPoint })) {
+                        for(let i=0;i<this.$redoStack[active.id].length;i++){
                         lastUnbraPoint[active.id].branchStack[unbraId[active.id]].shift();
+                        }
                     }
                 }
                 lastUnbraNum[active.id] = this.$undoStack[active.id].length - 1;
                 lastUnbraPoint[active.id] = this.$undoStack[active.id][lastUnbraNum[active.id]];
                 lastUnbraPoint[active.id].isBranchPoint = true;
                 if (lastUnbraPoint[active.id].branchStack.length == 0) {
-                    let num = this.$redoStack[active.id].indexOf([].concat(this.$redoStack[active.id]).reverse(false).find(function (e, i, a) {
+                    let num = this.$redoStack[active.id].indexOf(this.$redoStack[active.id].slice().reverse().find(function (e, i, a) {
                         return e.isBranchPoint;
                     }));
                     if (num < 0) {
-                        lastUnbraPoint[active.id].branchStack[0] = [].concat(this.$redoStack[active.id]);
+                        lastUnbraPoint[active.id].branchStack[0] = this.$redoStack[active.id].slice();
                     } else {
                         lastUnbraPoint[active.id].branchStack[0] = this.$redoStack[active.id].slice(num, this.$redoStack[active.id].length);
                     }
@@ -93,7 +95,9 @@ document.onclick=function(){
             }
             let deltaSets = options.args[0];
             this.$doc = options.args[1];
-            if (options.merge && this.hasUndo()) {
+            var action = deltaSets[0].deltas[0].action;
+            var prevAction = this.$undoStack[active.id][this.$undoStack[active.id].length - 1].delta[0] && this.$undoStack[active.id][this.$undoStack[active.id].length - 1].delta[0].deltas[0].action;
+            if (options.merge && this.hasUndo() && action == prevAction) {
                 this.dirtyCounter[active.id]--;
                 deltaSets = this.$undoStack[active.id].pop().delta.concat(deltaSets);
             }
@@ -102,7 +106,7 @@ document.onclick=function(){
             if (this.dirtyCounter[active.id] < 0) {
                 this.dirtyCounter[active.id] = NaN;
             }
-            lastUnbraPoint[active.id].branchStack[unbraId[active.id]] = this.$undoStack[active.id].slice(lastUnbraNum[active.id] + 1, this.$undoStack[active.id].length).reverse(false);
+            lastUnbraPoint[active.id].branchStack[unbraId[active.id]] = this.$undoStack[active.id].slice(lastUnbraNum[active.id] + 1, this.$undoStack[active.id].length).reverse();
             this.dirtyCounter[active.id]++;
             if (undoBranchGUI) {
                 let stack = this.$undoStack[active.id];
@@ -153,7 +157,7 @@ document.onclick=function(){
         this.dirtyCounter[active.id] = 0;
     });
     editor.session.getUndoManager().hasUndo = (function () {
-        return this.$undoStack[active.id].length > 0;
+        return this.$undoStack[active.id].length > 1;
     });
     editor.session.getUndoManager().hasRedo = (function () {
         return this.$redoStack[active.id].length > 0;
@@ -165,7 +169,7 @@ document.onclick=function(){
         return this.dirtyCounter[active.id] === 0;
     });
     editor.session.getUndoManager().unbra = (function () {
-        let branchPointStack = [].concat(this.$undoStack[active.id]).filter(function (e, i, a) {
+        let branchPointStack = this.$undoStack[active.id].slice().filter(function (e, i, a) {
             e.indexNum = i;
             return e.isBranchPoint;
         });
@@ -175,7 +179,7 @@ document.onclick=function(){
         if (!this.$undoStack[active.id][this.$undoStack[active.id].length - 1].isBranchPoint) {
             currentId.push(this.$undoStack[active.id][this.$undoStack[active.id].length - 1].branchPointId);
         }
-        let lastNumber = [].concat(currentId).reverse(false).find(function (e, i, a) {
+        let lastNumber = currentId.slice().reverse().find(function (e, i, a) {
             return e > 0;
         });
         let nextBranchPointNum = currentId.lastIndexOf(lastNumber) - 1;
@@ -200,18 +204,18 @@ document.onclick=function(){
                 this.dirtyCounter[active.id]++;
             }
             if (stack[0].isBranchPoint) {
-                arguments.callee.bind(this)([].concat(stack[0].branchStack[stack[0].branchStack.length - 1]));
+                arguments.callee.bind(this)(stack[0].branchStack[stack[0].branchStack.length - 1].slice());
             }
         }.bind(this))(nextBranchPoint.branchStack[targetBranchId]);
         this.$redoStack[active.id] = [];
-        lastUnbraNum[active.id] = this.$undoStack[active.id].indexOf([].concat(this.$undoStack[active.id]).reverse(false).find(function (e, i, a) {
+        lastUnbraNum[active.id] = this.$undoStack[active.id].lastIndexOf(this.$undoStack[active.id].slice().reverse().find(function (e, i, a) {
             return e.isBranchPoint;
         }));
         lastUnbraPoint[active.id] = this.$undoStack[active.id][lastUnbraNum[active.id]];
         unbraId[active.id] = this.$undoStack[active.id][this.$undoStack[active.id].length - 1].branchPointId;
     });
     editor.session.getUndoManager().rebra = (function () {
-        let branchPointStack = [].concat(this.$undoStack[active.id]).filter(function (e, i, a) {
+        let branchPointStack = this.$undoStack[active.id].slice().filter(function (e, i, a) {
             e.indexNum = i;
             return e.isBranchPoint;
         });
@@ -222,9 +226,9 @@ document.onclick=function(){
             currentId.push(this.$undoStack[active.id][this.$undoStack[active.id].length - 1].branchPointId);
         }
         let targetBranchId = 0;
-        let nextBranchPoint = [].concat(branchPointStack).reverse(false).find(function (e, i, a) {
-            targetBranchId = [].concat(currentId).reverse(false)[i] + 1;
-            return e.branchStack.length > [].concat(currentId).reverse(false)[i] + 1;
+        let nextBranchPoint = branchPointStack.slice().reverse().find(function (e, i, a) {
+            targetBranchId = currentId.slice().reverse()[i] + 1;
+            return e.branchStack.length > currentId.slice().reverse()[i] + 1;
         });
         let nextBranchPointIndex = nextBranchPoint.indexNum;
         let j = this.$undoStack[active.id].length - (nextBranchPointIndex + 1);
@@ -234,7 +238,11 @@ document.onclick=function(){
             this.$doc.undoChanges(deltaSets, null);
             this.dirtyCounter[active.id]--;
         }
+        console.log(nextBranchPoint.branchStack);
+        console.log(targetBranchId)
+        console.log(nextBranchPoint.branchStack[targetBranchId]);
         (function (stack) {
+            console.log(stack[0]);
             j = stack.length;
             for (let i = 0; i < j; i++) {
                 let s = stack[stack.length - 1 - i];
@@ -248,7 +256,7 @@ document.onclick=function(){
             }
         }.bind(this))(nextBranchPoint.branchStack[targetBranchId]);
         this.$redoStack[active.id] = [];
-        lastUnbraNum[active.id] = this.$undoStack[active.id].indexOf([].concat(this.$undoStack[active.id]).reverse(false).find(function (e, i, a) {
+        lastUnbraNum[active.id] = this.$undoStack[active.id].lastIndexOf(this.$undoStack[active.id].slice().reverse().find(function (e, i, a) {
             return e.isBranchPoint;
         }));
         lastUnbraPoint[active.id] = this.$undoStack[active.id][lastUnbraNum[active.id]];
@@ -260,8 +268,8 @@ document.onclick=function(){
     editor.setTheme("ace/theme/dawn");
     editor.setFontSize(23);
     editor.getSession().setMode("ace/mode/html");
-    editor.$blockScrolling = Infinity;    
-    editor.selection.clearSelection(); 
+    editor.$blockScrolling = Infinity;
+    editor.selection.clearSelection();
     const { HashHandler } = require('ace/keyboard/hash_handler');
     const keyboardHandler = new HashHandler();
     keyboardHandler.addCommand({
@@ -290,7 +298,7 @@ document.onclick=function(){
         exec: () => {
             try {
                 editor.undo();
-                editor.selection.clearSelection(); 
+                editor.selection.clearSelection();
             } catch (e) {
 
             }
@@ -303,7 +311,7 @@ document.onclick=function(){
         exec: () => {
             try {
                 editor.redo();
-                editor.selection.clearSelection(); 
+                editor.selection.clearSelection();
             } catch (e) {
 
             }
@@ -316,7 +324,7 @@ document.onclick=function(){
         exec: () => {
             try {
                 editor.session.getUndoManager().unbra();
-                editor.selection.clearSelection(); 
+                editor.selection.clearSelection();
             } catch (e) {
 
             }
@@ -328,7 +336,20 @@ document.onclick=function(){
         exec: () => {
             try {
                 editor.session.getUndoManager().rebra();
-                editor.selection.clearSelection(); 
+                editor.selection.clearSelection();
+            } catch (e) {
+
+            }
+        }
+    })
+    keyboardHandler.addCommand({
+        name: "demo-event",
+        bindKey: { win: 'Ctrl+d', mac: 'Command+d' },
+        exec: () => {
+            try {
+                const e = document.createEvent("MouseEvents");
+                e.initEvent("mousedown", false, true);
+                document.getElementById("demo").dispatchEvent(e);
             } catch (e) {
 
             }
@@ -496,7 +517,7 @@ document.onclick=function(){
                 context.stroke();
             }
             if (removeEvent) {
-                text = text.split("").reverse(false).join("");
+                text = text.split("").slice().reverse().join("");
                 context.fillStyle = "#3e8"
             } else {
                 context.fillStyle = "#e38";
@@ -515,7 +536,6 @@ document.onclick=function(){
                     context.lineTo(x + (i + 1) * 50, y + 50 * j);
                     context.stroke();
                     if (removeEvent) {
-                        text = text.split("").reverse(false).join("");
                         context.fillStyle = "#3e8"
                     } else {
                         context.fillStyle = "#e38";
@@ -527,7 +547,7 @@ document.onclick=function(){
                     context.fill();
                     context.fillStyle = "#fff";
                     context.fillText(text, x + i * 50, y, 40);
-                    createUndoBranchGUI([].concat(stack[i].branchStack[j]).reverse(false), x + (i + 1) * 50, y + 50 * j, i + j);
+                    createUndoBranchGUI(stack[i].branchStack[j].slice().reverse(), x + (i + 1) * 50, y + 50 * j, i + j);
                 }
                 break;
             }

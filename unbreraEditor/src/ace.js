@@ -12173,7 +12173,7 @@ var Editor = function(renderer, session) {
     this.renderer = renderer;
     this.id = "editor" + (++Editor.$uid);
 
-    this.commands = new CommandManager(useragent.isMac ? "mac" : "win", defaultCommands);
+    this.commands = new CommandManager(useragent.isMac ? "mac" : "win", defaultCommands);    
     if (typeof document == "object") {
         this.textInput  = new TextInput(renderer.getTextAreaContainer(), this);
         this.renderer.textarea = this.textInput.getElement();

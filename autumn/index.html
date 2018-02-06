@@ -1,7 +1,6 @@
 <!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><script id="vs" type="x-shader/x-vertex">#version 300 es
-  layout (location = 0)in vec3 position;                   
-  layout (location = 1)in vec3 normal;   
-  layout(location=2) in vec3 offset;     
+  layout (location = 0)in vec3 position;                     
+  layout (location = 1)in vec3 offset;     
   uniform vec2 resolution;
   uniform float time;
   out float fogFactor;
@@ -115,8 +114,7 @@
   const float far  = 40.0;
   const float linerDepth = 1.0 / (far - near);
 
-    void main(void){         
-      vec3 vNormal=normal;    
+    void main(void){               
       vec3 p=position+offset;
       vec3 eyePosition=vec3(0.0,0.0,10.0);
       mat4 mMatrix=identity;   
