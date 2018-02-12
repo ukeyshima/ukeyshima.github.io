@@ -49,11 +49,6 @@ window.addEventListener("load", function () {
         undoBranchGUI.frontElement.style.width = frontElementWidth - 450 + "px";
         undoBranchGUI.element.style.width = thisElementWidth + 450 + "px";
     });
-
-    document.onclick = function () {
-        console.log(editor.session.getUndoManager().$undoStack[active.id]);
-    }
-
     //rewrite ace.js undoManager            
 
     let undoStackObj = function (delta, branchPointId, isBranchPoint, branchStack) {
@@ -195,7 +190,7 @@ window.addEventListener("load", function () {
             this.dirtyCounter[active.id]--;
         }
         (function (stack) {
-            j = stack.length;
+            let j = stack.length;
             for (let i = 0; i < j; i++) {
                 let s = stack[stack.length - 1 - i];
                 let deltaSets = s.delta;
@@ -237,13 +232,9 @@ window.addEventListener("load", function () {
             let deltaSets = stack.delta;
             this.$doc.undoChanges(deltaSets, null);
             this.dirtyCounter[active.id]--;
-        }
-        console.log(nextBranchPoint.branchStack);
-        console.log(targetBranchId)
-        console.log(nextBranchPoint.branchStack[targetBranchId]);
-        (function (stack) {
-            console.log(stack[0]);
-            j = stack.length;
+        }                        
+        (function (stack) {         
+            let j = stack.length;
             for (let i = 0; i < j; i++) {
                 let s = stack[stack.length - 1 - i];
                 let deltaSets = s.delta;
@@ -482,16 +473,6 @@ window.addEventListener("load", function () {
             console.log(e);
         }
     });
-
-    function undoBranchLength(stack) {
-        let length = 0;
-        (function (s, l) {
-
-
-            aruguments.callee();
-        })(stack, length);
-        return length;
-    }
 
     function createUndoBranchGUI(stack, x, y, i) {
         let context = undoBranchGUIContext;
