@@ -1,5 +1,7 @@
 window.addEventListener("load", function () {
+    var drawFrame = document.getElementById("drawFrame");
     var draw = document.getElementById("draw");
+    var unbreraGUIFrontFrame = document.getElementById("unbreraGUIFrontFrame");
     var unbreraGUIFrame = document.getElementById("unbreraGUIFrame");
     var unbreraGUI = document.getElementById("unbreraGUI");
     var drawColor = document.getElementById("drawColor");
@@ -7,15 +9,15 @@ window.addEventListener("load", function () {
     var unbreraGUIContext = unbreraGUI.getContext("2d");
     var drawColorGl = drawColor.getContext("webgl");
     var drawWidth = draw.clientWidth;
-    var drawHeight = draw.clientHeight;
+    var drawHeight = draw.clientWidth;
     draw.width = drawWidth;
     draw.height = drawHeight;
-    var unbreraGUIWidth = unbreraGUIFrame.clientWidth * 10;
+    var unbreraGUIWidth = unbreraGUIFrame.clientWidth * 30;
     var unbreraGUIHeight = unbreraGUIFrame.clientHeight;
     unbreraGUI.width = unbreraGUIWidth;
     unbreraGUI.height = unbreraGUIHeight;
     var drawColorWidth = drawColor.clientWidth;
-    var drawColorHeight = drawColor.clientHeight;
+    var drawColorHeight = drawColor.clientWidth;
     drawColor.width = drawColorWidth;
     drawColor.height = drawColorHeight;
     drawContext.fillStyle = "#fff";
@@ -30,14 +32,14 @@ window.addEventListener("load", function () {
     var strokeColor = "rgb(0,0,0)";
     draw.addEventListener("mousedown", function (e) {
         drawFlag = true;
-        prevX = e.clientX;
-        prevY = e.clientY;
+        prevX = e.layerX;
+        prevY = e.layerY;
     });
     var undoStackDelta = [];
     draw.addEventListener("mousemove", function (e) {
         if (!drawFlag) return;
-        var x = e.clientX;
-        var y = e.clientY;
+        var x = e.layerX;
+        var y = e.layerY;
         drawContext.strokeStyle = strokeColor;
         drawContext.lineWidth = strokeWidth;
         drawContext.beginPath();
@@ -48,17 +50,16 @@ window.addEventListener("load", function () {
         prevX = x;
         prevY = y;
         undoStackDelta.push({
-            x: e.clientX,
-            y: e.clientY,
+            x: e.layerX,
+            y: e.layerY,
             color: strokeColor,
             width: strokeWidth,
         });
     });
-
-    document.addEventListener("mouseup", function (e) {        
+    document.addEventListener("mouseup", function (e) {
         if (drawFlag) {
             drawFlag = false;
-            var state = draw.toDataURL("image/png", 1.0);
+            var state = draw.toDataURL("image/webp", 1.0);
             execute(undoStackDelta, state);
             undoStackDelta = [];
         }
@@ -75,7 +76,7 @@ window.addEventListener("load", function () {
     drawColor.addEventListener("mousedown", function (e) {
         render();
         var u8 = new Uint8Array(4);
-        drawColorGl.readPixels(e.layerX, this.clientHeight - e.layerY, 1, 1, drawColorGl.RGBA, drawColorGl.UNSIGNED_BYTE, u8);
+        drawColorGl.readPixels(e.layerX, this.clientWidth - e.layerY, 1, 1, drawColorGl.RGBA, drawColorGl.UNSIGNED_BYTE, u8);
         strokeColor = "rgb(" + u8[0] + "," + u8[1] + "," + u8[2] + ")";
     });
     var drawColorVertexShader = `
@@ -175,13 +176,13 @@ window.addEventListener("load", function () {
     }
     window.addEventListener("resize", function (e) {
         drawWidth = draw.clientWidth;
-        drawHeight = draw.clientHeight;
+        drawHeight = draw.clientWidth;
         draw.width = drawWidth;
         draw.height = drawHeight;
         drawContext.lineJoin = "round";
         drawContext.lineCap = "round";
         drawColorWidth = drawColor.clientWidth;
-        drawColorHeight = drawColor.clientHeight;
+        drawColorHeight = drawColor.clientWidth;
         drawColor.width = drawColorWidth;
         drawColor.height = drawColorHeight;
         drawColorGl.viewport(0, 0, drawColorWidth, drawColorHeight);
@@ -192,9 +193,66 @@ window.addEventListener("load", function () {
         }
         img.src = lastUndoStack().state;
     });
+
+    var unbreraGUISizeChange=false;
+    unbreraGUIFrontFrame.addEventListener("mousedown", function (e) {
+        unbreraGUISizeChange = true;
+    });
+    unbreraGUIFrame.addEventListener("mousemove", function (e) {
+        if (unbreraGUISizeChange) {
+            let x = Math.floor(e.clientX - unbreraGUIFrame.getBoundingClientRect().left);
+            unbreraGUIFrame.style.width = Math.floor(unbreraGUIFrame.clientWidth - x) + "px";
+            drawFrame.style.width = Math.floor(drawFrame.clientWidth + x) + "px";
+            drawWidth = draw.clientWidth;
+            drawHeight = draw.clientWidth;
+            draw.width = drawWidth;
+            draw.height = drawHeight;
+            drawContext.lineJoin = "round";
+            drawContext.lineCap = "round";
+            var img = new Image();
+            img.onload = function () {
+                drawContext.drawImage(img, 0, 0, drawWidth, drawHeight);
+            }
+            img.src = lastUndoStack().state;
+        }
+    });    
+    drawFrame.addEventListener("mousemove", function (e) {        
+        if (unbreraGUISizeChange) {            
+            let x = Math.floor(e.clientX - drawFrame.getBoundingClientRect().left);            
+            unbreraGUIFrame.style.width = Math.floor(unbreraGUIFrame.clientWidth + (drawFrame.clientWidth - x)) + "px";                                                
+            drawFrame.style.width = Math.floor(x) + "px";            
+            drawWidth = draw.clientWidth;
+            drawHeight = draw.clientWidth;
+            draw.width = drawWidth;
+            draw.height = drawHeight;
+            drawContext.lineJoin = "round";
+            drawContext.lineCap = "round";
+            var img = new Image();
+            img.onload = function () {
+                drawContext.drawImage(img, 0, 0, drawWidth, drawHeight);
+            }
+            img.src = lastUndoStack().state;
+        }
+    });
+    
+    unbreraGUIFrontFrame.addEventListener("mouseup", function (e) {
+        if (unbreraGUISizeChange) {
+            unbreraGUISizeChange = false;
+        }
+    });
+    unbreraGUIFrame.addEventListener("mouseup", function (e) {
+        if (unbreraGUISizeChange) {
+            unbreraGUISizeChange = false;
+        }
+    });
+    drawFrame.addEventListener("mouseup", function (e) {
+        if (unbreraGUISizeChange) {
+            unbreraGUISizeChange = false;
+        }
+    });
     var undoStack;
     var redoStack;
-    var defalutDrawState = draw.toDataURL("image/png", 1.0);
+    var defalutDrawState = draw.toDataURL("image/webp", 1.0);
     var lastUnbraPoint;
     var lastUnbraNum;
     var unbraId;
@@ -302,7 +360,7 @@ window.addEventListener("load", function () {
         }
         let lastNumber = currentId.slice().reverse().find(function (e, i, a) {
             return e > 0;
-        });        
+        });
         let nextBranchPointNum = currentId.lastIndexOf(lastNumber) - 1;
         let nextBranchPoint = branchPointStack[nextBranchPointNum];
         let targetBranchId = lastNumber - 1;
@@ -310,12 +368,12 @@ window.addEventListener("load", function () {
         let j = undoStack.length - (nextBranchPointIndex + 1);
         for (let i = 0; i < j; i++) {
             undo();
-        }        
-        (function (stack) {            
+        }
+        (function (stack) {
             let j = stack.length;
             for (let i = 0; i < j; i++) {
-            var deltaStack=stack[j-1-i];
-            undoStack.push(deltaStack);                
+                var deltaStack = stack[j - 1 - i];
+                undoStack.push(deltaStack);
             }
             if (stack[0].isBranchPoint) {
                 arguments.callee(stack[0].branchStack[stack[0].branchStack.length - 1].slice());
@@ -331,9 +389,9 @@ window.addEventListener("load", function () {
             return e.isBranchPoint;
         }));
         lastUnbraPoint = undoStack[lastUnbraNum];
-        unbraId = lastUndoStack().branchPointId;        
+        unbraId = lastUndoStack().branchPointId;
     };
-    function rebra() {        
+    function rebra() {
         let branchPointStack = undoStack.slice().filter(function (e, i, a) {
             e.indexNum = i;
             return e.isBranchPoint;
@@ -354,11 +412,11 @@ window.addEventListener("load", function () {
         for (let i = 0; i < j; i++) {
             undo();
         }
-        (function (stack) {            
+        (function (stack) {
             let j = stack.length;
             for (let i = 0; i < j; i++) {
-            var deltaStack=stack[j-1-i];
-            undoStack.push(deltaStack);                
+                var deltaStack = stack[j - 1 - i];
+                undoStack.push(deltaStack);
             }
             if (stack[0].isBranchPoint) {
                 arguments.callee(stack[0].branchStack[0].slice());
@@ -398,21 +456,21 @@ window.addEventListener("load", function () {
                     unbreraGUIContext.lineWidth = 5;
                     unbreraGUIContext.beginPath();
                     unbreraGUIContext.moveTo(x + i * 150 + 50, y + 50);
-                    unbreraGUIContext.lineTo(x + (i+1) * 150 + 50, y + 150 * j + 50);
+                    unbreraGUIContext.lineTo(x + (i + 1) * 150 + 50, y + 150 * j + 50);
                     unbreraGUIContext.stroke();
-                let img = new Image();
+                    let img = new Image();
                     img.addEventListener("load", function () {
                         unbreraGUIContext.drawImage(img, x + i * 150, y, 100, 100)
                     });
-                    img.src = stack[i].state;                                        
-                    createUnbreraGUI(stack[i].branchStack[j].slice().reverse(), x + (i+1) * 150, y + 150 * j, i + j);
+                    img.src = stack[i].state;
+                    createUnbreraGUI(stack[i].branchStack[j].slice().reverse(), x + (i + 1) * 150, y + 150 * j, i + j);
                 }
                 break;
             }
         }
     }
     function undoRedoKeydown(e) {
-        e = window.event || e;        
+        e = window.event || e;
         if (e.key === 'z' && (e.ctrlKey || e.metaKey) && e.shiftKey) {
             redo();
         } else if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {
@@ -420,7 +478,7 @@ window.addEventListener("load", function () {
         }
     }
     function unbraRebraKeydown(e) {
-        e = window.event || e;        
+        e = window.event || e;
         if (e.key === '¸' && e.altKey && e.shiftKey) {
             rebra();
         } else if (e.key === 'Ω' && e.altKey) {

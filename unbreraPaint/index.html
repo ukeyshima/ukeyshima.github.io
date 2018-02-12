@@ -19,63 +19,26 @@
             visibility: hidden;
         }
 
-        #drawFrame {
-            padding: 0;
-            margin: 0;
-            width: 50vw;
-            height: 100vh;
-            float: left;
-            font-size: 0;
-        }
-
-        #draw {
-            padding: 0;
-            margin: 0;
-            width: 50vw;
-            height: 50vw;
-        }
-
+   
         #drawProperty {
+            background-color:#999;
             margin: 0;
             padding: 0;
-            width: 50vw;
-            height: calc( 100vh - 50vw);
+            width: 10vw;
+            height: 100vh;
+            float:left;
         }
 
         #drawColor {
             margin: 0;
             padding: 0;
-            width: calc( 100vh - 50vw);
-            height: 100%;
-            float: left;
-        }
-
-        #drawPropertyRight {
-            margin: 0;
-            padding: 0;
-            width: calc( 100% - (100vh - 50vw));
-            height: calc( 100vh - 50vw);
-            float: left;
-            text-align: center;
-            background-color:#aaa;
-        }
+            width: 10vw;
+            height: 10vw;            
+        }        
 
         #drawThickness {
             margin: 20px 0;
             padding: 0;
-            width: 100%;
-        }
-
-        #unbreraGUIFrame {
-            padding: 0;
-            margin: 0;
-            width: 50vw;
-            height: 100vh;
-            float: left;
-            overflow:auto;
-        }
-
-        #drawThickness {
             -webkit-appearance: none;
             -moz-appearance: none;
             background-color: #555;
@@ -103,26 +66,57 @@
         #drawThicknessPreview {
             margin: 0;
             padding: 0;
-            width: 100%;            
+            width: 100%;
             background: #777;
-            font-size: 50px;
-            text-align: center;            
+            font-size: 40px;
+            text-align: center;
             line-height: 50px;
+        }
+
+        #drawFrame {
+            background-color:#777;
+            padding: 0;
+            margin: 0;
+            width: 100vh;
+            height: 100vh;
+            float: left;
+            font-size: 0;
+        }
+
+        #draw {
+            padding: 0;
+            margin: 0;
+            width: 100%;            
+        }
+
+        #unbreraGUIFrame {
+            padding: 0;
+            margin: 0;
+            width: calc(100vw - 10vw - 100vh - 5px);
+            height: 100vh;
+            float: left;
+            overflow: auto;
+        }
+
+        .frame {
+            width: 5px;
+            height: 100vh;
+            float: left;
+            background-color: #e38;
         }
     </style>
 </head>
 
 <body>
+    <div id="drawProperty">
+        <canvas id="drawColor"></canvas>
+        <input id="drawThickness" type="range" min="1" max="100" step="1.0" value="50">
+        <p id="drawThicknessPreview">50</p>
+    </div>
     <div id="drawFrame">
         <canvas id="draw"></canvas>
-        <div id="drawProperty">
-            <canvas id="drawColor"></canvas>
-            <div id="drawPropertyRight">
-                <input id="drawThickness" type="range" min="1" max="100" step="1.0" value="50">
-                <p id="drawThicknessPreview">50</p>
-            </div>
-        </div>
     </div>
+    <div class="frame" id="unbreraGUIFrontFrame"></div>
     <div id="unbreraGUIFrame">
         <canvas id="unbreraGUI"></canvas>
     </div>
