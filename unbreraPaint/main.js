@@ -13,7 +13,7 @@ window.addEventListener("load", function () {
     var unbreraGUIFrontFrame = document.getElementById("unbreraGUIFrontFrame");
     var unbreraGUIFrame = document.getElementById("unbreraGUIFrame");
     var unbreraGUI = document.getElementById("unbreraGUI");
-    var unbreraGUIWidth = unbreraGUIFrame.clientWidth * 30;
+    var unbreraGUIWidth = unbreraGUIFrame.clientWidth * 10;
     var unbreraGUIHeight = unbreraGUIFrame.clientHeight;
     unbreraGUI.width = unbreraGUIWidth;
     unbreraGUI.height = unbreraGUIHeight;
@@ -122,24 +122,34 @@ window.addEventListener("load", function () {
         drawColorGl.readPixels(e.layerX, this.clientWidth - e.layerY, 1, 1, drawColorGl.RGBA, drawColorGl.UNSIGNED_BYTE, u8);
         strokeColor = "rgb(" + u8[0] + "," + u8[1] + "," + u8[2] + ")";
         preview.style.backgroundColor = strokeColor;
+        drawRect.style.color = strokeColor;
+        drawCircle.style.color = strokeColor;
     });
     var drawRect = document.getElementById("drawRect");
     var drawCircle = document.getElementById("drawCircle");
     var drawRectEvent = false;
     var drawCircleEvent = false;
-    drawRect.addEventListener("mousedown", function () {
-        drawRectEvent = !drawRectEvent;
+    var drawPreview = document.getElementById("drawPreview");
+    drawPreview.addEventListener("mousedown", function () {
+        drawRectEvent = false;
         drawCircleEvent = false;
-        this.style.backgroundColor = drawRectEvent ? "#eee" : "#bbb";
-        drawCircle.style.backgroundColor = drawCircleEvent ? "#eee" : "#bbb";
-        drawPreview.style.backgroundColor = drawCircleEvent || drawRectEvent ? "#bbb" : "#eee";
+        this.style.backgroundColor = "#eee";
+        drawRect.style.backgroundColor = "#bbb";
+        drawCircle.style.backgroundColor = "#bbb";
+    });
+    drawRect.addEventListener("mousedown", function () {
+        drawRectEvent = true;
+        drawCircleEvent = false;
+        this.style.backgroundColor = "#eee";
+        drawCircle.style.backgroundColor = "#bbb";
+        drawPreview.style.backgroundColor = "#bbb";
     });
     drawCircle.addEventListener("mousedown", function () {
-        drawCircleEvent = !drawCircleEvent;
+        drawCircleEvent = true;
         drawRectEvent = false;
-        this.style.backgroundColor = drawCircleEvent ? "#eee" : "#bbb";
-        drawRect.style.backgroundColor = drawRectEvent ? "#eee" : "#bbb";
-        drawPreview.style.backgroundColor = drawCircleEvent || drawRectEvent ? "#bbb" : "#eee";
+        this.style.backgroundColor = "#eee";
+        drawRect.style.backgroundColor = "#bbb";
+        drawPreview.style.backgroundColor = "#bbb";
     });
 
     var drawColorVertexShader = `
@@ -238,6 +248,7 @@ window.addEventListener("load", function () {
             gl.vertexAttribPointer(attL[i], attS[i], gl.FLOAT, false, 0, 0);
         }
     }
+    var drawProperty = document.getElementById("drawProperty");
     window.addEventListener("resize", function (e) {
         drawWidth = draw.clientWidth;
         drawHeight = draw.clientWidth;
@@ -256,6 +267,16 @@ window.addEventListener("load", function () {
             drawContext.drawImage(img, 0, 0, drawWidth, drawHeight);
         }
         img.src = lastUndoStack().state;
+        unbreraGUIFrame.style.width = (window.innerWidth - drawProperty.clientWidth - drawFrame.clientWidth - unbreraGUIFrontFrame.clientWidth) + "px";
+        unbreraGUIFrame.style.height = window.inneHeight + "px";
+        unbreraGUI.style.height = window.innerHeight + "px";
+        unbreraGUIHeight = unbreraGUIFrame.clientHeight;
+        unbreraGUI.height = unbreraGUIHeight;
+        clearEventListener(unbreraGUI);
+        unbreraGUIContext.fillStyle = "#222";
+        unbreraGUIContext.fillRect(0, 0, unbreraGUIWidth, unbreraGUIHeight);
+        createUnbreraGUI(undoStack.concat(redoStack.slice().reverse()), 50, 200, 0);
+
     });
     var unbreraGUISizeChange = false;
     unbreraGUIFrontFrame.addEventListener("mousedown", function (e) {
@@ -531,6 +552,8 @@ window.addEventListener("load", function () {
                 unbreraGUIContext.drawImage(img, x + i * 150, y, 100, 100)
             });
             img.src = stack[i].state;
+            unbreraGUIContext.fillStyle = "#f00";
+            unbreraGUIContext.fillText(stack[i].delta.length, x + i * 150, y);
             registerEventListener(unbreraGUI, "click", targetPointing(x + i * 150, y, 100, stack[i]));
             if (stack[i].isBranchPoint) {
                 for (let j = 0; j < stack[i].branchStack.length; j++) {
@@ -578,72 +601,150 @@ window.addEventListener("load", function () {
         if (branchPointStack[0] !== undoStack[0]) {
             branchPointStack = [].concat(undoStack[0]).concat(branchPointStack);
         }
-        var targetIsBranch = branchPointStack.indexOf(target);
-        var nextBranchPoint = targetIsBranch == -1 ? null : target;
+        var nextBranchPoint = null;
         var nextBranchStack = [];
-        console.log(branchPointStack);
-        if (targetIsBranch == -1) {
+        var branchNum = [];
+        for (var i = branchPointStack.length - 1; i >= 0; i--) {
+            nextBranchStack = [];
+            nextBranchPoint = (function (stack) {
+                loop: for (var j = 0; j < stack.branchStack.length; j++) {
+                    for (var k = stack.branchStack[j].length - 1; k >= 0; k--) {
+                        if (stack.branchStack[j][k] == target) {
+                            branchNum.push(j);
+                            nextBranchStack.unshift(branchPointStack[i]);
+                            return branchPointStack[i];
+                            break loop;
+                        } else if (stack.branchStack[j][k].isBranchPoint) {
+                            if ((function (stack) {
+                                loop: for (var j = 0; j < stack.branchStack.length; j++) {
+                                    for (var k = stack.branchStack[j].length - 1; k >= 0; k--) {
+                                        if (stack.branchStack[j][k] == target) {
+                                            return true;
+                                            break loop;
+                                        } else if (stack.branchStack[j][k].isBranchPoint) {
+                                            if (arguments.callee(stack.branchStack[j][k])) {
+                                                return arguments.callee(stack.branchStack[j][k]);
+                                            }
+                                        }
+                                    }
 
-
-
-            for (var i = branchPointStack.length-1; i >=0 ; i--) {
-                nextBranchStack = [];
-                nextBranchPoint = (function (stack) {
-                    for (var j = 0; j < stack.branchStack.length; j++) {
-                        for (var k = 0; k < stack.branchStack[j].length; k++) {
-                            if (stack.branchStack[j][k] == target) {
-                                nextBranchStack.unshift(branchPointStack[i]);
-                                return branchPointStack[i];
+                                }
+                            })(stack.branchStack[j][k])) {
+                                branchNum.push(j);
+                                nextBranchStack.push(stack.branchStack[j][k]);
+                                return arguments.callee(stack.branchStack[j][k]);
                             }
                         }
-                        if (stack.branchStack[j][0].isBranchPoint) {
-                            nextBranchStack.unshift(stack.branchStack[j][0]);
-                            arguments.callee(stack.branchStack[j][0]);
-                        }
                     }
-                })(branchPointStack[i]);
-                if (nextBranchPoint) {
+
+                }
+            })(branchPointStack[i]);
+            if (nextBranchPoint) {
+                break;
+            }
+        }        
+        if (nextBranchStack.length == 0) {
+            nextBranchStack.push(nextBranchPoint);
+            branchNum = [0];
+        }
+        if (!nextBranchPoint) {
+            nextBranchPoint = undoStack[0];
+            nextBranchStack = branchPointStack;
+        }
+        let nextBranchPointIndex = undoStack.indexOf(nextBranchPoint);
+        if (nextBranchPointIndex === -1) {
+            for (var i = 0; i < redoStack.length; i++) {
+                redo();
+                if (lastUndoStack() === nextBranchPoint) break;
+            }
+            redoStack = [];
+            loop: for (var i = 0; i < nextBranchStack.length; i++) {
+                if (lastUndoStack() === target) {
+                    (function (stack) {
+                        var j = stack.length;
+                        for (var i = j - 1; i >= 0; i--) {
+                            redoStack.unshift(stack[i]);
+                            if (stack[i].isBranchPoint) {
+                                return arguments.callee(stack[i].branchStack[stack[i].branchStack.length - 1]);
+                            }
+
+                        }
+                    })(target.branchStack[target.branchStack.lengt - 1]);
                     break;
+                }
+                j = nextBranchStack[i].branchStack[branchNum[i]].length;
+                for (var t = 0; t < j; t++) {
+                    var deltaStack = nextBranchStack[i].branchStack[branchNum[i]][j - 1 - t];
+                    undoStack.push(deltaStack);
+                    if (deltaStack === target) {
+                        (function (stack) {
+                            var j = stack.length;
+                            for (var i = j - 1; i >= 0; i--) {
+                                redoStack.unshift(stack[i]);
+                                if (stack[i].isBranchPoint) {
+                                    return arguments.callee(stack[i].branchStack[stack[i].branchStack.length - 1]);
+                                }
+
+                            }
+                        })(target.isBranchPoint ? target.branchStack[target.branchStack.length - 1] : nextBranchStack[i].branchStack[branchNum[i]].slice(0, j - 1 - t));
+                        break loop;
+                    }
+                }
+            }
+        } else {
+            let j = undoStack.length - (nextBranchPointIndex + 1);
+            for (let i = 0; i < j; i++) {
+                undo();
+            }
+            redoStack = [];
+            loop: for (var i = 0; i < nextBranchStack.length; i++) {
+                if (lastUndoStack() === target) {
+                    (function (stack) {
+                        var j = stack.length;
+                        for (var i = j - 1; i >= 0; i--) {
+                            redoStack.unshift(stack[i]);
+                            if (stack[i].isBranchPoint) {
+                                return arguments.callee(stack[i].branchStack[stack[i].branchStack.length - 1]);
+                            }
+
+                        }
+                    })(target.branchStack[target.branchStack.length - 1]);
+                    break;
+                }
+                j = nextBranchStack[i].branchStack[branchNum[i]].length;
+                for (var t = 0; t < j; t++) {
+                    var deltaStack = nextBranchStack[i].branchStack[branchNum[i]][j - 1 - t];
+                    undoStack.push(deltaStack);
+                    if (deltaStack === target) {
+                        (function (stack) {
+                            var j = stack.length;
+                            for (var i = j - 1; i >= 0; i--) {
+                                redoStack.unshift(stack[i]);
+                                if (stack[i].isBranchPoint) {
+                                    return arguments.callee(stack[i].branchStack[stack[i].branchStack.length - 1]);
+                                }
+
+                            }
+                        })(target.isBranchPoint ? target.branchStack[target.branchStack.length - 1] : nextBranchStack[i].branchStack[branchNum[i]].slice(0, j - 1 - t));
+                        break loop;
+                    }
                 }
             }
         }
-        console.log(nextBranchPoint);
-        console.log(nextBranchStack);
-        /*
-                let nextBranchPointIndex = nextBranchPoint.indexNum;
-                let j = undoStack.length - (nextBranchPointIndex + 1);
-                for (let i = 0; i < j; i++) {
-                    undo();
-                }
-        
-                (function (stack) {
-                    let j = stack.length;
-                    for (let i = 0; i < j; i++) {
-                        var deltaStack = stack[j - 1 - i];
-                        undoStack.push(deltaStack);
-                        if (deltaStack === target) return;
-                    }
-                    if (stack[0].isBranchPoint) {
-                        arguments.callee(stack[0].branchStack[stack[0].branchStack.length - 1].slice());
-                    }
-                })(nextBranchPoint);
-        
-        
-                clearEventListener(unbreraGUI);
-                unbreraGUIContext.fillStyle = "#222";
-                unbreraGUIContext.fillRect(0, 0, unbreraGUIWidth, unbreraGUIHeight);
-                createUnbreraGUI(undoStack.concat(redoStack.slice().reverse()), 50, 200, 0);
-                var img = new Image();
-                img.onload = function () {
-                    drawContext.drawImage(img, 0, 0, drawWidth, drawHeight);
-                }
-                img.src = lastUndoStack().state;
-                redoStack = [];
-                lastUnbraNum = undoStack.lastIndexOf(undoStack.slice().reverse().find(function (e, i, a) {
-                    return e.isBranchPoint;
-                }));
-                lastUnbraPoint = undoStack[lastUnbraNum];
-                unbraId = lastUndoStack().branchPointId;*/
+        clearEventListener(unbreraGUI);
+        unbreraGUIContext.fillStyle = "#222";
+        unbreraGUIContext.fillRect(0, 0, unbreraGUIWidth, unbreraGUIHeight);
+        createUnbreraGUI(undoStack.concat(redoStack.slice().reverse()), 50, 200, 0);
+        var img = new Image();
+        img.onload = function () {
+            drawContext.drawImage(img, 0, 0, drawWidth, drawHeight);
+        }
+        img.src = lastUndoStack().state;
+        lastUnbraNum = undoStack.lastIndexOf(undoStack.slice().reverse().find(function (e, i, a) {
+            return e.isBranchPoint;
+        }));
+        lastUnbraPoint = undoStack[lastUnbraNum];
+        unbraId = lastUndoStack().branchPointId;
     }
     function undoRedoKeydown(e) {
         e = window.event || e;
