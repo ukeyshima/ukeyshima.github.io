@@ -1,25 +1,72 @@
 window.addEventListener("load", function () {
-    var httpObj = new XMLHttpRequest();
-    httpObj.open("get", "data.json", true);
-    httpObj.addEventListener("load", function () {
-        var json = JSON.parse(this.responseText);
+    var model = new XMLHttpRequest();
+    var mainVertexShaderText = new XMLHttpRequest();
+    var mainFragmentShaderText = new XMLHttpRequest();
+    var gpgpuVertexShaderText = new XMLHttpRequest();
+    var gpgpuFragmentShaderText = new XMLHttpRequest();
+    model.open("get", "data.json", true);
+    mainVertexShaderText.open("get", "../autumn/mainVertexShader.glsl", true);
+    mainFragmentShaderText.open("get", "../autumn/mainFragmentShader.glsl", true);
+    gpgpuVertexShaderText.open("get", "../autumn/gpgpuVertexShader.glsl", true);
+    gpgpuFragmentShaderText.open("get", "../autumn/gpgpuFragmentShader.glsl", true);
+    var object, mainVs, mainFs, gpgpuVs, gpgpuFs;
+    model.addEventListener("load", function () {
+        object = JSON.parse(this.responseText);
+        if(mainVs && mainFs && gpgpuVs && gpgpuFs){   
+            console.log(mainVs);
+            console.log(mainFs);         
+            console.log(gpgpuVs);
+            console.log(gpgpuFs);            
+            glStart();
+        }
+    });
+    model.send(null);
+    mainVertexShaderText.addEventListener("load", function () {
+        mainVs = this.responseText;
+        if(object && mainFs && gpgpuVs && gpgpuFs){
+            glStart();
+        }
+    });
+    mainVertexShaderText.send(null);
+    mainFragmentShaderText.addEventListener("load", function () {
+        mainFs = this.responseText;
+        if(mainVs && object && gpgpuVs && gpgpuFs){
+            glStart();
+        }
+    });
+    mainFragmentShaderText.send(null);
+    gpgpuVertexShaderText.addEventListener("load", function () {
+        gpgpuVs = this.responseText;
+        if(mainVs && mainFs && object && gpgpuFs){            
+            glStart();
+        }
+    });
+    gpgpuVertexShaderText.send(null);
+    gpgpuFragmentShaderText.addEventListener("load", function () {
+        gpgpuFs = this.responseText;
+        if(mainVs && mainFs && gpgpuVs && object){                        
+            glStart();
+        }
+    });
+    gpgpuFragmentShaderText.send(null);
+    function glStart() {        
         var c = document.getElementById("canvas");
         var cw = window.innerWidth;
         var ch = window.innerHeight;
         c.width = cw; c.height = ch;
         var gl = c.getContext("webgl2") || c.getContext("webgl") || c.getContext("experimental-webgl");
-        var gpgpuProgram = create_gpgpu_program(create_shader("gpgpuVs"), create_shader("gpgpuFs"));
+        var gpgpuProgram = create_gpgpu_program(create_vertex_shader(gpgpuVs), create_fragment_shader(gpgpuFs));
         var gpgpuUniLocation = [];
         var gpgpuAttLocation = [];
         var gpgpuAttStride = [];
         var particleNum = 30;
-        var position = new Array(particleNum * 3).fill(0).map(function(e,i,a){
+        var position = new Array(particleNum * 3).fill(0).map(function (e, i, a) {
             if (i % 3 == 0) {
-                return 20.0+(Math.random()) * 10.0;
+                return 20.0 + (Math.random()) * 10.0;
             } else if (i % 3 == 1) {
-                return 5.0+(Math.random()) * 5.0;
+                return 5.0 + (Math.random()) * 5.0;
             } else {
-                return (Math.random())*2.0-1.0 ;
+                return (Math.random()) * 2.0 - 1.0;
             }
         });
         gpgpuAttLocation[0] = gl.getAttribLocation(gpgpuProgram, "position");
@@ -51,7 +98,7 @@ window.addEventListener("load", function () {
         gl.enableVertexAttribArray(gpgpuAttLocation[0]);
         gl.vertexAttribPointer(gpgpuAttLocation[0], gpgpuAttStride[0], gl.FLOAT, false, 0, 0);
         gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback[0]);
-        
+
 
         gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vboList[1]), gl.STATIC_DRAW);
@@ -91,16 +138,16 @@ window.addEventListener("load", function () {
 
         let gpgpuVaos = [gpgpuInputVao, gpgpuOutputVao];
 
-        var mainProgram = create_main_program(create_shader("vs"), create_shader("fs"));
+        var mainProgram = create_main_program(create_vertex_shader(mainVs), create_fragment_shader(mainFs));
         var mainUniLocation = [];
         mainUniLocation[0] = gl.getUniformLocation(mainProgram, "resolution");
         mainUniLocation[1] = gl.getUniformLocation(mainProgram, "time");
         var mainAttLocation = [];
         var mainAttStride = [];
         var obj = {
-            "position": json.data.attributes.position.array,
-            "normal": json.data.attributes.normal.array,
-            "index": json.data.index.array
+            "position": object.data.attributes.position.array,
+            "normal": object.data.attributes.normal.array,
+            "index": object.data.index.array
         }
         mainAttLocation[0] = gl.getAttribLocation(mainProgram, "position");
         mainAttStride[0] = 3;
@@ -169,29 +216,28 @@ window.addEventListener("load", function () {
             gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, null);
             gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, null);
             gl.useProgram(mainProgram);
-            gl.uniform2fv(mainUniLocation[0],[cw,ch]);
-            gl.uniform1f(mainUniLocation[1],(new Date().getTime()-startTime)*0.001);
+            gl.uniform2fv(mainUniLocation[0], [cw, ch]);
+            gl.uniform1f(mainUniLocation[1], (new Date().getTime() - startTime) * 0.001);
             gl.bindVertexArray(mainVaos[dist]);
             gl.drawElementsInstanced(gl.TRIANGLES, new Int16Array(obj.index).length, gl.UNSIGNED_SHORT, 0, particleNum);
             gl.flush();
             requestAnimationFrame(render);
         })();
 
-        function create_shader(id) {
-            var shader;
-            var scriptElement = document.getElementById(id);
-            if (!scriptElement) { return; }
-            switch (scriptElement.type) {
-                case "x-shader/x-vertex":
-                    shader = gl.createShader(gl.VERTEX_SHADER);
-                    break;
-                case "x-shader/x-fragment":
-                    shader = gl.createShader(gl.FRAGMENT_SHADER);
-                    break;
-                default:
-                    return;
+        function create_vertex_shader(script) {
+            var shader=gl.createShader(gl.VERTEX_SHADER);;      
+            gl.shaderSource(shader, script);
+            gl.compileShader(shader);
+            if (gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                return shader;
+            } else {
+                alert(gl.getShaderInfoLog(shader));
+                console.log(gl.getShaderInfoLog(shader));
             }
-            gl.shaderSource(shader, scriptElement.text);
+        }
+        function create_fragment_shader(script) {
+            var shader=gl.createShader(gl.FRAGMENT_SHADER);;      
+            gl.shaderSource(shader, script);
             gl.compileShader(shader);
             if (gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
                 return shader;
@@ -232,7 +278,5 @@ window.addEventListener("load", function () {
             c.height = ch;
             gl.viewport(0, 0, cw, ch);
         });
-    });
-    httpObj.send(null);
-
+    }
 });

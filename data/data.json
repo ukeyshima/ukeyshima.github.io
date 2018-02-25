@@ -17,7 +17,6 @@
         {"name":"riverRipple"}
     ],
     "other": [
-        {"name":"unbreraEditor"},
-        {"name":"unbreraPaint"}    
+        {"name":"unbreraEditor"}        
     ]
 }

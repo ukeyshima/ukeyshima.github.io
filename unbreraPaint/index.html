@@ -118,6 +118,13 @@
             float: left;
             overflow: auto;
             position: relative;
+            background-color:#222;
+        }
+
+        #animationCanvas {
+            position: absolute;
+            left: 0;
+            top: 0;
         }
 
         .frame {
@@ -155,59 +162,6 @@
             position: fixed;
         }
 
-        .arrow {
-            width: 0px;
-            border-color: #ff0000;
-            border-style: solid;
-            border-width: 50px;
-            text-align: center;
-            vertical-align: middle;
-        }
-
-        #topArrow {
-            border-left-color: transparent;
-            border-top-color: transparent;
-            border-right-color: transparent;
-            position: absolute;
-            top: 0px;
-            left: 125px;
-        }
-
-        #rightArrow {
-            border-left-color: transparent;
-            border-top-color: transparent;
-            border-bottom-color: transparent;
-            position: absolute;
-            top: 125px;
-            left: 0px;
-        }
-
-        #bottomArrow {
-            border-left-color: transparent;
-            border-bottom-color: transparent;
-            border-right-color: transparent;
-            position: absolute;
-            bottom: 0px;
-            left: 125px;
-        }
-
-        #bottomArrow {
-            position: absolute;
-            bottom: 0px;
-            left: 125px;
-            background: linear-gradient(to top right, rgba(255, 255, 255, 0) 50%, #f00 50.5%) no-repeat top left/50% 100%,
-            linear-gradient(to top left, rgba(255, 255, 255, 0) 50%, #f00 50.5%) no-repeat top right/50% 100%;
-        }
-
-        #leftArrow {
-            border-right-color: transparent;
-            border-top-color: transparent;
-            border-bottom-color: transparent;
-            position: absolute;
-            top: 125px;
-            right: 0px;
-        }
-
         #drawRect {
             margin: 2px 0;
             background-color: #bbb;
@@ -226,6 +180,9 @@
             font-size: 20px;
             line-height: 40px;
             color: #000;
+        }
+        .arrow{
+            fill:rgb(255,0,0);
         }
     </style>
 </head>
@@ -246,15 +203,18 @@
     <div class="frame" id="unbreraGUIFrontFrame"></div>
     <div id="unbreraGUIFrame">
         <canvas id="unbreraGUI"></canvas>
+        <canvas id="animationCanvas"></canvas>
         <div id="commandPreviewFrame">
             <div id="commandPreview"></div>
         </div>
         <div id="commandOperationFrame">
             <div id="commandOperation">
-                <div id="topArrow" class="arrow"></div>
-                <div id="rightArrow" class="arrow"></div>
-                <div id="bottomArrow" class="arrow"></div>
-                <div id="leftArrow" class="arrow"></div>
+                <svg id="logomark" x="0px" y="0px" width="350px" height="350px">
+                    <polygon id="topArrow" class="arrow" points="175,50 125,100 225,100" />
+                    <polygon id="leftArrow" class="arrow" points="50,175 100,125 100,225" />                    
+                    <polygon id="bottomArrow" class="arrow" points="175,300 125,250 225,250" />
+                    <polygon id="rightArrow" class="arrow" points="300,175 250,125 250,225" />
+                </svg>
             </div>
         </div>
     </div>
