@@ -16,7 +16,7 @@ window.addEventListener("load", function () {
     var unbreraGUIWidth = unbreraGUIFrame.clientWidth * 3;
     var unbreraGUIHeight = unbreraGUIFrame.clientHeight * 3;
     unbreraGUI.width = unbreraGUIWidth;
-    unbreraGUI.height = unbreraGUIHeight;    
+    unbreraGUI.height = unbreraGUIHeight;
     var unbreraGUIContext = unbreraGUI.getContext("2d");
     unbreraGUIContext.fillStyle = "#222";
     unbreraGUIContext.fillRect(0, 0, unbreraGUIWidth, unbreraGUIHeight);
@@ -24,7 +24,7 @@ window.addEventListener("load", function () {
     var animationCanvasWidth = unbreraGUIWidth;
     var animationCanvasHeight = unbreraGUIHeight;
     animationCanvas.width = unbreraGUIWidth;
-    animationCanvas.height = unbreraGUIHeight;    
+    animationCanvas.height = unbreraGUIHeight;
     var animationCanvasContext = animationCanvas.getContext("2d");
     var drawColor = document.getElementById("drawColor");
     var drawColorWidth = drawColor.clientWidth;
@@ -42,22 +42,25 @@ window.addEventListener("load", function () {
     var prevImage;
     var drawRectFlag;
     var drawCircleFlag;
-    var imgSize=50;
+    var imgSize = 50;
+    prevImage = draw.toDataURL("image/png", 1.0);
     draw.addEventListener("mousedown", function (e) {
         if (!drawRectEvent && !drawCircleEvent) {
             drawFlag = true;
         }
         if (drawRectEvent) drawRectFlag = true;
         if (drawCircleEvent) drawCircleFlag = true;
-        prevImage = draw.toDataURL("image/webp", 1.0);
+        prevImage = draw.toDataURL("image/png", 1.0);
         prevX = e.layerX;
         prevY = e.layerY;
     });
     var undoStackDelta = [];
+    var drawRectEvent = false;
+    var drawCircleEvent = false;
     draw.addEventListener("mousemove", function (e) {
+        var x = e.layerX;
+        var y = e.layerY;
         if (drawFlag) {
-            var x = e.layerX;
-            var y = e.layerY;
             drawContext.strokeStyle = strokeColor;
             drawContext.lineWidth = strokeWidth;
             drawContext.beginPath();
@@ -74,8 +77,6 @@ window.addEventListener("load", function () {
                 width: strokeWidth,
             });
         } else if (drawRectFlag) {
-            var x = e.layerX;
-            var y = e.layerY;
             var img = new Image();
             img.onload = function () {
                 drawContext.drawImage(img, 0, 0, drawWidth, drawHeight);
@@ -84,8 +85,6 @@ window.addEventListener("load", function () {
             }
             img.src = prevImage;
         } else if (drawCircleFlag) {
-            var x = e.layerX;
-            var y = e.layerY;
             var img = new Image();
             img.onload = function () {
                 drawContext.drawImage(img, 0, 0, drawWidth, drawHeight);
@@ -95,16 +94,27 @@ window.addEventListener("load", function () {
                 drawContext.fill();
             }
             img.src = prevImage;
+        } else if (!drawRectEvent && !drawCircleEvent) {
+            var img = new Image();
+            img.onload = function () {
+                drawContext.drawImage(img, 0, 0, drawWidth, drawHeight);
+                drawContext.fillStyle = strokeColor;
+                drawContext.beginPath();
+                drawContext.arc(x, y, strokeWidth / 2, 0, Math.PI * 2, false);
+                drawContext.fill();
+            }
+            img.src = prevImage;
         }
     });
+
     function dist(x, y, tx, ty) {
         return Math.sqrt((tx - x) * (tx - x) + (ty - y) * (ty - y));
     }
     draw.addEventListener("mouseup", function (e) {
-        var state = draw.toDataURL("image/webp", 1.0);
+        var state = draw.toDataURL("image/png", 1.0);
+        prevImage = state;
         if (drawFlag) {
             drawFlag = false;
-            var state = draw.toDataURL("image/webp", 1.0);
             execute(undoStackDelta, state);
             undoStackDelta = [];
         } else if (drawRectFlag) {
@@ -114,6 +124,21 @@ window.addEventListener("load", function () {
             drawCircleFlag = false;
             execute([], state);
         }
+    });
+    draw.addEventListener("mouseout", function (e) {
+        if (drawFlag || drawCircleFlag || drawRectFlag) {
+            prevImage = draw.toDataURL("image/png", 1.0);
+            execute(undoStackDelta, prevImage);
+        } else {
+            var img = new Image();
+            img.onload = function () {
+                drawContext.drawImage(img, 0, 0, drawWidth, drawHeight);
+            }
+            img.src = prevImage;
+        }
+        drawCircleFlag = false;
+        drawFlag = false;
+        drawRectFlag = false;        
     });
     var drawThickness = document.getElementById("drawThickness");
     strokeWidth = drawThickness.value;
@@ -134,8 +159,6 @@ window.addEventListener("load", function () {
     });
     var drawRect = document.getElementById("drawRect");
     var drawCircle = document.getElementById("drawCircle");
-    var drawRectEvent = false;
-    var drawCircleEvent = false;
     var drawPreview = document.getElementById("drawPreview");
     drawPreview.addEventListener("mousedown", function () {
         drawRectEvent = false;
@@ -275,16 +298,16 @@ window.addEventListener("load", function () {
         }
         img.src = lastUndoStack().state;
         unbreraGUIFrame.style.width = (window.innerWidth - drawProperty.clientWidth - drawFrame.clientWidth - unbreraGUIFrontFrame.clientWidth) + "px";
-        unbreraGUIFrame.style.height = window.inneHeight + "px";        
+        unbreraGUIFrame.style.height = window.inneHeight + "px";
         clearEventListener(animationCanvas);
         unbreraGUIContext.fillStyle = "#222";
         unbreraGUIContext.fillRect(0, 0, unbreraGUIWidth, unbreraGUIHeight);
-        var array = undoStack.concat(redoStack.slice().reverse());
+        var array = undoStack.slice().concat(redoStack.slice().reverse());;
         var sliceNum = array.indexOf(array.find(function (e, i, a) {
             return e.isBranchPoint;
         }));
         array = sliceNum == -1 ? array : array.slice(0, sliceNum + 1);
-        createUnbreraGUI(array, 50,100, 0);
+        createUnbreraGUI(array, 50, undoStack[0].totalBranchStack / 2 * (imgSize / 2 + imgSize * 3 / 4 + imgSize / 4), 0);
     });
     var unbreraGUISizeChange = false;
     unbreraGUIFrontFrame.addEventListener("mousedown", function (e) {
@@ -326,7 +349,6 @@ window.addEventListener("load", function () {
             img.src = lastUndoStack().state;
         }
     });
-
     unbreraGUIFrontFrame.addEventListener("mouseup", function (e) {
         if (unbreraGUISizeChange) {
             unbreraGUISizeChange = false;
@@ -358,18 +380,18 @@ window.addEventListener("load", function () {
     }
     initUndoStack();
     clearEventListener(animationCanvas);
-    unbreraGUIHeight=undoStack[0].totalBranchStack*(imgSize*3/2)+imgSize; 
-    unbreraGUI.height=unbreraGUIHeight;
-    animationCanvasHeight=unbreraGUIHeight;
-        animationCanvas.height=unbreraGUIHeight;
+    unbreraGUIHeight = undoStack[0].totalBranchStack * (imgSize * 3 / 2) + imgSize;
+    unbreraGUI.height = unbreraGUIHeight;
+    animationCanvasHeight = unbreraGUIHeight;
+    animationCanvas.height = unbreraGUIHeight;
     unbreraGUIContext.fillStyle = "#222";
     unbreraGUIContext.fillRect(0, 0, unbreraGUIWidth, unbreraGUIHeight);
-    var array = undoStack.concat(redoStack.slice().reverse());
+    var array = undoStack.slice().concat(redoStack.slice().reverse());;
     var sliceNum = array.indexOf(array.find(function (e, i, a) {
         return e.isBranchPoint;
     }));
-    array = sliceNum == -1 ? array : array.slice(0, sliceNum + 1);    
-    createUnbreraGUI(array, 50,undoStack[0].totalBranchStack/2*(imgSize/2+imgSize*3/4+imgSize/4), 0);
+    array = sliceNum == -1 ? array : array.slice(0, sliceNum + 1);
+    createUnbreraGUI(array, 50, undoStack[0].totalBranchStack / 2 * (imgSize / 2 + imgSize * 3 / 4 + imgSize / 4), 0);
     function initUndoStack() {
         unbraId = 0;
         undoStack = [new undoStackObj([], defalutDrawState, 0, false, [], 1)];
@@ -386,19 +408,20 @@ window.addEventListener("load", function () {
                 drawContext.drawImage(img, 0, 0, drawWidth, drawHeight);
             }
             img.src = lastUndoStack().state;
+            prevImage = lastUndoStack().state;
             clearEventListener(animationCanvas);
-            unbreraGUIHeight=undoStack[0].totalBranchStack*(imgSize*3/2)+imgSize; 
-            unbreraGUI.height=unbreraGUIHeight;
-            animationCanvasHeight=unbreraGUIHeight;
-        animationCanvas.height=unbreraGUIHeight;
+            unbreraGUIHeight = undoStack[0].totalBranchStack * (imgSize * 3 / 2) + imgSize;
+            unbreraGUI.height = unbreraGUIHeight;
+            animationCanvasHeight = unbreraGUIHeight;
+            animationCanvas.height = unbreraGUIHeight;
             unbreraGUIContext.fillStyle = "#222";
             unbreraGUIContext.fillRect(0, 0, unbreraGUIWidth, unbreraGUIHeight);
-            var array = undoStack.concat(redoStack.slice().reverse());
+            var array = undoStack.slice().concat(redoStack.slice().reverse());;
             var sliceNum = array.indexOf(array.find(function (e, i, a) {
                 return e.isBranchPoint;
             }));
-            array = sliceNum == -1 ? array : array.slice(0, sliceNum + 1);            
-            createUnbreraGUI(array, 50,undoStack[0].totalBranchStack/2*(imgSize/2+imgSize*3/4+imgSize/4), 0);
+            array = sliceNum == -1 ? array : array.slice(0, sliceNum + 1);
+            createUnbreraGUI(array, 50, undoStack[0].totalBranchStack / 2 * (imgSize / 2 + imgSize * 3 / 4 + imgSize / 4), 0);
         }
     }
     function redo() {
@@ -410,19 +433,20 @@ window.addEventListener("load", function () {
                 drawContext.drawImage(img, 0, 0, drawWidth, drawHeight);
             }
             img.src = lastUndoStack().state;
+            prevImage = lastUndoStack().state;
             clearEventListener(animationCanvas);
-            unbreraGUIHeight=undoStack[0].totalBranchStack*(imgSize*3/2)+imgSize; 
-            unbreraGUI.height=unbreraGUIHeight;
-            animationCanvasHeight=unbreraGUIHeight;
-        animationCanvas.height=unbreraGUIHeight;
+            unbreraGUIHeight = undoStack[0].totalBranchStack * (imgSize * 3 / 2) + imgSize;
+            unbreraGUI.height = unbreraGUIHeight;
+            animationCanvasHeight = unbreraGUIHeight;
+            animationCanvas.height = unbreraGUIHeight;
             unbreraGUIContext.fillStyle = "#222";
             unbreraGUIContext.fillRect(0, 0, unbreraGUIWidth, unbreraGUIHeight);
-            var array = undoStack.concat(redoStack.slice().reverse());
+            var array = undoStack.slice().concat(redoStack.slice().reverse());;
             var sliceNum = array.indexOf(array.find(function (e, i, a) {
                 return e.isBranchPoint;
             }));
-            array = sliceNum == -1 ? array : array.slice(0, sliceNum + 1);            
-            createUnbreraGUI(array, 50,undoStack[0].totalBranchStack/2*(imgSize/2+imgSize*3/4+imgSize/4), 0);
+            array = sliceNum == -1 ? array : array.slice(0, sliceNum + 1);
+            createUnbreraGUI(array, 50, undoStack[0].totalBranchStack / 2 * (imgSize / 2 + imgSize * 3 / 4 + imgSize / 4), 0);
         }
     }
     function updateTotalBranchStack(stack) {
@@ -466,18 +490,18 @@ window.addEventListener("load", function () {
         redoStack = [];
         lastUnbraPoint.branchStack[unbraId] = undoStack.slice(lastUnbraNum + 1, undoStack.length).reverse();
         clearEventListener(animationCanvas);
-        unbreraGUIHeight=undoStack[0].totalBranchStack*(imgSize*3/2)+imgSize; 
-        unbreraGUI.height=unbreraGUIHeight;
-        animationCanvasHeight=unbreraGUIHeight;
-        animationCanvas.height=unbreraGUIHeight;
+        unbreraGUIHeight = undoStack[0].totalBranchStack * (imgSize * 3 / 2) + imgSize;
+        unbreraGUI.height = unbreraGUIHeight;
+        animationCanvasHeight = unbreraGUIHeight;
+        animationCanvas.height = unbreraGUIHeight;
         unbreraGUIContext.fillStyle = "#222";
         unbreraGUIContext.fillRect(0, 0, unbreraGUIWidth, unbreraGUIHeight);
-        var array = undoStack.concat(redoStack.slice().reverse());
+        var array = undoStack.slice().concat(redoStack.slice().reverse());;
         var sliceNum = array.indexOf(array.find(function (e, i, a) {
             return e.isBranchPoint;
         }));
-        array = sliceNum == -1 ? array : array.slice(0, sliceNum + 1);        
-        createUnbreraGUI(array, 50,undoStack[0].totalBranchStack/2*(imgSize/2+imgSize*3/4+imgSize/4), 0);
+        array = sliceNum == -1 ? array : array.slice(0, sliceNum + 1);
+        createUnbreraGUI(array, 50, undoStack[0].totalBranchStack / 2 * (imgSize / 2 + imgSize * 3 / 4 + imgSize / 4), 0);
         commandAfterAnimation();
     }
     function hasUndo() {
@@ -524,23 +548,24 @@ window.addEventListener("load", function () {
                 }
             })(nextBranchPoint.branchStack[targetBranchId]);
             clearEventListener(animationCanvas);
-            unbreraGUIHeight=undoStack[0].totalBranchStack*(imgSize*3/2)+imgSize; 
-            unbreraGUI.height=unbreraGUIHeight;
-            animationCanvasHeight=unbreraGUIHeight;
-        animationCanvas.height=unbreraGUIHeight;
+            unbreraGUIHeight = undoStack[0].totalBranchStack * (imgSize * 3 / 2) + imgSize;
+            unbreraGUI.height = unbreraGUIHeight;
+            animationCanvasHeight = unbreraGUIHeight;
+            animationCanvas.height = unbreraGUIHeight;
             unbreraGUIContext.fillStyle = "#222";
             unbreraGUIContext.fillRect(0, 0, unbreraGUIWidth, unbreraGUIHeight);
-            var array = undoStack.concat(redoStack.slice().reverse());
+            var array = undoStack.slice().concat(redoStack.slice().reverse());;
             var sliceNum = array.indexOf(array.find(function (e, i, a) {
                 return e.isBranchPoint;
             }));
-            array = sliceNum == -1 ? array : array.slice(0, sliceNum + 1);            
-            createUnbreraGUI(array, 50,undoStack[0].totalBranchStack/2*(imgSize/2+imgSize*3/4+imgSize/4), 0);
+            array = sliceNum == -1 ? array : array.slice(0, sliceNum + 1);
+            createUnbreraGUI(array, 50, undoStack[0].totalBranchStack / 2 * (imgSize / 2 + imgSize * 3 / 4 + imgSize / 4), 0);
             var img = new Image();
             img.onload = function () {
                 drawContext.drawImage(img, 0, 0, drawWidth, drawHeight);
             }
             img.src = lastUndoStack().state;
+            prevImage = lastUndoStack().state;
             redoStack = [];
             lastUnbraNum = undoStack.lastIndexOf(undoStack.slice().reverse().find(function (e, i, a) {
                 return e.isBranchPoint;
@@ -549,28 +574,28 @@ window.addEventListener("load", function () {
             unbraId = lastUndoStack().branchPointId;
         }
     };
-    function rebra() {
+    function rebra() {        
         let branchPointStack = undoStack.slice().filter(function (e, i, a) {
             e.indexNum = i;
             return e.isBranchPoint;
-        });
+        });        
         let currentId = branchPointStack.map(function (e, i, a) {
             return e.branchPointId;
         });
         if (!lastUndoStack().isBranchPoint) {
             currentId.push(lastUndoStack().branchPointId);
-        }
+        }        
         let targetBranchId = 0;
         let nextBranchPoint = branchPointStack.slice().reverse().find(function (e, i, a) {
             targetBranchId = currentId.slice().reverse()[i] + 1;
             return e.branchStack.length > currentId.slice().reverse()[i] + 1;
-        });
+        });                 
         if (nextBranchPoint) {
             let nextBranchPointIndex = nextBranchPoint.indexNum;
             let j = undoStack.length - (nextBranchPointIndex + 1);
             for (let i = 0; i < j; i++) {
                 undo();
-            }
+            }            
             (function (stack) {
                 let j = stack.length;
                 for (let i = j - 1; i >= 0; i--) {
@@ -578,27 +603,29 @@ window.addEventListener("load", function () {
                     undoStack.push(deltaStack);
                     if (stack[i].isBranchPoint) {
                         arguments.callee(stack[i].branchStack[0].slice());
+                        break;
                     }
                 }
-            })(nextBranchPoint.branchStack[targetBranchId]);
+            })(nextBranchPoint.branchStack[targetBranchId]);            
             clearEventListener(animationCanvas);
-            unbreraGUIHeight=undoStack[0].totalBranchStack*(imgSize*3/2)+imgSize; 
-            unbreraGUI.height=unbreraGUIHeight;
-            animationCanvasHeight=unbreraGUIHeight;
-        animationCanvas.height=unbreraGUIHeight;
+            unbreraGUIHeight = undoStack[0].totalBranchStack * (imgSize * 3 / 2) + imgSize;
+            unbreraGUI.height = unbreraGUIHeight;
+            animationCanvasHeight = unbreraGUIHeight;
+            animationCanvas.height = unbreraGUIHeight;
             unbreraGUIContext.fillStyle = "#222";
-            unbreraGUIContext.fillRect(0, 0, unbreraGUIWidth, unbreraGUIHeight);
-            var array = undoStack.concat(redoStack.slice().reverse());
+            unbreraGUIContext.fillRect(0, 0, unbreraGUIWidth, unbreraGUIHeight);            
+            let array = undoStack.slice().concat(redoStack.slice().reverse());;
             var sliceNum = array.indexOf(array.find(function (e, i, a) {
                 return e.isBranchPoint;
             }));
-            array = sliceNum == -1 ? array : array.slice(0, sliceNum + 1);            
-            createUnbreraGUI(array, 50,undoStack[0].totalBranchStack/2*(imgSize/2+imgSize*3/4+imgSize/4), 0);
+            array = sliceNum == -1 ? array : array.slice(0, sliceNum + 1);
+            createUnbreraGUI(array, 50, undoStack[0].totalBranchStack / 2 * (imgSize / 2 + imgSize * 3 / 4 + imgSize / 4), 0);
             var img = new Image();
             img.onload = function () {
                 drawContext.drawImage(img, 0, 0, drawWidth, drawHeight);
             }
             img.src = lastUndoStack().state;
+            prevImage = lastUndoStack().state;
             redoStack = [];
             lastUnbraNum = undoStack.lastIndexOf(undoStack.slice().reverse().find(function (e, i, a) {
                 return e.isBranchPoint;
@@ -606,32 +633,33 @@ window.addEventListener("load", function () {
             lastUnbraPoint = undoStack[lastUnbraNum];
             unbraId = lastUndoStack().branchPointId;
         }
+        
     };
-    var prevPosition = [50 + 50, undoStack[0].totalBranchStack/2*(imgSize/2+imgSize*3/4+imgSize/4) + imgSize/2];
-    var afterPosition = [50 + 50, undoStack[0].totalBranchStack/2*(imgSize/2+imgSize*3/4+imgSize/4) + imgSize/2];
+    var prevPosition = [50 + 50, undoStack[0].totalBranchStack / 2 * (imgSize / 2 + imgSize * 3 / 4 + imgSize / 4) + imgSize / 2];
+    var afterPosition = [50 + 50, undoStack[0].totalBranchStack / 2 * (imgSize / 2 + imgSize * 3 / 4 + imgSize / 4) + imgSize / 2];
     function createUnbreraGUI(stack, x, y, i) {
         for (let i = 0; i < stack.length; i++) {
             if (i < stack.length - 1) {
                 unbreraGUIContext.strokeStyle = "#38e";
                 unbreraGUIContext.lineWidth = 5;
                 unbreraGUIContext.beginPath();
-                unbreraGUIContext.moveTo(x + i * imgSize/2*3 + imgSize/2, y + imgSize/2);
-                unbreraGUIContext.lineTo(x + (i + 1) * imgSize/2*3 + imgSize/2, y + imgSize/2);
+                unbreraGUIContext.moveTo(x + i * imgSize / 2 * 3 + imgSize / 2, y + imgSize / 2);
+                unbreraGUIContext.lineTo(x + (i + 1) * imgSize / 2 * 3 + imgSize / 2, y + imgSize / 2);
                 unbreraGUIContext.stroke();
             }
             if (stack[i] === lastUndoStack()) {
                 unbreraGUIContext.fillStyle = "#d83";
-                unbreraGUIContext.fillRect(x + i * imgSize/2*3 - 10, y - 10, imgSize+20, imgSize+20);
-                afterPosition = [x + i * imgSize/2*3 + imgSize/2, y + imgSize/2];
+                unbreraGUIContext.fillRect(x + i * imgSize / 2 * 3 - 10, y - 10, imgSize + 20, imgSize + 20);
+                afterPosition = [x + i * imgSize / 2 * 3 + imgSize / 2, y + imgSize / 2];
             }
             let img = new Image();
             img.addEventListener("load", function () {
-                unbreraGUIContext.drawImage(img, x + i * imgSize/2*3, y, imgSize, imgSize)
+                unbreraGUIContext.drawImage(img, x + i * imgSize / 2 * 3, y, imgSize, imgSize)
             });
             img.src = stack[i].state;
             unbreraGUIContext.fillStyle = "#f00";
-            unbreraGUIContext.fillText(stack[i].totalBranchStack, x + i * imgSize/2*3, y);
-            registerEventListener(animationCanvas, "click", targetPointing(x + i * imgSize/2*3, y, imgSize, stack[i]));
+            unbreraGUIContext.fillText(stack[i].branchPointId, x + i * imgSize / 2 * 3, y);
+            registerEventListener(animationCanvas, "click", targetPointing(x + i * imgSize / 2 * 3, y, imgSize, stack[i]));
             if (stack[i].isBranchPoint) {
                 let totalSpread = -(stack[i].totalBranchStack - 1) / 2 + (stack[i].branchStack[0][stack[i].branchStack[0].length - 1].totalBranchStack - 1) / 2;
                 let num = 0;
@@ -641,10 +669,15 @@ window.addEventListener("load", function () {
                     unbreraGUIContext.strokeStyle = "#38e";
                     unbreraGUIContext.lineWidth = 5;
                     unbreraGUIContext.beginPath();
-                    unbreraGUIContext.moveTo(x + i * imgSize/2*3 + imgSize/2, y + imgSize/2);
-                    unbreraGUIContext.lineTo(x + (i + 1) * imgSize/2*3 + imgSize/2, y + imgSize/2*3 * num + imgSize/2);
+                    unbreraGUIContext.moveTo(x + i * imgSize / 2 * 3 + imgSize / 2, y + imgSize / 2);
+                    unbreraGUIContext.lineTo(x + (i + 1) * imgSize / 2 * 3 + imgSize / 2, y + imgSize / 2 * 3 * num + imgSize / 2);
                     unbreraGUIContext.stroke();
-                    createUnbreraGUI(stack[i].branchStack[j].slice().reverse(), x + (i + 1) * imgSize/2*3, y + imgSize/2*3 * num, i + j);
+                    var array = stack[i].branchStack[j].slice().reverse();
+                    var sliceNum = array.indexOf(array.find(function (e, i, a) {
+                        return e.isBranchPoint;
+                    }));
+                    array = sliceNum == -1 ? array : array.slice(0, sliceNum + 1);
+                    createUnbreraGUI(array, x + (i + 1) * imgSize / 2 * 3, y + imgSize / 2 * 3 * num, i + j);
                 }
                 break;
             }
@@ -670,6 +703,7 @@ window.addEventListener("load", function () {
     function targetPointing(x, y, size, target) {
         return function (e) {
             if (e.layerX > x && e.layerX < x + size && e.layerY > y && e.layerY < y + size) {
+                console.log(target);
                 searchTarget(target);
             }
         }
@@ -813,23 +847,24 @@ window.addEventListener("load", function () {
             }
         }
         clearEventListener(animationCanvas);
-        unbreraGUIHeight=undoStack[0].totalBranchStack*(imgSize*3/2)+imgSize; 
-        unbreraGUI.height=unbreraGUIHeight;
-        animationCanvasHeight=unbreraGUIHeight;
-        animationCanvas.height=unbreraGUIHeight;
+        unbreraGUIHeight = undoStack[0].totalBranchStack * (imgSize * 3 / 2) + imgSize;
+        unbreraGUI.height = unbreraGUIHeight;
+        animationCanvasHeight = unbreraGUIHeight;
+        animationCanvas.height = unbreraGUIHeight;
         unbreraGUIContext.fillStyle = "#222";
         unbreraGUIContext.fillRect(0, 0, unbreraGUIWidth, unbreraGUIHeight);
-        var array = undoStack.concat(redoStack.slice().reverse());
+        var array = undoStack.slice().concat(redoStack.slice().reverse());
         var sliceNum = array.indexOf(array.find(function (e, i, a) {
             return e.isBranchPoint;
         }));
-        array = sliceNum == -1 ? array : array.slice(0, sliceNum + 1);        
-        createUnbreraGUI(array, 50,undoStack[0].totalBranchStack/2*(imgSize/2+imgSize*3/4+imgSize/4), 0);
+        array = sliceNum == -1 ? array : array.slice(0, sliceNum + 1);
+        createUnbreraGUI(array, 50, undoStack[0].totalBranchStack / 2 * (imgSize / 2 + imgSize * 3 / 4 + imgSize / 4), 0);
         var img = new Image();
         img.onload = function () {
             drawContext.drawImage(img, 0, 0, drawWidth, drawHeight);
         }
         img.src = lastUndoStack().state;
+        prevImage = lastUndoStack().state;
         lastUnbraNum = undoStack.lastIndexOf(undoStack.slice().reverse().find(function (e, i, a) {
             return e.isBranchPoint;
         }));
@@ -839,7 +874,7 @@ window.addEventListener("load", function () {
     }
     function undoRedoKeydown(e) {
         e = window.event || e;
-        if (e.key === 'z' && (e.ctrlKey || e.metaKey) && e.shiftKey) {
+        if ((e.key === 'z' && (e.ctrlKey || e.metaKey) && e.shiftKey)||(e.key === 'Z' && (e.ctrlKey || e.metaKey) && e.shiftKey)) {
             redo();
             commandPreviewExpression("redo");
             commandOperationExpression(3);
@@ -851,15 +886,15 @@ window.addEventListener("load", function () {
             commandAfterAnimation();
         }
     }
-    function unbraRebraKeydown(e) {
+    function unbraRebraKeydown(e) {        
         e = window.event || e;
-        if (e.key === '¸' && e.altKey && e.shiftKey) {
+        if ((e.key === '¸' && e.altKey && e.shiftKey )||(e.key === 'Z' && e.altKey && e.shiftKey )) {            
             rebra();
             commandPreviewExpression("rebra");
             commandOperationExpression(2);
             commandAfterAnimation();
             prevPosition = afterPosition.slice();
-        } else if (e.key === 'Ω' && e.altKey) {
+        } else if ((e.key === 'Ω' && e.altKey) ||(e.key === 'z' && e.altKey )){
             unbra();
             commandPreviewExpression("unbra");
             commandOperationExpression(0);

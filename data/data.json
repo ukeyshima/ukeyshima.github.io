@@ -14,9 +14,10 @@
         {"name":"mountain"},
         {"name":"mandelBox"},
         {"name":"randomizeHeight"},
-        {"name":"riverRipple"}
+        {"name":"riverRipple"},
+        {"name":"monteCarlo"}
     ],
     "other": [
-        {"name":"unbreraEditor"}        
+        {"name":"unbreraEditor"}           
     ]
 }

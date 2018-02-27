@@ -118,7 +118,7 @@
             float: left;
             overflow: auto;
             position: relative;
-            background-color:#222;
+            background-color: #222;
         }
 
         #animationCanvas {
@@ -132,6 +132,7 @@
             height: 100vh;
             float: left;
             background-color: #e38;
+            cursor: col-resize;
         }
 
         #commandPreviewFrame {
@@ -181,9 +182,10 @@
             line-height: 40px;
             color: #000;
         }
-        .arrow{
-            fill:rgb(255,0,0);
-        }
+
+        .arrow {
+            fill: rgb(255, 0, 0);
+        } 
     </style>
 </head>
 
@@ -211,7 +213,7 @@
             <div id="commandOperation">
                 <svg id="logomark" x="0px" y="0px" width="350px" height="350px">
                     <polygon id="topArrow" class="arrow" points="175,50 125,100 225,100" />
-                    <polygon id="leftArrow" class="arrow" points="50,175 100,125 100,225" />                    
+                    <polygon id="leftArrow" class="arrow" points="50,175 100,125 100,225" />
                     <polygon id="bottomArrow" class="arrow" points="175,300 125,250 225,250" />
                     <polygon id="rightArrow" class="arrow" points="300,175 250,125 250,225" />
                 </svg>

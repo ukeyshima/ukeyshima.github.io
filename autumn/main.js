@@ -12,44 +12,40 @@ window.addEventListener("load", function () {
     var object, mainVs, mainFs, gpgpuVs, gpgpuFs;
     model.addEventListener("load", function () {
         object = JSON.parse(this.responseText);
-        if(mainVs && mainFs && gpgpuVs && gpgpuFs){   
-            console.log(mainVs);
-            console.log(mainFs);         
-            console.log(gpgpuVs);
-            console.log(gpgpuFs);            
+        if (mainVs && mainFs && gpgpuVs && gpgpuFs) {
             glStart();
         }
     });
     model.send(null);
     mainVertexShaderText.addEventListener("load", function () {
         mainVs = this.responseText;
-        if(object && mainFs && gpgpuVs && gpgpuFs){
+        if (object && mainFs && gpgpuVs && gpgpuFs) {
             glStart();
         }
     });
     mainVertexShaderText.send(null);
     mainFragmentShaderText.addEventListener("load", function () {
         mainFs = this.responseText;
-        if(mainVs && object && gpgpuVs && gpgpuFs){
+        if (mainVs && object && gpgpuVs && gpgpuFs) {
             glStart();
         }
     });
     mainFragmentShaderText.send(null);
     gpgpuVertexShaderText.addEventListener("load", function () {
         gpgpuVs = this.responseText;
-        if(mainVs && mainFs && object && gpgpuFs){            
+        if (mainVs && mainFs && object && gpgpuFs) {
             glStart();
         }
     });
     gpgpuVertexShaderText.send(null);
     gpgpuFragmentShaderText.addEventListener("load", function () {
         gpgpuFs = this.responseText;
-        if(mainVs && mainFs && gpgpuVs && object){                        
+        if (mainVs && mainFs && gpgpuVs && object) {
             glStart();
         }
     });
     gpgpuFragmentShaderText.send(null);
-    function glStart() {        
+    function glStart() {
         var c = document.getElementById("canvas");
         var cw = window.innerWidth;
         var ch = window.innerHeight;
@@ -99,7 +95,6 @@ window.addEventListener("load", function () {
         gl.vertexAttribPointer(gpgpuAttLocation[0], gpgpuAttStride[0], gl.FLOAT, false, 0, 0);
         gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback[0]);
 
-
         gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vboList[1]), gl.STATIC_DRAW);
         gl.enableVertexAttribArray(gpgpuAttLocation[1]);
@@ -111,6 +106,7 @@ window.addEventListener("load", function () {
         gl.vertexAttribPointer(gpgpuAttLocation[2], gpgpuAttStride[2], gl.FLOAT, false, 0, 0);
 
         gl.bindVertexArray(null);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
         gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, null);
 
@@ -134,6 +130,7 @@ window.addEventListener("load", function () {
 
         gl.bindVertexArray(null);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, feedback[1]);
         gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, null);
 
         let gpgpuVaos = [gpgpuInputVao, gpgpuOutputVao];
@@ -165,12 +162,13 @@ window.addEventListener("load", function () {
         gl.bindBuffer(gl.ARRAY_BUFFER, feedback[0]);
         gl.enableVertexAttribArray(mainAttLocation[1]);
         gl.vertexAttribPointer(mainAttLocation[1], mainAttStride[1], gl.FLOAT, false, 0, 0);
-        gl.vertexAttribDivisor(mainAttLocation[1], 1);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Int16Array(obj.index), gl.STATIC_DRAW);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Int16Array(obj.index), gl.DYNAMIC_COPY);
+        gl.vertexAttribDivisor(mainAttLocation[1], 1);
 
         gl.bindVertexArray(null);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, feedback[0]);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
         var mainOutputVao = gl.createVertexArray();
@@ -184,48 +182,51 @@ window.addEventListener("load", function () {
         gl.bindBuffer(gl.ARRAY_BUFFER, feedback[1]);
         gl.enableVertexAttribArray(mainAttLocation[1]);
         gl.vertexAttribPointer(mainAttLocation[1], mainAttStride[1], gl.FLOAT, false, 0, 0);
+        //gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
+        //gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Int16Array(obj.index), gl.DYNAMIC_COPY);
         gl.vertexAttribDivisor(mainAttLocation[1], 1);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Int16Array(obj.index), gl.STATIC_DRAW);
 
         gl.bindVertexArray(null);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, feedback[1]);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
         let mainVaos = [mainInputVao, mainOutputVao];
-
         gl.clearColor(242 / 255, 242 / 255, 232 / 255, 1.0);
         var startTime = new Date().getTime();
         let frame = 0;
         (function render() {
             gl.clear(gl.COLOR_BUFFER_BIT);
-            let dist = 1 - frame,
-                vao = gpgpuVaos[frame],
-                vbo = feedback[dist],
-                trans = transformFeedback[dist];
+            let dist = 1 - frame;
             gl.useProgram(gpgpuProgram);
-            gl.bindVertexArray(vao);
-            gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, trans);
-            gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, vbo);
+            gl.bindVertexArray(gpgpuVaos[frame]);
+            gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback[dist]);
+            gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, feedback[dist]);
             gl.enable(gl.RASTERIZER_DISCARD);
             gl.beginTransformFeedback(gl.POINTS);
             gl.drawArrays(gl.POINTS, 0, particleNum);
             gl.endTransformFeedback();
+            let arrBuffer = new Float32Array(particleNum);
+            gl.getBufferSubData(gl.TRANSFORM_FEEDBACK_BUFFER, 0, arrBuffer);
+            console.log(arrBuffer);
+            //console.log(gl.getBufferParameter(gl.ARRAY_BUFFER, gl.BUFFER_SIZE));
             gl.disable(gl.RASTERIZER_DISCARD);
-            gl.bindVertexArray(null);
             gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, null);
             gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, null);
+            gl.bindVertexArray(null);
             gl.useProgram(mainProgram);
             gl.uniform2fv(mainUniLocation[0], [cw, ch]);
             gl.uniform1f(mainUniLocation[1], (new Date().getTime() - startTime) * 0.001);
             gl.bindVertexArray(mainVaos[dist]);
-            gl.drawElementsInstanced(gl.TRIANGLES, new Int16Array(obj.index).length, gl.UNSIGNED_SHORT, 0, particleNum);
+            //  gl.drawElementsInstanced(gl.TRIANGLES, new Int16Array(obj.index).length, gl.UNSIGNED_SHORT, 0, particleNum);            
+            gl.drawArraysInstanced(gl.TRIANGLES, 0, obj.position.length / 4, particleNum);
+            gl.bindVertexArray(null);
             gl.flush();
             requestAnimationFrame(render);
         })();
 
         function create_vertex_shader(script) {
-            var shader=gl.createShader(gl.VERTEX_SHADER);;      
+            var shader = gl.createShader(gl.VERTEX_SHADER);;
             gl.shaderSource(shader, script);
             gl.compileShader(shader);
             if (gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
@@ -236,7 +237,7 @@ window.addEventListener("load", function () {
             }
         }
         function create_fragment_shader(script) {
-            var shader=gl.createShader(gl.FRAGMENT_SHADER);;      
+            var shader = gl.createShader(gl.FRAGMENT_SHADER);;
             gl.shaderSource(shader, script);
             gl.compileShader(shader);
             if (gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {

@@ -3,6 +3,7 @@
   layout (location = 1)in vec3 offset;     
   uniform vec2 resolution;
   uniform float time;
+  out float vTime;
   out float fogFactor;
   #define PI 3.141592
 
@@ -115,8 +116,9 @@
   const float linerDepth = 1.0 / (far - near);
 
     void main(void){               
+      vTime=time;
       vec3 p=position+offset;
-      vec3 eyePosition=vec3(0.0,0.0,0.0);
+      vec3 eyePosition=vec3(0.0,0.0,10.0);
       mat4 mMatrix=identity;   
       mMatrix=translate(mMatrix,position+offset);
       mMatrix=rotate(mMatrix,time,vec3(1.0,0.0,1.0));     
