@@ -196,8 +196,7 @@ window.addEventListener("load", function () {
         gl.clearColor(242 / 255, 242 / 255, 232 / 255, 1.0);
         var startTime = new Date().getTime();
         let dist = 1;
-        (function render() {
-            console.log(dist);
+        (function render() {            
             gl.clear(gl.COLOR_BUFFER_BIT);
             gl.useProgram(gpgpuProgram);
             gl.bindVertexArray(gpgpuVaos[1 - dist]);
@@ -205,11 +204,7 @@ window.addEventListener("load", function () {
             gl.enable(gl.RASTERIZER_DISCARD);
             gl.beginTransformFeedback(gl.POINTS);
             gl.drawArrays(gl.POINTS, 0, particleNum);
-            gl.endTransformFeedback();
-            let arrBuffer = new Float32Array(particleNum);
-            gl.getBufferSubData(gl.TRANSFORM_FEEDBACK_BUFFER, 0, arrBuffer);
-            console.log(arrBuffer);
-            //console.log(gl.getBufferParameter(gl.ARRAY_BUFFER, gl.BUFFER_SIZE));
+            gl.endTransformFeedback();                        
             gl.disable(gl.RASTERIZER_DISCARD);
             gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, null);
             gl.bindVertexArray(null);
@@ -222,8 +217,7 @@ window.addEventListener("load", function () {
             gl.bindVertexArray(null);
             gl.flush();
             dist = 1 - dist;
-            requestAnimationFrame(render);            
-            //setTimeout(render, 100);
+            requestAnimationFrame(render);                        
         })();
 
         function create_vertex_shader(script) {
