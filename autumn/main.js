@@ -4,7 +4,7 @@ window.addEventListener("load", function () {
     var mainFragmentShaderText = new XMLHttpRequest();
     var gpgpuVertexShaderText = new XMLHttpRequest();
     var gpgpuFragmentShaderText = new XMLHttpRequest();
-    model.open("get", "data.json", true);
+    model.open("get", "../autumn/data.json", true);
     mainVertexShaderText.open("get", "../autumn/mainVertexShader.glsl", true);
     mainFragmentShaderText.open("get", "../autumn/mainFragmentShader.glsl", true);
     gpgpuVertexShaderText.open("get", "../autumn/gpgpuVertexShader.glsl", true);

@@ -18,7 +18,6 @@
         {"name":"monteCarlo"}
     ],
     "other": [
-        {"name":"unbreraEditor"},
-        {"name":"unbreraPaint"}           
+        {"name":"unbreraEditor"}                 
     ]
 }
