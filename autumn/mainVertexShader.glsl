@@ -118,7 +118,7 @@
     void main(void){               
       vTime=time;
       vec3 p=position+offset;
-      vec3 eyePosition=vec3(0.0,0.0,10.0);
+      vec3 eyePosition=vec3(0.0,0.0,0.0);
       mat4 mMatrix=identity;   
       mMatrix=translate(mMatrix,position+offset);
       mMatrix=rotate(mMatrix,time,vec3(1.0,0.0,1.0));     
