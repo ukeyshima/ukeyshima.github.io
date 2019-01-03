@@ -1,0 +1,246 @@
+html {
+  background-color: #111;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #111;
+  width: 100vw;
+  height: 100vh;
+  overflow: auto;
+  font-family: 'arial';
+}
+
+#root {
+  font-size: 0;
+}
+
+$headerHeight: 80px;
+
+.header {
+  width: 100vw;
+  height: $headerHeight;
+  position: fixed;
+  top: 0;
+  opacity: 0.8;
+  background-color: #111;
+  z-index: 1;
+}
+
+.logo {
+  float: left;
+  height: calc(#{$headerHeight} * 2 / 3);
+  width: calc(#{$headerHeight} * 2 / 3);
+  border-radius: 50%;
+  margin: calc(#{$headerHeight} * 1 / 6);
+  background-size: cover;
+  background-position: center;
+}
+
+.pageLink {
+  float: right;
+  color: #eee;
+  font-size: 25px;
+}
+
+.worksLink {
+  float: left;
+  color: #eee;
+  margin: 20px 30px 0 0;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.aboutLink {
+  float: left;
+  color: #eee;
+  margin: 20px 30px 0 10px;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.works {
+  width: 100vw;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: $headerHeight;
+}
+
+$thumbnailWrapperWidth: 700px;
+$thumbnailWrapperHeight: 200px;
+
+.thumbnailWrapper {
+  width: $thumbnailWrapperWidth;
+  height: $thumbnailWrapperHeight;
+  background: #222;
+  color: #eee;
+  position: relative;
+  margin-top: 50px;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 3px 3px 10px 2px rgba(0, 0, 0, 1);
+}
+
+.works .thumbnailWrapper:first-of-type {
+  margin-top: 0;
+}
+
+.thumbnailName {
+  width: 30px;
+  height: 200px;
+  font-size: 23px;
+  transform: rotate(270deg) translate(79px, 84px);
+  direction: rtl;
+  float: left;
+}
+
+$thumbnailWidth: 320px;
+$thumbnailHeight: 170px;
+
+.workLink {
+  display: inline-block;
+  width: $thumbnailWidth;
+  height: $thumbnailHeight;
+}
+
+.thumbnail {
+  width: $thumbnailWidth;
+  height: $thumbnailHeight;
+  background-size: cover;
+  background-position: center;
+  margin: 10px 0 0 0;
+  float: left;
+}
+
+.workRepletion {
+  width: calc(#{$thumbnailWrapperWidth} - #{$thumbnailWidth} - 50px);
+  height: $thumbnailHeight;
+  float: left;
+  margin: 10px 10px 0 10px;
+}
+
+.workDescription {
+  font-size: 15px;
+  width: 100%;
+  height: calc(#{$thumbnailHeight} * 4 / 5);
+}
+
+.workRelation {
+  font-size: 18px;
+  width: 100%;
+  height: calc(#{$thumbnailHeight} * 1 / 5);
+}
+
+.qiita {
+  margin: 0 1px;
+  border-radius: 50%;
+  background-color: #55c500;
+  height: 100%;
+  line-height: 190%;
+  width: calc(#{$thumbnailHeight} * 1 / 5);
+  text-align: center;
+  float: right;
+  text-decoration: none;
+  color: #eee;
+}
+.demo {
+  margin: 0 1px;
+  border-radius: 50%;
+  background-color: #0099c5;
+  height: 100%;
+  line-height: 190%;
+  width: calc(#{$thumbnailHeight} * 1 / 5);
+  text-align: center;
+  float: right;
+  text-decoration: none;
+  color: #eee;
+}
+.shadertoy {
+  margin: 0 1px;
+  border-radius: 50%;
+  background-color: #c55555;
+  height: 100%;
+  line-height: 190%;
+  width: calc(#{$thumbnailHeight} * 1 / 5);
+  text-align: center;
+  float: right;
+  text-decoration: none;
+  color: #eee;
+}
+.github {
+  margin: 0 1px;
+  border-radius: 50%;
+  background-color: #000000;
+  height: 100%;
+  line-height: 190%;
+  width: calc(#{$thumbnailHeight} * 1 / 5);
+  text-align: center;
+  float: right;
+  text-decoration: none;
+  color: #eee;
+}
+$iconSize: 200px;
+
+.icon {
+  width: $iconSize;
+  height: $iconSize;
+  margin: $headerHeight auto 0;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  float: none;
+}
+
+.profile {
+  color: #eee;
+  float: none;
+  font-size: 18px;
+  padding: 0 50px;
+  h1 {
+    font-size: 20px;
+    font-weight: unset;
+  }
+  h2 {
+    font-size: 16px;
+    font-weight: unset;
+  }
+  h3 {
+    font-size: 12px;
+    font-weight: unset;
+    a {
+      text-decoration: none;
+      color: #eee;
+      margin: 0 3px;
+    }
+  }
+}
+
+@media only screen and (min-width: 1100px) {
+  $thumbnailWrapperWidth: 500px;
+  .thumbnailWrapper {
+    float: left;
+    width: #{$thumbnailWrapperWidth};
+    height: $thumbnailWrapperHeight;
+    margin-left: calc((100% - #{$thumbnailWrapperWidth} * 2) / 3);
+  }
+  .works .thumbnailWrapper:nth-of-type(2n) {
+    margin-right: calc((100% - #{$thumbnailWrapperWidth} * 2) / 3);
+  }
+  .works .thumbnailWrapper:nth-of-type(-n + 2) {
+    margin-top: 0;
+  }
+  .workRepletion {
+    width: calc(#{$thumbnailWrapperWidth} - #{$thumbnailWidth} - 50px);
+  }
+  .icon {
+    margin: $headerHeight 0 0 $headerHeight;
+    float: left;
+  }
+  .profile {
+    margin: $headerHeight 0;
+    float: left;
+    width: calc(100vw - #{$iconSize} - #{$headerHeight} - 100px);
+    padding: 0 50px;
+  }
+}
