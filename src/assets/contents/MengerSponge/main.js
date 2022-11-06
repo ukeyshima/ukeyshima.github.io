@@ -48,7 +48,7 @@ const loop = () => {
   webgl2.gl.drawElements(webgl2.gl.TRIANGLES, WebGL2.planeVertexIndex.length, webgl2.gl.UNSIGNED_SHORT, 0);
   webgl2.gl.flush();
 
-  animationID = requestAnimationFrame(loop);
+  requestAnimationFrame(loop);
 };
 
 loop();
