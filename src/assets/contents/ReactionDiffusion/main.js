@@ -79,7 +79,7 @@ const loop = () => {
   webgl2.gl.clearColor(0.0, 0.0, 0.0, 1.0);
   webgl2.gl.clear(webgl2.gl.COLOR_BUFFER_BIT);
 
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < 30; i++) {
     webgl2.gl.useProgram(webgl2.webglPrograms.mainProgram.program);
     webgl2.gl.bindFramebuffer(webgl2.gl.FRAMEBUFFER, frameBuffer1.f);
     webgl2.gl.bindVertexArray(mainVAO);
@@ -88,8 +88,8 @@ const loop = () => {
     webgl2.gl.uniform1i(webgl2.webglPrograms.mainProgram.uniLocations.tex, 0);
     webgl2.gl.uniform1f(webgl2.webglPrograms.mainProgram.uniLocations.da, 1);
     webgl2.gl.uniform1f(webgl2.webglPrograms.mainProgram.uniLocations.db, 0.5);
-    webgl2.gl.uniform1f(webgl2.webglPrograms.mainProgram.uniLocations.f, 0.03731);
-    webgl2.gl.uniform1f(webgl2.webglPrograms.mainProgram.uniLocations.k, 0.06287);
+    webgl2.gl.uniform1f(webgl2.webglPrograms.mainProgram.uniLocations.f, 0.037);
+    webgl2.gl.uniform1f(webgl2.webglPrograms.mainProgram.uniLocations.k, 0.062);
     webgl2.gl.uniform1f(webgl2.webglPrograms.mainProgram.uniLocations.dt, 1);
     webgl2.gl.uniform3fv(webgl2.webglPrograms.mainProgram.uniLocations.mouse, mouse);
     webgl2.gl.uniform2fv(webgl2.webglPrograms.mainProgram.uniLocations.resolution, [canvas.width, canvas.height]);
