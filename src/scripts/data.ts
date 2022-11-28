@@ -58,5 +58,32 @@ export const Data: IData[] = [
             { name: "renderingFrag.glsl", language: "glsl" } as IFile,
             { name: "main.css", language: "css" } as IFile,
         ]
+    },
+    {
+        title: 'Boids',
+        mainPage: "index.html",
+        files: [
+            { name: "index.html", language: "html" } as IFile,
+            { name: "main.js", language: "javascript" } as IFile,
+            { name: "initParams.js", language: "javascript" } as IFile,
+            { name: "index.js", language: "javascript" } as IFile,
+            { name: "bitonicSort.js", language: "javascript" } as IFile,
+            { name: "gridIndex.js", language: "javascript" } as IFile,
+            { name: "updateParams.js", language: "javascript" } as IFile,
+            { name: "boids.js", language: "javascript" } as IFile,
+            { name: "rendering.js", language: "javascript" } as IFile,
+            { name: "matrix4x4.js", language: "javascript" } as IFile,
+            { name: "webgl2.js", language: "javascript" } as IFile,
+            { name: "model.js", language: "javascript" } as IFile,
+            { name: "initParamsFrag.glsl", language: "glsl" } as IFile,
+            { name: "indexFrag.glsl", language: "glsl" } as IFile,
+            { name: "bitonicSortFrag.glsl", language: "glsl" } as IFile,
+            { name: "gridIndexFrag.glsl", language: "glsl" } as IFile,
+            { name: "updateParamsFrag.glsl", language: "glsl" } as IFile,
+            { name: "boidsFrag.glsl", language: "glsl" } as IFile,
+            { name: "boidsVert.glsl", language: "glsl" } as IFile,
+            { name: "renderingFrag.glsl", language: "glsl" } as IFile,
+            { name: "main.css", language: "css" } as IFile,
+        ]
     }
 ];
