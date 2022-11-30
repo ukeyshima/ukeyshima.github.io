@@ -2,30 +2,7 @@ class UpdateParams {
   constructor(webgl2, frag) {
     this.webgl2 = webgl2;
 
-    const uniList = [
-      'velocityTexture',
-      'positionTexture',
-      'indexTexture',
-      'gridIndexTexture',
-      'deltaTime',
-      'indexResolution',
-      'gridIndexResolution',
-      'gridNum',
-      'maxSpeed',
-      'maxForce',
-      'separationRadius',
-      'alignmentRadius',
-      'cohesionRadius',
-      'separationWeight',
-      'alignmentWeight',
-      'cohesionWeight',
-      'simAreaCenter',
-      'cameraAreaCenter',
-      'cameraAreaSize',
-      'simAreaSize',
-      'wallWeight',
-      'mouse',
-    ];
+    const uniList = ['velocityTexture', 'positionTexture', 'indexTexture', 'gridIndexTexture', 'time', 'deltaTime', 'indexResolution', 'gridIndexResolution', 'gridNum', 'maxSpeed', 'maxForce', 'separationRadius', 'alignmentRadius', 'cohesionRadius', 'separationWeight', 'alignmentWeight', 'cohesionWeight', 'simAreaCenter', 'simAreaSize', 'wallWeight'];
     const attList = [{ array: WebGL2.planeVertexPosition, location: 'position', stride: 3 }];
 
     this.webgl2.addPrograms([
@@ -45,7 +22,7 @@ class UpdateParams {
     );
   }
 
-  execute(paramsFrameBufferRead, paramsFrameBufferWrite, indexFrameBuffer, gridIndexFrameBuffer, deltaTime, indexResolution, gridIndexResolution, gridNum, maxSpeed, maxForce, separationRadius, alignmentRadius, cohesionRadius, separationWeight, alignmentWeight, cohesionWeight, simAreaCenter, simAreaSize, cameraAreaCenter, cameraAreaSize, wallWeight, mouse) {
+  execute(paramsFrameBufferRead, paramsFrameBufferWrite, indexFrameBuffer, gridIndexFrameBuffer, time, deltaTime, indexResolution, gridIndexResolution, gridNum, maxSpeed, maxForce, separationRadius, alignmentRadius, cohesionRadius, separationWeight, alignmentWeight, cohesionWeight, simAreaCenter, simAreaSize, wallWeight) {
     this.webgl2.gl.useProgram(this.webgl2.webglPrograms.updateParamsProgram.program);
     this.webgl2.gl.bindFramebuffer(this.webgl2.gl.FRAMEBUFFER, paramsFrameBufferWrite.f);
     this.webgl2.gl.drawBuffers([webgl2.gl.COLOR_ATTACHMENT0, webgl2.gl.COLOR_ATTACHMENT1]);
@@ -62,6 +39,7 @@ class UpdateParams {
     this.webgl2.gl.uniform1i(this.webgl2.webglPrograms.updateParamsProgram.uniLocations.positionTexture, 1);
     this.webgl2.gl.uniform1i(this.webgl2.webglPrograms.updateParamsProgram.uniLocations.indexTexture, 2);
     this.webgl2.gl.uniform1i(this.webgl2.webglPrograms.updateParamsProgram.uniLocations.gridIndexTexture, 3);
+    this.webgl2.gl.uniform1f(this.webgl2.webglPrograms.updateParamsProgram.uniLocations.time, time);
     this.webgl2.gl.uniform1f(this.webgl2.webglPrograms.updateParamsProgram.uniLocations.deltaTime, deltaTime);
     this.webgl2.gl.uniform2fv(this.webgl2.webglPrograms.updateParamsProgram.uniLocations.indexResolution, indexResolution);
     this.webgl2.gl.uniform2fv(this.webgl2.webglPrograms.updateParamsProgram.uniLocations.gridIndexResolution, gridIndexResolution);
@@ -76,10 +54,7 @@ class UpdateParams {
     this.webgl2.gl.uniform1f(this.webgl2.webglPrograms.updateParamsProgram.uniLocations.cohesionWeight, cohesionWeight);
     this.webgl2.gl.uniform3fv(this.webgl2.webglPrograms.updateParamsProgram.uniLocations.simAreaCenter, simAreaCenter);
     this.webgl2.gl.uniform3fv(this.webgl2.webglPrograms.updateParamsProgram.uniLocations.simAreaSize, simAreaSize);
-    this.webgl2.gl.uniform3fv(this.webgl2.webglPrograms.updateParamsProgram.uniLocations.cameraAreaCenter, cameraAreaCenter);
-    this.webgl2.gl.uniform1f(this.webgl2.webglPrograms.updateParamsProgram.uniLocations.cameraAreaSize, cameraAreaSize);
     this.webgl2.gl.uniform1f(this.webgl2.webglPrograms.updateParamsProgram.uniLocations.wallWeight, wallWeight);
-    this.webgl2.gl.uniform3fv(this.webgl2.webglPrograms.updateParamsProgram.uniLocations.mouse, mouse);
 
     this.webgl2.gl.drawElements(this.webgl2.gl.TRIANGLES, WebGL2.planeVertexIndex.length, this.webgl2.gl.UNSIGNED_SHORT, 0);
     this.webgl2.gl.bindFramebuffer(this.webgl2.gl.FRAMEBUFFER, null);
