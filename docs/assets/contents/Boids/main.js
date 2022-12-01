@@ -6,23 +6,23 @@ canvas.height = window.innerHeight;
 const mouse = [0, 0, 0];
 const simAreaCenter = [0, 0, 0];
 const simAreaSize = [(20 * canvas.width) / canvas.height, 20, 20];
-const gridSize = [2, 2, 2];
+const gridSize = [3, 3, 3];
 const gridNum = [Math.ceil(simAreaSize[0] / gridSize[0]), Math.ceil(simAreaSize[1] / gridSize[1]), Math.ceil(simAreaSize[2] / gridSize[2])];
 const instanceNum = Math.pow(2, 14);
 const size = Math.sqrt(instanceNum);
 const maxSpeed = 3;
 const maxForce = 1;
-const separationRadius = 2;
-const alignmentRadius = 2;
-const cohesionRadius = 2;
-const separationWeight = 2;
+const separationRadius = 3;
+const alignmentRadius = 3;
+const cohesionRadius = 3;
+const separationWeight = 3;
 const alignmentWeight = 3;
 const cohesionWeight = 2;
 const wallWeight = 3;
 
 const mMatrix = Matrix4x4.multiply(Matrix4x4.rotationX(-90), Matrix4x4.scale([0.15, 0.15, 0.15]));
 const vMatrix = Matrix4x4.lookAt([0, 0, 20], [0, 0, 0], [0, 1, 0]);
-const pMatrix = Matrix4x4.orthographic(simAreaSize[1]/2 , canvas.width / canvas.height, 0.1, 1000);
+const pMatrix = Matrix4x4.orthographic(simAreaSize[1] / 2, canvas.width / canvas.height, 0.1, 1000);
 
 const vpMatrix = Matrix4x4.multiply(pMatrix, vMatrix);
 

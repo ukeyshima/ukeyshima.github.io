@@ -64,12 +64,12 @@ bool isNeighborGridIndexInSimulationArea(int gridIndex, int x, int y, int z) {
 }
 
 vec3 getForce(vec3 pos, vec3 vel) {
-    vec3 separationForce;
-    vec3 alignmentForce;
-    vec3 cohesionForce;
-    float separationCount;
-    float alignmentCount;
-    float cohesionCount;
+    vec3 separationForce = vec3(0.0);
+    vec3 alignmentForce = vec3(0.0);
+    vec3 cohesionForce = vec3(0.0);
+    float separationCount = 0.0;
+    float alignmentCount = 0.0;
+    float cohesionCount = 0.0;
     int gridIndex = int(getGridIndex(pos));
     for(int x = -1; x <= 1; x++) {
         for(int y = -1; y <= 1; y++) {

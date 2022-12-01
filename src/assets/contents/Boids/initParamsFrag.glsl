@@ -48,6 +48,7 @@ void main(void) {
     }
     pos = pos - 0.5;
     pos *= simAreaSize;
+    pos.z *= 0.01;
     pos -= simAreaCenter;
 
     outVelocity = vec4(vel, 0.0);
