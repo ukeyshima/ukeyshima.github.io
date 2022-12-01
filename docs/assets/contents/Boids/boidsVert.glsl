@@ -2,7 +2,6 @@
 in vec3 vertex;
 in float instanceIndex;
 
-out float vsDepth;
 out vec4 vsColor;
 
 uniform vec2 paramsResolution;
@@ -45,13 +44,13 @@ void main(void) {
 
     position.x += int(instanceIndex) < instanceNum ? 0.0 : position.x < 0.0 ? simAreaSize.x : -simAreaSize.x;
 
-    float rand = float(pcg(uint(instanceIndex))) / FLOAT_MAX * 2.0 - 1.0;
+    float rand = float(pcg(uint(int(instanceIndex) % instanceNum))) / FLOAT_MAX * 2.0 - 1.0;
     float velocityMagnitude = length(velocity);
     float wing = smoothstep(0.2, 0.6, abs(vertex.x)) * abs(vertex.x) / 2.0;
-    float flapAmp = rand + 0.1 * velocityMagnitude;
-    float flapFreq = 2.0 + rand * 0.3 - 0.1 * velocityMagnitude;
+    float flapAmp = rand + 0.3 * velocityMagnitude;
+    float flapFreq = 4.0 + rand * 0.3 - 0.1 * velocityMagnitude;
 
-    vec4 vertex = vec4(vertex, 1.0);
+    vec4 vertex = vec4(vertex * (rand * 0.3 + 0.7), 1.0);
     vertex.z += wing * flapAmp * sin(flapFreq * time);
     vertex = mMatrix * vertex;
     vertex = rotZ * vertex;
@@ -61,5 +60,5 @@ void main(void) {
     vec3 color = vec3(clamp(vertex.z * 0.5 + 0.5, 0.5, 1.0)) * (velocity.xyz * 0.5 + vec3(0.5));
 
     gl_Position = vertex;
-    vsColor = vec4(color, 0.9);
+    vsColor = vec4(color * (rand * 0.2 + 0.8), 0.9);
 }

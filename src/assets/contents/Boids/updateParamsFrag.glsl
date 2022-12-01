@@ -5,7 +5,7 @@ precision highp isampler2D;
 
 uniform float deltaTime;
 uniform float time;
-uniform vec2 indexResolution;
+uniform vec2 paramsResolution;
 uniform vec2 gridIndexResolution;
 uniform vec3 gridNum;
 uniform float maxSpeed;
@@ -22,7 +22,6 @@ uniform float wallWeight;
 
 uniform sampler2D velocityTexture;
 uniform sampler2D positionTexture;
-uniform usampler2D indexTexture;
 uniform isampler2D gridIndexTexture;
 
 #define FLOAT_MAX float(0xffffffffu)
@@ -35,17 +34,14 @@ vec3 limit(vec3 vec, float max) {
     return (length > max && length > 0.0) ? vec.xyz * (max / length) : vec.xyz;
 }
 
-int getInstanceIndex(ivec2 coord) {
-    return coord.x + coord.y * int(indexResolution.x);
-}
-
 ivec2 getCoord(int instanceIndex) {
-    return ivec2(instanceIndex % int(indexResolution.x), instanceIndex / int(indexResolution.x));
+    return ivec2(instanceIndex % int(paramsResolution.x), instanceIndex / int(paramsResolution.x));
 }
 
-int getGridIndex(int instanceIndex) {
-    ivec2 coord = getCoord(instanceIndex);
-    return int(texelFetch(indexTexture, coord, 0).y);
+uint getGridIndex(vec3 position) {
+    vec3 np = (position - simAreaCenter) / simAreaSize + vec3(0.5);
+    uvec3 ip = uvec3(floor(np * gridNum));
+    return ip.x + ip.y * uint(gridNum.x) + ip.z * uint(gridNum.x * gridNum.y);
 }
 
 ivec2 getGridCoord(int gridIndex) {
@@ -67,14 +63,14 @@ bool isNeighborGridIndexInSimulationArea(int gridIndex, int x, int y, int z) {
         (gridPos.z + z) >= 0 && (gridPos.z + z) < int(gridNum.z);
 }
 
-vec3 getForce(int instanceIndex, vec3 pos, vec3 vel) {
+vec3 getForce(vec3 pos, vec3 vel) {
     vec3 separationForce;
     vec3 alignmentForce;
     vec3 cohesionForce;
     float separationCount;
     float alignmentCount;
     float cohesionCount;
-    int gridIndex = getGridIndex(instanceIndex);
+    int gridIndex = int(getGridIndex(pos));
     for(int x = -1; x <= 1; x++) {
         for(int y = -1; y <= 1; y++) {
             for(int z = -1; z <= 1; z++) {
@@ -98,7 +94,6 @@ vec3 getForce(int instanceIndex, vec3 pos, vec3 vel) {
                     cohesionForce += dist > 0.0 && dist <= cohesionRadius ? otherPos : vec3(0.0);
                     cohesionCount += dist > 0.0 && dist <= cohesionRadius ? 1.0 : 0.0;
                 }
-
             }
         }
     }
@@ -144,12 +139,11 @@ vec3 vNoise3d(vec3 p) {
 
 void main(void) {
     ivec2 coord = ivec2(gl_FragCoord.xy);
-    int instanceIndex = getInstanceIndex(coord);
 
     vec3 vel = texelFetch(velocityTexture, coord, 0).xyz;
     vec3 pos = texelFetch(positionTexture, coord, 0).xyz;
 
-    vec3 force = getForce(instanceIndex, pos, vel);
+    vec3 force = getForce(pos, vel);
     force += avoidWall(pos) * wallWeight;
     force += vNoise3d(vec3(pos.xy, time)) * 2.0 - 1.0;
 

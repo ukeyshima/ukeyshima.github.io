@@ -20,7 +20,7 @@ const alignmentWeight = 3;
 const cohesionWeight = 2;
 const wallWeight = 3;
 
-const mMatrix = Matrix4x4.multiply(Matrix4x4.rotationX(-90), Matrix4x4.scale([0.1, 0.1, 0.1]));
+const mMatrix = Matrix4x4.multiply(Matrix4x4.rotationX(-90), Matrix4x4.scale([0.15, 0.15, 0.15]));
 const vMatrix = Matrix4x4.lookAt([0, 0, 20], [0, 0, 0], [0, 1, 0]);
 const pMatrix = Matrix4x4.orthographic(simAreaSize[1]/2 , canvas.width / canvas.height, 0.1, 1000);
 
@@ -55,7 +55,7 @@ const init = () => {
   paramsFrameBufferWrite = webgl2.createFrameBufferMRT(size, size, [webgl2.gl.RGBA32F, webgl2.gl.RGBA32F], [webgl2.gl.RGBA, webgl2.gl.RGBA], [webgl2.gl.FLOAT, webgl2.gl.FLOAT], [webgl2.gl.LINEAR, webgl2.gl.LINEAR], [webgl2.gl.REPEAT, webgl2.gl.REPEAT], 2, false);
   indexFrameBufferRead = webgl2.createFrameBuffer(size, size, webgl2.gl.RGBA32UI, webgl2.gl.RGBA_INTEGER, webgl2.gl.UNSIGNED_INT, webgl2.gl.NEAREST, webgl2.gl.CLAMP_TO_EDGE, false);
   indexFrameBufferWrite = webgl2.createFrameBuffer(size, size, webgl2.gl.RGBA32UI, webgl2.gl.RGBA_INTEGER, webgl2.gl.UNSIGNED_INT, webgl2.gl.NEAREST, webgl2.gl.CLAMP_TO_EDGE, false);
-  gridIndexFrameBuffer = webgl2.createFrameBuffer(gridNum[0] * gridNum[1], gridNum[2], webgl2.gl.RGBA32I, webgl2.gl.RGBA_INTEGER, webgl2.gl.INT, webgl2.gl.NEAREST, webgl2.gl.CLAMP_TO_EDGE, false);
+  gridIndexFrameBuffer = webgl2.createFrameBuffer(gridNum[0], gridNum[1] * gridNum[2], webgl2.gl.RGBA32I, webgl2.gl.RGBA_INTEGER, webgl2.gl.INT, webgl2.gl.NEAREST, webgl2.gl.CLAMP_TO_EDGE, false);
   boidsFrameBuffer = webgl2.createFrameBufferMRT(canvas.width, canvas.height, [webgl2.gl.RGBA, webgl2.gl.RGBA], [webgl2.gl.RGBA, webgl2.gl.RGBA], [webgl2.gl.UNSIGNED_BYTE, webgl2.gl.UNSIGNED_BYTE], [webgl2.gl.NEAREST, webgl2.gl.NEAREST], [webgl2.gl.CLAMP_TO_EDGE, webgl2.gl.CLAMP_TO_EDGE], 2, true);
 
   startTime = new Date().getTime();
@@ -77,9 +77,9 @@ const loop = () => {
   bitonicSort.execute(indexFrameBufferRead, indexFrameBufferWrite, [size, size], instanceNum);
   [indexFrameBufferRead, indexFrameBufferWrite] = [indexFrameBufferWrite, indexFrameBufferRead];
 
-  gridIndex.execute(indexFrameBufferRead, gridIndexFrameBuffer, [gridNum[0] * gridNum[1], gridNum[2]], instanceNum, [size, size]);
+  gridIndex.execute(indexFrameBufferRead, gridIndexFrameBuffer, [gridNum[0], gridNum[1] * gridNum[2]], instanceNum, [size, size]);
 
-  updateParams.execute(paramsFrameBufferRead, paramsFrameBufferWrite, indexFrameBufferRead, gridIndexFrameBuffer, time, deltaTime, [size, size], [gridNum[0] * gridNum[1], gridNum[2]], gridNum, maxSpeed, maxForce, separationRadius, alignmentRadius, cohesionRadius, separationWeight, alignmentWeight, cohesionWeight, simAreaCenter, simAreaSize, wallWeight);
+  updateParams.execute(paramsFrameBufferRead, paramsFrameBufferWrite, gridIndexFrameBuffer, time, deltaTime, [size, size], [gridNum[0], gridNum[1] * gridNum[2]], gridNum, maxSpeed, maxForce, separationRadius, alignmentRadius, cohesionRadius, separationWeight, alignmentWeight, cohesionWeight, simAreaCenter, simAreaSize, wallWeight);
   [paramsFrameBufferRead, paramsFrameBufferWrite] = [paramsFrameBufferWrite, paramsFrameBufferRead];
 
   boids.execute(paramsFrameBufferRead, boidsFrameBuffer, [size, size], Matrix4x4.transpose(mMatrix), Matrix4x4.transpose(vpMatrix), simAreaSize, instanceNum, time);
