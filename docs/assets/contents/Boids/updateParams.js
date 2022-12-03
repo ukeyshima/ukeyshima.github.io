@@ -2,7 +2,7 @@ class UpdateParams {
   constructor(webgl2, frag) {
     this.webgl2 = webgl2;
 
-    const uniList = ['velocityTexture', 'positionTexture', 'gridIndexTexture', 'time', 'deltaTime', 'paramsResolution', 'gridIndexResolution', 'gridNum', 'maxSpeed', 'maxForce', 'separationRadius', 'alignmentRadius', 'cohesionRadius', 'separationWeight', 'alignmentWeight', 'cohesionWeight', 'simAreaCenter', 'simAreaSize', 'wallWeight'];
+    const uniList = ['velocityTexture', 'positionTexture', 'gridIndexTexture',"indexTexture",'time', 'deltaTime', 'paramsResolution', 'gridIndexResolution', 'gridNum', 'maxSpeed', 'maxForce', 'separationRadius', 'alignmentRadius', 'cohesionRadius', 'separationWeight', 'alignmentWeight', 'cohesionWeight', 'simAreaCenter', 'simAreaSize', 'wallWeight'];
     const attList = [{ array: WebGL2.planeVertexPosition, location: 'position', stride: 3 }];
 
     this.webgl2.addPrograms([
@@ -22,7 +22,7 @@ class UpdateParams {
     );
   }
 
-  execute(paramsFrameBufferRead, paramsFrameBufferWrite, gridIndexFrameBuffer, time, deltaTime, paramsResolution, gridIndexResolution, gridNum, maxSpeed, maxForce, separationRadius, alignmentRadius, cohesionRadius, separationWeight, alignmentWeight, cohesionWeight, simAreaCenter, simAreaSize, wallWeight) {
+  execute(paramsFrameBufferRead, paramsFrameBufferWrite, gridIndexFrameBuffer, indexFrameBuffer, time, deltaTime, paramsResolution, gridIndexResolution, gridNum, maxSpeed, maxForce, separationRadius, alignmentRadius, cohesionRadius, separationWeight, alignmentWeight, cohesionWeight, simAreaCenter, simAreaSize, wallWeight) {
     this.webgl2.gl.useProgram(this.webgl2.webglPrograms.updateParamsProgram.program);
     this.webgl2.gl.bindFramebuffer(this.webgl2.gl.FRAMEBUFFER, paramsFrameBufferWrite.f);
     this.webgl2.gl.drawBuffers([webgl2.gl.COLOR_ATTACHMENT0, webgl2.gl.COLOR_ATTACHMENT1]);
@@ -33,9 +33,12 @@ class UpdateParams {
     this.webgl2.gl.bindTexture(this.webgl2.gl.TEXTURE_2D, paramsFrameBufferRead.ts[1]);
     this.webgl2.gl.activeTexture(this.webgl2.gl.TEXTURE2);
     this.webgl2.gl.bindTexture(this.webgl2.gl.TEXTURE_2D, gridIndexFrameBuffer.t);
+    this.webgl2.gl.activeTexture(this.webgl2.gl.TEXTURE3);
+    this.webgl2.gl.bindTexture(this.webgl2.gl.TEXTURE_2D, indexFrameBuffer.t);
     this.webgl2.gl.uniform1i(this.webgl2.webglPrograms.updateParamsProgram.uniLocations.velocityTexture, 0);
     this.webgl2.gl.uniform1i(this.webgl2.webglPrograms.updateParamsProgram.uniLocations.positionTexture, 1);
     this.webgl2.gl.uniform1i(this.webgl2.webglPrograms.updateParamsProgram.uniLocations.gridIndexTexture, 2);
+    this.webgl2.gl.uniform1i(this.webgl2.webglPrograms.updateParamsProgram.uniLocations.indexTexture, 3);
     this.webgl2.gl.uniform1f(this.webgl2.webglPrograms.updateParamsProgram.uniLocations.time, time);
     this.webgl2.gl.uniform1f(this.webgl2.webglPrograms.updateParamsProgram.uniLocations.deltaTime, deltaTime);
     this.webgl2.gl.uniform2fv(this.webgl2.webglPrograms.updateParamsProgram.uniLocations.paramsResolution, paramsResolution);

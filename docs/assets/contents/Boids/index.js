@@ -28,7 +28,7 @@ class Index {
     this.webgl2.gl.bindVertexArray(this.vao);
     this.webgl2.gl.activeTexture(this.webgl2.gl.TEXTURE0);
     this.webgl2.gl.bindTexture(this.webgl2.gl.TEXTURE_2D, paramsFrameBuffer.ts[1]);
-    this.webgl2.gl.uniform1i(this.webgl2.webglPrograms.bitonicSortProgram.uniLocations.positionTexture, 0);
+    this.webgl2.gl.uniform1i(this.webgl2.webglPrograms.indexProgram.uniLocations.positionTexture, 0);
     this.webgl2.gl.uniform2fv(this.webgl2.webglPrograms.indexProgram.uniLocations.resolution, resolution);
     this.webgl2.gl.uniform3fv(this.webgl2.webglPrograms.indexProgram.uniLocations.simAreaCenter, simAreaCenter);
     this.webgl2.gl.uniform3fv(this.webgl2.webglPrograms.indexProgram.uniLocations.simAreaSize, simAreaSize);

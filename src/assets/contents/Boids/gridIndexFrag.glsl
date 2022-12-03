@@ -45,7 +45,7 @@ int binarySearchMax(int target, int from, int to) {
     to = target >= gridIndex ? to : middle;
   }
 
-  return getGridIndex(from - 1) == target ? from - 1 : 1;
+  return getGridIndex(from - 1) == target ? from - 1 : -1;
 }
 
 ivec2 binarySearchRange(int target, int from, int to) {

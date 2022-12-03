@@ -6,16 +6,16 @@ canvas.height = window.innerHeight;
 const mouse = [0, 0, 0];
 const simAreaCenter = [0, 0, 0];
 const simAreaSize = [(20 * canvas.width) / canvas.height, 20, 20];
-const gridSize = [3, 3, 3];
+const gridSize = [2, 2, 2];
 const gridNum = [Math.ceil(simAreaSize[0] / gridSize[0]), Math.ceil(simAreaSize[1] / gridSize[1]), Math.ceil(simAreaSize[2] / gridSize[2])];
 const instanceNum = Math.pow(2, 14);
 const size = Math.sqrt(instanceNum);
 const maxSpeed = 3;
 const maxForce = 1;
-const separationRadius = 3;
-const alignmentRadius = 3;
-const cohesionRadius = 3;
-const separationWeight = 3;
+const separationRadius = 2;
+const alignmentRadius = 2;
+const cohesionRadius = 2;
+const separationWeight = 2.5;
 const alignmentWeight = 3;
 const cohesionWeight = 2;
 const wallWeight = 3;
@@ -79,7 +79,7 @@ const loop = () => {
 
   gridIndex.execute(indexFrameBufferRead, gridIndexFrameBuffer, [gridNum[0], gridNum[1] * gridNum[2]], instanceNum, [size, size]);
 
-  updateParams.execute(paramsFrameBufferRead, paramsFrameBufferWrite, gridIndexFrameBuffer, time, deltaTime, [size, size], [gridNum[0], gridNum[1] * gridNum[2]], gridNum, maxSpeed, maxForce, separationRadius, alignmentRadius, cohesionRadius, separationWeight, alignmentWeight, cohesionWeight, simAreaCenter, simAreaSize, wallWeight);
+  updateParams.execute(paramsFrameBufferRead, paramsFrameBufferWrite, gridIndexFrameBuffer, indexFrameBufferRead, time, deltaTime, [size, size], [gridNum[0], gridNum[1] * gridNum[2]], gridNum, maxSpeed, maxForce, separationRadius, alignmentRadius, cohesionRadius, separationWeight, alignmentWeight, cohesionWeight, simAreaCenter, simAreaSize, wallWeight);
   [paramsFrameBufferRead, paramsFrameBufferWrite] = [paramsFrameBufferWrite, paramsFrameBufferRead];
 
   boids.execute(paramsFrameBufferRead, boidsFrameBuffer, [size, size], Matrix4x4.transpose(mMatrix), Matrix4x4.transpose(vpMatrix), simAreaSize, instanceNum, time);

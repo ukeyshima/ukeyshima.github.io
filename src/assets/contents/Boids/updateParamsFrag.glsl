@@ -1,7 +1,7 @@
 #version 300 es
 precision highp float;
-precision highp usampler2D;
 precision highp isampler2D;
+precision highp usampler2D;
 
 uniform float deltaTime;
 uniform float time;
@@ -23,6 +23,7 @@ uniform float wallWeight;
 uniform sampler2D velocityTexture;
 uniform sampler2D positionTexture;
 uniform isampler2D gridIndexTexture;
+uniform usampler2D indexTexture;
 
 #define FLOAT_MAX float(0xffffffffu)
 
@@ -36,6 +37,11 @@ vec3 limit(vec3 vec, float max) {
 
 ivec2 getCoord(int instanceIndex) {
     return ivec2(instanceIndex % int(paramsResolution.x), instanceIndex / int(paramsResolution.x));
+}
+
+uint getInstanceIndex(int id) {
+    ivec2 coord = getCoord(id);
+    return texelFetch(indexTexture, coord, 0).x;
 }
 
 uint getGridIndex(vec3 position) {
@@ -81,7 +87,8 @@ vec3 getForce(vec3 pos, vec3 vel) {
                 ivec2 firstLastIndex = texelFetch(gridIndexTexture, gridCoord, 0).xy;
 
                 for(int i = firstLastIndex.x; i <= firstLastIndex.y; i++) {
-                    ivec2 coord = getCoord(i);
+                    int instanceIndex = int(getInstanceIndex(i));
+                    ivec2 coord = getCoord(instanceIndex);
                     vec3 otherPos = texelFetch(positionTexture, coord, 0).xyz;
                     vec3 otherVel = texelFetch(velocityTexture, coord, 0).xyz;
                     vec3 diff = pos - otherPos;
