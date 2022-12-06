@@ -1,9 +1,8 @@
 #version 300 es
-precision lowp float;
-precision highp sampler2D;
+precision mediump float;
+precision mediump sampler2D;
 
 uniform sampler2D tex;
-uniform vec2 resolution;
 uniform float time;
 #define FLOAT_MAX float(0xffffffffu)
 

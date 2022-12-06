@@ -1,11 +1,11 @@
 #version 300 es
-precision highp float;
+precision lowp float;
 
 uniform vec3 simAreaCenter;
 uniform vec3 simAreaSize;
 
-layout(location = 0) out vec4 outVelocity;
-layout(location = 1) out vec4 outPosition;
+layout(location = 0) out vec3 outVelocity;
+layout(location = 1) out vec3 outPosition;
 
 #define FLOAT_MAX float(0xffffffffu)
 
@@ -51,6 +51,6 @@ void main(void) {
     pos.z *= 0.01;
     pos -= simAreaCenter;
 
-    outVelocity = vec4(vel, 0.0);
-    outPosition = vec4(pos, 0.0);
+    outVelocity = vel;
+    outPosition = pos;
 }

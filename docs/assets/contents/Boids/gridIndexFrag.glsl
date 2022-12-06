@@ -1,13 +1,13 @@
 #version 300 es
-precision highp float;
-precision highp usampler2D;
+precision lowp float;
+precision mediump usampler2D;
 
 uniform vec2 resolution;
 uniform vec2 indexResolution;
 uniform int instanceNum;
 uniform usampler2D indexTexture;
 
-layout(location = 0) out ivec4 outGridIndex;
+layout(location = 0) out ivec2 outGridIndex;
 
 #define FLOAT_MAX float(0xffffffffu)
 
@@ -59,5 +59,5 @@ void main(void) {
   int gridIndex = getGridIndex(coord);
   ivec2 indexRange = binarySearchRange(gridIndex, 0, instanceNum + 1);
 
-  outGridIndex = ivec4(indexRange.x, indexRange.y, 0, 0);
+  outGridIndex = ivec2(indexRange.x, indexRange.y);
 }

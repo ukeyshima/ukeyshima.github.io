@@ -1,5 +1,6 @@
 #version 300 es
-precision highp float;
+precision lowp float;
+precision lowp sampler2D;
 
 uniform vec2 resolution;
 uniform vec3 simAreaCenter;
@@ -8,9 +9,7 @@ uniform vec3 gridNum;
 
 uniform sampler2D positionTexture;
 
-layout(location = 0) out uvec4 outIndex;
-
-#define FLOAT_MAX float(0xffffffffu)
+layout(location = 0) out uvec2 outIndex;
 
 uint getInstanceIndex(vec2 fragCoord) {
     return uint(fragCoord.x) + uint(fragCoord.y) * uint(resolution.x);
@@ -27,5 +26,5 @@ void main(void) {
     vec3 pos = texelFetch(positionTexture, coord, 0).xyz;
     uint index = getInstanceIndex(gl_FragCoord.xy);
     uint gridIndex = getGridIndex(pos);
-    outIndex = uvec4(index, gridIndex, 0, 0);
+    outIndex = uvec2(index, gridIndex);
 }

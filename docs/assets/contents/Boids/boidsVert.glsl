@@ -1,4 +1,7 @@
 #version 300 es
+precision lowp float;
+precision lowp sampler2D;
+
 in vec3 vertex;
 in float instanceIndex;
 

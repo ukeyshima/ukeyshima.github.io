@@ -1,7 +1,8 @@
 #version 300 es
-precision highp float;
-precision highp isampler2D;
-precision highp usampler2D;
+precision lowp float;
+precision mediump isampler2D;
+precision mediump usampler2D;
+precision lowp sampler2D;
 
 uniform float deltaTime;
 uniform float time;
@@ -27,8 +28,8 @@ uniform usampler2D indexTexture;
 
 #define FLOAT_MAX float(0xffffffffu)
 
-layout(location = 0) out vec4 outVelocity;
-layout(location = 1) out vec4 outPosition;
+layout(location = 0) out vec3 outVelocity;
+layout(location = 1) out vec3 outPosition;
 
 vec3 limit(vec3 vec, float max) {
     float length = sqrt(dot(vec, vec));
@@ -157,6 +158,6 @@ void main(void) {
     vel += force * deltaTime;
     vel = limit(vel, maxSpeed);
     pos += vel * deltaTime;
-    outVelocity = vec4(vel, 0.0);
-    outPosition = vec4(pos, 0.0);
+    outVelocity = vel;
+    outPosition = pos;
 }
