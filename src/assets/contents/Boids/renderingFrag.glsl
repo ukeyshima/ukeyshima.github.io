@@ -58,7 +58,7 @@ void main(void) {
     vec3 color = vec3(texelFetch(tex, coord, 0).xyz);
 
     color += fbm(vec3(vec2(coord) * 10.0, 0.1 * time)) * 0.5 - 0.5;
-    color += pow(fbm(vec3(vec2(coord) * vec2(0.002, 0.005), 0.2 * time)), 2.0) * 0.5;
+    color += pow(max(fbm(vec3(vec2(coord) * vec2(0.002, 0.005), 0.2 * time)), 0.0001), 2.0) * 0.5;
 
     color -= 0.1 * pcg3d01(uvec3(uint(coord.y) - uint(coord.y) % pcg(uint(coord.x)), uint(coord.x), 0)).xxx;
     color -= 0.1 * pcg3d01(uvec3(uint(coord.x) - uint(coord.x) % pcg(uint(coord.y)), uint(coord.y), 0)).xxx;
