@@ -5,26 +5,29 @@ canvas.height = window.innerHeight;
 
 const mouse = [0, 0, 0];
 const simAreaCenter = [0, 0, 0];
-const simAreaSize = [(20 * canvas.width) / canvas.height, 20, 20];
-const gridSize = [2, 2, 2];
+const simAreaSize = [(20 * canvas.width) / canvas.height, 20, 60];
+const gridSize = [1.8, 1.8, 1.8];
 const gridNum = [Math.ceil(simAreaSize[0] / gridSize[0]), Math.ceil(simAreaSize[1] / gridSize[1]), Math.ceil(simAreaSize[2] / gridSize[2])];
 const instanceNum = Math.pow(2, 14);
 const size = Math.sqrt(instanceNum);
 const maxSpeed = 3;
 const maxForce = 1;
-const separationRadius = 2;
-const alignmentRadius = 2;
-const cohesionRadius = 2;
-const separationWeight = 2.5;
+const separationRadius = 1.8;
+const alignmentRadius = 1.8;
+const cohesionRadius = 1.8;
+const separationWeight = 2.2;
 const alignmentWeight = 3;
 const cohesionWeight = 2;
 const wallWeight = 1;
 
 const mMatrix = Matrix4x4.multiply(Matrix4x4.rotationX(-90), Matrix4x4.scale([0.25, 0.25, 0.25]));
-const vMatrix = Matrix4x4.lookAt([0, 0, 100], [0, 0, 0], [0, 1, 0]);
+const vMatrix = Matrix4x4.lookAt([0, 0, 200], [0, 0, 0], [0, 1, 0]);
 const pMatrix = Matrix4x4.orthographic(simAreaSize[1] / 2, canvas.width / canvas.height, 0.1, 1000);
 
 const vpMatrix = Matrix4x4.multiply(pMatrix, vMatrix);
+
+const tMMatrix = Matrix4x4.transpose(mMatrix);
+const tVPMatrix = Matrix4x4.transpose(vpMatrix);
 
 const webgl2 = new WebGL2(canvas, []);
 webgl2.useTextureFloatExtension();
@@ -51,8 +54,8 @@ let preTime;
 let deltaTime;
 
 const init = () => {
-  paramsFrameBufferRead = webgl2.createFrameBufferMRT(size, size, [webgl2.gl.RGBA16F, webgl2.gl.RGBA16F], [webgl2.gl.RGBA, webgl2.gl.RGBA], [webgl2.gl.HALF_FLOAT, webgl2.gl.HALF_FLOAT], [webgl2.gl.NEAREST, webgl2.gl.NEAREST], [webgl2.gl.REPEAT, webgl2.gl.REPEAT], 2, false);
-  paramsFrameBufferWrite = webgl2.createFrameBufferMRT(size, size, [webgl2.gl.RGBA16F, webgl2.gl.RGBA16F], [webgl2.gl.RGBA, webgl2.gl.RGBA], [webgl2.gl.HALF_FLOAT, webgl2.gl.HALF_FLOAT], [webgl2.gl.NEAREST, webgl2.gl.NEAREST], [webgl2.gl.REPEAT, webgl2.gl.REPEAT], 2, false);
+  paramsFrameBufferRead = webgl2.createFrameBufferMRT(size, size, [webgl2.gl.RGBA32F, webgl2.gl.RGBA32F], [webgl2.gl.RGBA, webgl2.gl.RGBA], [webgl2.gl.FLOAT, webgl2.gl.FLOAT], [webgl2.gl.NEAREST, webgl2.gl.NEAREST], [webgl2.gl.REPEAT, webgl2.gl.REPEAT], 2, false);
+  paramsFrameBufferWrite = webgl2.createFrameBufferMRT(size, size, [webgl2.gl.RGBA32F, webgl2.gl.RGBA32F], [webgl2.gl.RGBA, webgl2.gl.RGBA], [webgl2.gl.FLOAT, webgl2.gl.FLOAT], [webgl2.gl.NEAREST, webgl2.gl.NEAREST], [webgl2.gl.REPEAT, webgl2.gl.REPEAT], 2, false);
   indexFrameBufferRead = webgl2.createFrameBuffer(size, size, webgl2.gl.RG16UI, webgl2.gl.RG_INTEGER, webgl2.gl.UNSIGNED_SHORT, webgl2.gl.NEAREST, webgl2.gl.CLAMP_TO_EDGE, false);
   indexFrameBufferWrite = webgl2.createFrameBuffer(size, size, webgl2.gl.RG16UI, webgl2.gl.RG_INTEGER, webgl2.gl.UNSIGNED_SHORT, webgl2.gl.NEAREST, webgl2.gl.CLAMP_TO_EDGE, false);
   gridIndexFrameBuffer = webgl2.createFrameBuffer(gridNum[0], gridNum[1] * gridNum[2], webgl2.gl.RG16I, webgl2.gl.RG_INTEGER, webgl2.gl.SHORT, webgl2.gl.NEAREST, webgl2.gl.CLAMP_TO_EDGE, false);
@@ -82,7 +85,7 @@ const loop = () => {
   updateParams.execute(paramsFrameBufferRead, paramsFrameBufferWrite, gridIndexFrameBuffer, indexFrameBufferRead, time, deltaTime, [size, size], [gridNum[0], gridNum[1] * gridNum[2]], gridNum, maxSpeed, maxForce, separationRadius, alignmentRadius, cohesionRadius, separationWeight, alignmentWeight, cohesionWeight, simAreaCenter, simAreaSize, wallWeight);
   [paramsFrameBufferRead, paramsFrameBufferWrite] = [paramsFrameBufferWrite, paramsFrameBufferRead];
 
-  boids.execute(paramsFrameBufferRead, boidsFrameBuffer, [size, size], Matrix4x4.transpose(mMatrix), Matrix4x4.transpose(vpMatrix), simAreaSize, instanceNum, time);
+  boids.execute(paramsFrameBufferRead, boidsFrameBuffer, [size, size], tMMatrix, tVPMatrix, simAreaSize, instanceNum, time);
 
   rendering.execute(boidsFrameBuffer, time);
 
