@@ -15,13 +15,13 @@ const impulseTemperature = 10;
 const impulseDensity = 1;
 const temperatureDissipation = 0.99;
 const velocityDissipation = 0.99;
-const densityDissipation = 0.9999;
-const ambientTemperature = 0;
+const densityDissipation = 0.98;
+const ambientTemperature = 1;
 const smokeBuoyancy = 1;
 const smokeWeight = 0.05;
 const cellSize = 1;
 const gradientScale = 1;
-const numJacobiIterations = 50;
+const numJacobiIterations = 20;
 const inverseBeta = 0.25;
 
 const advection = new Advection(webgl2, document.getElementById('advectionFrag').textContent);
@@ -42,6 +42,8 @@ let pressureFrameBufferRead;
 let pressureFrameBufferWrite;
 let divergenceFrameBuffer;
 
+let startTime;
+
 const init = () => {
   velocityFrameBufferRead = webgl2.createFrameBuffer(canvas.width, canvas.height, webgl2.gl.RG32F, webgl2.gl.RG, webgl2.gl.FLOAT, webgl2.gl.LINEAR, webgl2.gl.REPEAT);
   velocityFrameBufferWrite = webgl2.createFrameBuffer(canvas.width, canvas.height, webgl2.gl.RG32F, webgl2.gl.RG, webgl2.gl.FLOAT, webgl2.gl.LINEAR, webgl2.gl.REPEAT);
@@ -52,9 +54,13 @@ const init = () => {
   pressureFrameBufferRead = webgl2.createFrameBuffer(canvas.width, canvas.height, webgl2.gl.R32F, webgl2.gl.RED, webgl2.gl.FLOAT, webgl2.gl.LINEAR, webgl2.gl.REPEAT);
   pressureFrameBufferWrite = webgl2.createFrameBuffer(canvas.width, canvas.height, webgl2.gl.R32F, webgl2.gl.RED, webgl2.gl.FLOAT, webgl2.gl.LINEAR, webgl2.gl.REPEAT);
   divergenceFrameBuffer = webgl2.createFrameBuffer(canvas.width, canvas.height, webgl2.gl.R32F, webgl2.gl.RED, webgl2.gl.FLOAT, webgl2.gl.LINEAR, webgl2.gl.REPEAT);
+
+  startTime = new Date().getTime();
 };
 
 const loop = () => {
+  const time = (new Date().getTime() - startTime) / 1000;
+
   advection.execute(velocityFrameBufferRead, velocityFrameBufferRead, velocityFrameBufferWrite, timeStep, velocityDissipation);
   advection.execute(velocityFrameBufferRead, temperatureFrameBufferRead, temperatureFrameBufferWrite, timeStep, temperatureDissipation);
   advection.execute(velocityFrameBufferRead, densityFrameBufferRead, densityFrameBufferWrite, timeStep, densityDissipation);
@@ -65,8 +71,8 @@ const loop = () => {
   buoyancy.execute(velocityFrameBufferRead, temperatureFrameBufferRead, densityFrameBufferRead, velocityFrameBufferWrite, timeStep, ambientTemperature, smokeBuoyancy, smokeWeight, mouse);
   [velocityFrameBufferRead, velocityFrameBufferWrite] = [velocityFrameBufferWrite, velocityFrameBufferRead];
 
-  impulse.execute(temperatureFrameBufferRead, temperatureFrameBufferWrite, impulseTemperature);
-  impulse.execute(densityFrameBufferRead, densityFrameBufferWrite, impulseDensity);
+  impulse.execute(temperatureFrameBufferRead, temperatureFrameBufferWrite, impulseTemperature, time);
+  impulse.execute(densityFrameBufferRead, densityFrameBufferWrite, impulseDensity, time);
   [temperatureFrameBufferRead, temperatureFrameBufferWrite] = [temperatureFrameBufferWrite, temperatureFrameBufferRead];
   [densityFrameBufferRead, densityFrameBufferWrite] = [densityFrameBufferWrite, densityFrameBufferRead];
 
