@@ -63,5 +63,5 @@ void main(void) {
     vec3 color = vec3(clamp(vertex.z * 0.5 + 0.5, 0.5, 1.0)) * (velocity.xyz * 0.5 + vec3(0.5));
 
     gl_Position = vertex;
-    vsColor = vec4(color * (rand * 0.2 + 0.8), 0.9);
+    vsColor = vec4(color * (rand * 0.2 + 0.8), 1.0);
 }

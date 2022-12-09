@@ -32,8 +32,6 @@ class Boids {
 
   execute(paramsFrameBuffer, outputFrameBuffer, paramsResolution, mMatrix, vpMatrix, simAreaSize, instanceNum, time) {
     this.webgl2.gl.useProgram(this.webgl2.webglPrograms.boidsProgram.program);
-    this.webgl2.gl.enable(this.webgl2.gl.BLEND);
-    this.webgl2.gl.blendFunc(this.webgl2.gl.SRC_ALPHA, this.webgl2.gl.ONE_MINUS_SRC_ALPHA);
     this.webgl2.gl.bindFramebuffer(this.webgl2.gl.FRAMEBUFFER, outputFrameBuffer.f);
     this.webgl2.gl.drawBuffers([webgl2.gl.COLOR_ATTACHMENT0, webgl2.gl.COLOR_ATTACHMENT1]);
     this.webgl2.gl.clearColor(0.7, 0.5, 0.0, 1.0);
@@ -53,7 +51,6 @@ class Boids {
     this.webgl2.gl.uniform1i(this.webgl2.webglPrograms.boidsProgram.uniLocations.instanceNum, instanceNum);
     this.webgl2.gl.uniform1f(this.webgl2.webglPrograms.boidsProgram.uniLocations.time, time);
     this.webgl2.gl.drawElementsInstanced(this.webgl2.gl.TRIANGLES, this.modelVertexIndex.length, this.webgl2.gl.UNSIGNED_SHORT, 0, this.instanceNum);
-    this.webgl2.gl.disable(this.webgl2.gl.BLEND);
     this.webgl2.gl.bindFramebuffer(this.webgl2.gl.FRAMEBUFFER, null);
   }
 }
