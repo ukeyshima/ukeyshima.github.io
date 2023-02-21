@@ -85,5 +85,36 @@ export const Data: IData[] = [
             { name: "renderingFrag.glsl", language: "glsl" } as IFile,
             { name: "main.css", language: "css" } as IFile,
         ]
+    },
+    {
+        title: 'SPH',
+        mainPage: "index.html",
+        files: [
+            { name: "index.html", language: "html" } as IFile,
+            { name: "main.js", language: "javascript" } as IFile,
+            { name: "initParams.js", language: "javascript" } as IFile,
+            { name: "index.js", language: "javascript" } as IFile,
+            { name: "bitonicSort.js", language: "javascript" } as IFile,
+            { name: "gridIndexReference.js", language: "javascript" } as IFile,
+            { name: "density.js", language: "javascript" } as IFile,
+            { name: "pressure.js", language: "javascript" } as IFile,
+            { name: "acceleration.js", language: "javascript" } as IFile,
+            { name: "integrate.js", language: "javascript" } as IFile,
+            { name: "rendering.js", language: "javascript" } as IFile,
+            { name: "matrix4x4.js", language: "javascript" } as IFile,
+            { name: "webgl2.js", language: "javascript" } as IFile,
+            { name: "initParamsFrag.glsl", language: "glsl" } as IFile,
+            { name: "indexFrag.glsl", language: "glsl" } as IFile,
+            { name: "bitonicSortFrag.glsl", language: "glsl" } as IFile,
+            { name: "gridIndexReferenceFrag.glsl", language: "glsl" } as IFile,
+            { name: "gridIndexReferenceVert.glsl", language: "glsl" } as IFile,
+            { name: "densityFrag.glsl", language: "glsl" } as IFile,
+            { name: "pressureFrag.glsl", language: "glsl" } as IFile,
+            { name: "accelerationFrag.glsl", language: "glsl" } as IFile,
+            { name: "integrateFrag.glsl", language: "glsl" } as IFile,
+            { name: "renderingVert.glsl", language: "glsl" } as IFile,
+            { name: "renderingFrag.glsl", language: "glsl" } as IFile,
+            { name: "main.css", language: "css" } as IFile,
+        ]
     }
 ];
