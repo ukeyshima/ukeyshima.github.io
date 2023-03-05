@@ -2,7 +2,7 @@ class Acceleration {
   constructor(webgl2, frag) {
     this.webgl2 = webgl2;
 
-    const uniList = ['velocityTexture', 'positionTexture', 'densityTexture', 'pressureTexture', 'gridIndexTexture', 'gridIndexReferenceTexture', 'gridNum', 'simAreaCenter', 'simAreaSize', 'smoothLen', 'viscosity'];
+    const uniList = ['velocityTexture', 'positionTexture', 'densityTexture', 'pressureTexture', 'gridIndexTexture', 'gridIndexReferenceTexture', 'gridNum', 'simAreaCenter', 'simAreaSize', 'smoothLen', 'viscosity', 'gravity', 'wallStiffness'];
     const attList = [{ array: WebGL2.planeVertexPosition, location: 'position', stride: 3 }];
 
     this.webgl2.addPrograms([
@@ -22,7 +22,7 @@ class Acceleration {
     );
   }
 
-  execute(accelerationFrameBuffer, velocityTexture, positionTexture, densityTexture, pressureTexture, gridIndexTexture, gridIndexReferenceTexture, gridNum, simAreaCenter, simAreaSize, smoothLen, viscosity) {
+  execute(accelerationFrameBuffer, velocityTexture, positionTexture, densityTexture, pressureTexture, gridIndexTexture, gridIndexReferenceTexture, gridNum, simAreaCenter, simAreaSize, smoothLen, viscosity, gravity, wallStiffness) {
     this.webgl2.gl.useProgram(this.webgl2.webglPrograms.acceleration.program);
     this.webgl2.gl.bindFramebuffer(this.webgl2.gl.FRAMEBUFFER, accelerationFrameBuffer);
     this.webgl2.gl.bindVertexArray(this.vao);
@@ -49,6 +49,8 @@ class Acceleration {
     this.webgl2.gl.uniform3fv(this.webgl2.webglPrograms.acceleration.uniLocations.simAreaSize, simAreaSize);
     this.webgl2.gl.uniform1f(this.webgl2.webglPrograms.acceleration.uniLocations.smoothLen, smoothLen);
     this.webgl2.gl.uniform1f(this.webgl2.webglPrograms.acceleration.uniLocations.viscosity, viscosity);
+    this.webgl2.gl.uniform3fv(this.webgl2.webglPrograms.acceleration.uniLocations.gravity, gravity);
+    this.webgl2.gl.uniform1f(this.webgl2.webglPrograms.acceleration.uniLocations.wallStiffness, wallStiffness);
 
     this.webgl2.gl.drawElements(this.webgl2.gl.TRIANGLES, WebGL2.planeVertexIndex.length, this.webgl2.gl.UNSIGNED_SHORT, 0);
     this.webgl2.gl.bindFramebuffer(this.webgl2.gl.FRAMEBUFFER, null);

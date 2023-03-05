@@ -7,6 +7,8 @@ uniform vec3 simAreaCenter;
 uniform vec3 simAreaSize;
 uniform float smoothLen;
 uniform float viscosity;
+uniform vec3 gravity;
+uniform float wallStiffness;
 
 uniform sampler2D velocityTexture;
 uniform sampler2D positionTexture;
@@ -81,7 +83,16 @@ vec3 getAcceleration(vec3 pos, vec3 vel, float den, float pre) {
             }
         }
     }
-    return 1.0 / den * press + viscosity * visco;
+    return 1.0 / den * press + viscosity * visco + gravity;
+}
+
+void avoidWall(vec3 pos, inout vec3 acceleration) {
+    acceleration.x += max(dot(vec4(pos, 1.0), vec4(-1.0, 0.0, 0.0, simAreaCenter.x - simAreaSize.x * 0.5)), 0.0) * wallStiffness;
+    acceleration.x += min(dot(vec4(pos, 1.0), vec4(-1.0, 0.0, 0.0, simAreaCenter.x + simAreaSize.x * 0.5)), 0.0) * wallStiffness;
+    acceleration.y += max(dot(vec4(pos, 1.0), vec4(0.0, -1.0, 0.0, simAreaCenter.y - simAreaSize.y * 0.5)), 0.0) * wallStiffness;
+    acceleration.y += min(dot(vec4(pos, 1.0), vec4(0.0, -1.0, 0.0, simAreaCenter.y + simAreaSize.y * 0.5)), 0.0) * wallStiffness;
+    acceleration.z += max(dot(vec4(pos, 1.0), vec4(0.0, 0.0, -1.0, simAreaCenter.z - simAreaSize.z * 0.5)), 0.0) * wallStiffness;
+    acceleration.z += min(dot(vec4(pos, 1.0), vec4(0.0, 0.0, -1.0, simAreaCenter.z + simAreaSize.z * 0.5)), 0.0) * wallStiffness;
 }
 
 void main(void) {
@@ -91,5 +102,6 @@ void main(void) {
     float den = texelFetch(densityTexture, coord, 0).x;
     float pre = texelFetch(pressureTexture, coord, 0).x;
     vec3 acceleration = getAcceleration(pos, vel, den, pre);
+    avoidWall(pos, acceleration);
     outAcceleration = vec4(acceleration, 1.0);
 }

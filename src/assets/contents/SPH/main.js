@@ -87,10 +87,10 @@ const loop = () => {
   pressure.execute(frameBuffers.pressure.f, frameBuffers.density.t, pressureStiffness, restDensity);
 
   webgl2.gl.viewport(0, 0, paramsTextureResolution[0], paramsTextureResolution[1]);
-  acceleration.execute(frameBuffers.acceleration.f, frameBuffers.velocityPosition.read.ts[0], frameBuffers.velocityPosition.read.ts[1], frameBuffers.density.t, frameBuffers.pressure.t, frameBuffers.gridIndex.read.t, frameBuffers.gridIndexReference.t, gridNum, simAreaCenter, simAreaSize, smoothLen, viscosity);
+  acceleration.execute(frameBuffers.acceleration.f, frameBuffers.velocityPosition.read.ts[0], frameBuffers.velocityPosition.read.ts[1], frameBuffers.density.t, frameBuffers.pressure.t, frameBuffers.gridIndex.read.t, frameBuffers.gridIndexReference.t, gridNum, simAreaCenter, simAreaSize, smoothLen, viscosity, gravity, wallStiffness);
 
   webgl2.gl.viewport(0, 0, paramsTextureResolution[0], paramsTextureResolution[1]);
-  integrate.execute(frameBuffers.velocityPosition.write.f, frameBuffers.velocityPosition.read.ts[0], frameBuffers.velocityPosition.read.ts[1], frameBuffers.acceleration.t, simAreaCenter, simAreaSize, gravity, wallStiffness, timeStep);
+  integrate.execute(frameBuffers.velocityPosition.write.f, frameBuffers.velocityPosition.read.ts[0], frameBuffers.velocityPosition.read.ts[1], frameBuffers.acceleration.t, timeStep);
   [frameBuffers.velocityPosition.read, frameBuffers.velocityPosition.write] = [frameBuffers.velocityPosition.write, frameBuffers.velocityPosition.read];
 
   webgl2.gl.viewport(0, 0, canvas.width, canvas.height);
