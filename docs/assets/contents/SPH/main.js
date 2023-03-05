@@ -50,17 +50,17 @@ const init = () => {
   time.delta = 0;
 
   frameBuffers.velocityPosition = {
-    read: webgl2.createFrameBufferMRT(paramsTextureResolution[0], paramsTextureResolution[1], [webgl2.gl.RGBA32F, webgl2.gl.RGBA32F], [webgl2.gl.RGBA, webgl2.gl.RGBA], [webgl2.gl.FLOAT, webgl2.gl.FLOAT], [webgl2.gl.NEAREST, webgl2.gl.NEAREST], [webgl2.gl.CLAMP_TO_EDGE, webgl2.gl.CLAMP_TO_EDGE], 2, false),
-    write: webgl2.createFrameBufferMRT(paramsTextureResolution[0], paramsTextureResolution[1], [webgl2.gl.RGBA32F, webgl2.gl.RGBA32F], [webgl2.gl.RGBA, webgl2.gl.RGBA], [webgl2.gl.FLOAT, webgl2.gl.FLOAT], [webgl2.gl.NEAREST, webgl2.gl.NEAREST], [webgl2.gl.CLAMP_TO_EDGE, webgl2.gl.CLAMP_TO_EDGE], 2, false),
+    read: webgl2.createFrameBufferMRT(paramsTextureResolution[0], paramsTextureResolution[1], webgl2.gl.RGBA32F, webgl2.gl.RGBA, webgl2.gl.FLOAT, webgl2.gl.NEAREST, webgl2.gl.CLAMP_TO_EDGE, 2),
+    write: webgl2.createFrameBufferMRT(paramsTextureResolution[0], paramsTextureResolution[1], webgl2.gl.RGBA32F, webgl2.gl.RGBA, webgl2.gl.FLOAT, webgl2.gl.NEAREST, webgl2.gl.CLAMP_TO_EDGE, 2),
   };
   frameBuffers.gridIndex = {
-    read: webgl2.createFrameBuffer(paramsTextureResolution[0], paramsTextureResolution[1], webgl2.gl.RG32I, webgl2.gl.RG_INTEGER, webgl2.gl.INT, webgl2.gl.NEAREST, webgl2.gl.CLAMP_TO_EDGE, false),
-    write: webgl2.createFrameBuffer(paramsTextureResolution[0], paramsTextureResolution[1], webgl2.gl.RG32I, webgl2.gl.RG_INTEGER, webgl2.gl.INT, webgl2.gl.NEAREST, webgl2.gl.CLAMP_TO_EDGE, false),
+    read: webgl2.createFrameBuffer(paramsTextureResolution[0], paramsTextureResolution[1], webgl2.gl.RG32I, webgl2.gl.RG_INTEGER, webgl2.gl.INT, webgl2.gl.NEAREST, webgl2.gl.CLAMP_TO_EDGE),
+    write: webgl2.createFrameBuffer(paramsTextureResolution[0], paramsTextureResolution[1], webgl2.gl.RG32I, webgl2.gl.RG_INTEGER, webgl2.gl.INT, webgl2.gl.NEAREST, webgl2.gl.CLAMP_TO_EDGE),
   };
-  frameBuffers.acceleration = webgl2.createFrameBuffer(paramsTextureResolution[0], paramsTextureResolution[1], webgl2.gl.RGBA32F, webgl2.gl.RGBA, webgl2.gl.FLOAT, webgl2.gl.NEAREST, webgl2.gl.CLAMP_TO_EDGE, false);
-  frameBuffers.density = webgl2.createFrameBuffer(paramsTextureResolution[0], paramsTextureResolution[1], webgl2.gl.RGBA32F, webgl2.gl.RGBA, webgl2.gl.FLOAT, webgl2.gl.NEAREST, webgl2.gl.CLAMP_TO_EDGE, false);
-  frameBuffers.pressure = webgl2.createFrameBuffer(paramsTextureResolution[0], paramsTextureResolution[1], webgl2.gl.RGBA32F, webgl2.gl.RGBA, webgl2.gl.FLOAT, webgl2.gl.NEAREST, webgl2.gl.CLAMP_TO_EDGE, false);
-  frameBuffers.gridIndexReference = webgl2.createFrameBuffer(sortedGridIndexTextureResolution[0], sortedGridIndexTextureResolution[1], webgl2.gl.RGBA32F, webgl2.gl.RGBA, webgl2.gl.FLOAT, webgl2.gl.NEAREST, webgl2.gl.CLAMP_TO_EDGE, false);
+  frameBuffers.acceleration = webgl2.createFrameBuffer(paramsTextureResolution[0], paramsTextureResolution[1], webgl2.gl.RGBA32F, webgl2.gl.RGBA, webgl2.gl.FLOAT, webgl2.gl.NEAREST, webgl2.gl.CLAMP_TO_EDGE);
+  frameBuffers.density = webgl2.createFrameBuffer(paramsTextureResolution[0], paramsTextureResolution[1], webgl2.gl.RGBA32F, webgl2.gl.RGBA, webgl2.gl.FLOAT, webgl2.gl.NEAREST, webgl2.gl.CLAMP_TO_EDGE);
+  frameBuffers.pressure = webgl2.createFrameBuffer(paramsTextureResolution[0], paramsTextureResolution[1], webgl2.gl.RGBA32F, webgl2.gl.RGBA, webgl2.gl.FLOAT, webgl2.gl.NEAREST, webgl2.gl.CLAMP_TO_EDGE);
+  frameBuffers.gridIndexReference = webgl2.createFrameBuffer(sortedGridIndexTextureResolution[0], sortedGridIndexTextureResolution[1], webgl2.gl.RGBA32F, webgl2.gl.RGBA, webgl2.gl.FLOAT, webgl2.gl.NEAREST, webgl2.gl.CLAMP_TO_EDGE);
 
   initParams.execute(frameBuffers.velocityPosition.write, simAreaCenter, simAreaSize);
   [frameBuffers.velocityPosition.read, frameBuffers.velocityPosition.write] = [frameBuffers.velocityPosition.write, frameBuffers.velocityPosition.read];

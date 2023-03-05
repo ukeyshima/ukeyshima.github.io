@@ -125,11 +125,11 @@ class WebGL2 {
     for (let i = 0; i < count; i++) {
       fTextures[i] = this.gl.createTexture();
       this.gl.bindTexture(this.gl.TEXTURE_2D, fTextures[i]);
-      this.gl.texImage2D(this.gl.TEXTURE_2D, 0, internalFormat[i], width, height, 0, format[i], type[i], null);
-      this.gl.texParameterf(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, filterType[i]);
-      this.gl.texParameterf(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, filterType[i]);
-      this.gl.texParameterf(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, wrapType[i]);
-      this.gl.texParameterf(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, wrapType[i]);
+      this.gl.texImage2D(this.gl.TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, null);
+      this.gl.texParameterf(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, filterType);
+      this.gl.texParameterf(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, filterType);
+      this.gl.texParameterf(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, wrapType);
+      this.gl.texParameterf(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, wrapType);
       this.gl.bindTexture(this.gl.TEXTURE_2D, null);
     }
     this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, frameBuffer);
