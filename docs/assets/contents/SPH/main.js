@@ -41,14 +41,8 @@ const integrate = new Integrate(webgl2, document.getElementById('integrateFrag')
 const rendering = new Rendering(webgl2, document.getElementById('renderingFrag').textContent, document.getElementById('renderingVert').textContent, instanceNum);
 
 const frameBuffers = {};
-const time = {};
 
 const init = () => {
-  time.start = new Date().getTime();
-  time.pre = 0;
-  time.now = 0;
-  time.delta = 0;
-
   frameBuffers.velocityPosition = {
     read: webgl2.createFrameBufferMRT(paramsTextureResolution[0], paramsTextureResolution[1], webgl2.gl.RGBA32F, webgl2.gl.RGBA, webgl2.gl.FLOAT, webgl2.gl.NEAREST, webgl2.gl.CLAMP_TO_EDGE, 2),
     write: webgl2.createFrameBufferMRT(paramsTextureResolution[0], paramsTextureResolution[1], webgl2.gl.RGBA32F, webgl2.gl.RGBA, webgl2.gl.FLOAT, webgl2.gl.NEAREST, webgl2.gl.CLAMP_TO_EDGE, 2),
@@ -67,10 +61,6 @@ const init = () => {
 };
 
 const loop = () => {
-  time.pre = time.now;
-  time.now = (new Date().getTime() - time.start) / 1000;
-  time.delta = time.now - time.pre;
-
   webgl2.gl.viewport(0, 0, paramsTextureResolution[0], paramsTextureResolution[1]);
   index.execute(frameBuffers.velocityPosition.read, frameBuffers.gridIndex.read, simAreaCenter, simAreaSize, gridNum);
 
@@ -103,6 +93,7 @@ const loop = () => {
 
 init();
 loop();
+
 window.addEventListener('resize', () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
