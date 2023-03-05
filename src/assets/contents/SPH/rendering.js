@@ -3,10 +3,8 @@ class Rendering {
     this.webgl2 = webgl2;
     this.instanceNum = instanceNum;
 
-    const instanceIndex = new Array(this.instanceNum).fill(0).map((e, i) => i);
-
     const uniList = ['positionTexture', 'densityTexture', 'vpMatrix'];
-    const attList = [{ array: instanceIndex, location: 'instanceIndex', stride: 1 }];
+    const attList = [];
 
     this.webgl2.addPrograms([
       {
@@ -20,7 +18,7 @@ class Rendering {
 
     this.vao = this.webgl2.createVAO(
       Object.keys(this.webgl2.webglPrograms.renderingProgram.attLocations).map((key) => this.webgl2.webglPrograms.renderingProgram.attLocations[key]),
-      [{ location: this.webgl2.webglPrograms.renderingProgram.attLocations.instanceIndex.location, stride: 1 }],
+      [],
       1
     );
   }
