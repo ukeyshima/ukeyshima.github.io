@@ -10,13 +10,14 @@ const gap: number = 5;
 
 interface IImageProps {
     name: string,
+    type: string,
     size: number,
     onClick: (e: React.MouseEvent) => void
 }
 
 const Image = (props: IImageProps) => <img
     style={{ width: props.size, height: props.size, objectFit: "cover" }}
-    src={`./assets/img/thumbnails/${props.name}.png`}
+    src={`./assets/img/thumbnails/${props.type}/${props.name}.png`}
     alt={props.name}
     loading="lazy"
     onClick={props.onClick}
@@ -27,7 +28,7 @@ const GetFileList = async (data: IData) => {
         return {
             name: e.name,
             language: e.language,
-            script: await fetch(`assets/contents/${data.title}/${e.name}`).then((result) => result.text()),
+            script: await fetch(`assets/contents/${data.type}/${data.title}/${e.name}`).then((result) => result.text()),
         } as IFile
     }));
     return fileList;
@@ -44,6 +45,7 @@ export const ImageMatrix: React.FC = () => {
                     <ImageListItem key={data.title}>
                         <Image
                             name={data.title}
+                            type={data.type}
                             size={size}
                             onClick={async () => {
                                 setFileList(await GetFileList(data));

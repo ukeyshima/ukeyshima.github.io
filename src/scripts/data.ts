@@ -6,6 +6,7 @@ export interface IFile {
 
 export interface IData {
     title: string,
+    type: string,
     mainPage: string,
     files: IFile[]
 }
@@ -13,6 +14,7 @@ export interface IData {
 export const Data: IData[] = [
     {
         title: 'MengerSponge',
+        type: "WebGL",
         mainPage: "index.html",
         files: [
             { name: "index.html", language: "html" } as IFile,
@@ -24,19 +26,7 @@ export const Data: IData[] = [
     },
     {
         title: 'ReactionDiffusion',
-        mainPage: "index.html",
-        files: [
-            { name: "index.html", language: "html" } as IFile,
-            { name: "main.js", language: "javascript" } as IFile,
-            { name: "webgl2.js", language: "javascript" } as IFile,
-            { name: "initialFrag.glsl", language: "glsl" } as IFile,
-            { name: "mainFrag.glsl", language: "glsl" } as IFile,
-            { name: "renderingFrag.glsl", language: "glsl" } as IFile,
-            { name: "main.css", language: "css" } as IFile,
-        ]
-    },
-    {
-        title: 'GameOfLife',
+        type: "WebGL",
         mainPage: "index.html",
         files: [
             { name: "index.html", language: "html" } as IFile,
@@ -50,6 +40,7 @@ export const Data: IData[] = [
     },
     {
         title: 'SmokeSimulation',
+        type: "WebGL",
         mainPage: "index.html",
         files: [
             { name: "index.html", language: "html" } as IFile,
@@ -74,6 +65,7 @@ export const Data: IData[] = [
     },
     {
         title: 'Boids',
+        type: "WebGL",
         mainPage: "index.html",
         files: [
             { name: "index.html", language: "html" } as IFile,
@@ -101,6 +93,7 @@ export const Data: IData[] = [
     },
     {
         title: 'SPH',
+        type: "WebGL",
         mainPage: "index.html",
         files: [
             { name: "index.html", language: "html" } as IFile,
