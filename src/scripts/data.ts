@@ -127,5 +127,17 @@ export const Data: IData[] = [
             { name: "renderingFrag.glsl", language: "glsl" } as IFile,
             { name: "main.css", language: "css" } as IFile,
         ]
+    },
+    {
+        title: 'HelloWebGPU',
+        pageType: PageType.WebGPU,
+        mainPage: "index.html",
+        files: [
+            { name: "index.html", language: "html" } as IFile,
+            { name: "main.js", language: "javascript" } as IFile,
+            { name: "frag.wgsl", language: "wgsl" } as IFile,
+            { name: "vert.wgsl", language: "wgsl" } as IFile,
+            { name: "main.css", language: "css" } as IFile,
+        ]
     }
 ];

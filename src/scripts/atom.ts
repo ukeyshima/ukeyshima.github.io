@@ -9,7 +9,7 @@ export const fileListState = atom<IFile[]>({
 
 export const pageTypeState = atom<PageType>({
     key: "pageType",
-    default: PageType.WebGL
+    default: PageType.WebGPU
 })
 
 export const contentOpenState = atom<boolean>({

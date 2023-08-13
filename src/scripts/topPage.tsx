@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { ReactNode } from 'react';
 import { useRecoilState } from "recoil"
-import { Box, Typography, Container, Fade } from '@mui/material';
+import { Box, Typography, Container, Breadcrumbs, Link } from '@mui/material';
 import { ImageMatrix } from './imageMatrix';
 import { contentOpenState } from './atom';
 import { pageTypeState } from './atom';
@@ -15,7 +15,7 @@ interface IHeaderProps {
 const Header = (props: IHeaderProps) => <Box sx={{
     display: "table-cell",
     width: 100 + "vw",
-    height: 100 + "vh",
+    height: 30 + "vh",
     textAlign: 'center',
     verticalAlign: 'middle',
     fontWeight: 'light',
@@ -30,8 +30,11 @@ export const TopPage: React.FC = () => {
     return (
         <Box>
             <Header>
-                <Typography sx={{ padding: 2 }} variant="h5">WebGraphics</Typography>
-                <Typography>Real-time simulation and art implemented on WebGL / WebGPU</Typography>
+                <Typography sx={{ padding: 2 }} variant="h5">ukeyshima.github.io</Typography>
+                <Breadcrumbs sx={{ "& ol": { justifyContent: "center", margin: "auto" } }}>
+                    <Link onClick={() => setPageType(PageType.WebGL)}>WebGL</Link>
+                    <Link onClick={() => setPageType(PageType.WebGPU)}>WebGPU</Link>
+                </Breadcrumbs>
             </Header>
             <Container maxWidth="lg" >
                 <ImageMatrix pageType={pageType} />

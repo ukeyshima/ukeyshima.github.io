@@ -23,6 +23,9 @@ const GetScriptDocument = (props: IFile[]) => {
             case "glsl":
                 script = script.replace(`<script src="./${e.name}" type="text/plain" id="${e.name.split(".")[0]}"></script>`, `<script type="text/plain" id="${e.name.split(".")[0]}">${e.script}</script>`);
                 break;
+            case "wgsl":
+                script = script.replace(`<script src="./${e.name}" type="text/plain" id="${e.name.split(".")[0]}"></script>`, `<script type="text/plain" id="${e.name.split(".")[0]}">${e.script}</script>`);
+                break;
             default:
                 break;
         }
