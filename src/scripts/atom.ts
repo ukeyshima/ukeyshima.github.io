@@ -1,10 +1,15 @@
 import { atom } from "recoil"
-import { IFile } from "./data"
+import { IFile, PageType } from "./data"
 import { ViewMode } from "./view"
 
 export const fileListState = atom<IFile[]>({
     key: "fileList",
     default: [],
+})
+
+export const pageTypeState = atom<PageType>({
+    key: "pageType",
+    default: PageType.WebGL
 })
 
 export const contentOpenState = atom<boolean>({

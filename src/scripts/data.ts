@@ -1,3 +1,8 @@
+export enum PageType {
+    WebGL = 0,
+    WebGPU = 1,
+}
+
 export interface IFile {
     name: string,
     language: string,
@@ -6,7 +11,7 @@ export interface IFile {
 
 export interface IData {
     title: string,
-    type: string,
+    pageType: PageType,
     mainPage: string,
     files: IFile[]
 }
@@ -14,7 +19,7 @@ export interface IData {
 export const Data: IData[] = [
     {
         title: 'MengerSponge',
-        type: "WebGL",
+        pageType: PageType.WebGL,
         mainPage: "index.html",
         files: [
             { name: "index.html", language: "html" } as IFile,
@@ -26,7 +31,7 @@ export const Data: IData[] = [
     },
     {
         title: 'ReactionDiffusion',
-        type: "WebGL",
+        pageType: PageType.WebGL,
         mainPage: "index.html",
         files: [
             { name: "index.html", language: "html" } as IFile,
@@ -40,7 +45,7 @@ export const Data: IData[] = [
     },
     {
         title: 'SmokeSimulation',
-        type: "WebGL",
+        pageType: PageType.WebGL,
         mainPage: "index.html",
         files: [
             { name: "index.html", language: "html" } as IFile,
@@ -65,7 +70,7 @@ export const Data: IData[] = [
     },
     {
         title: 'Boids',
-        type: "WebGL",
+        pageType: PageType.WebGL,
         mainPage: "index.html",
         files: [
             { name: "index.html", language: "html" } as IFile,
@@ -93,7 +98,7 @@ export const Data: IData[] = [
     },
     {
         title: 'SPH',
-        type: "WebGL",
+        pageType: PageType.WebGL,
         mainPage: "index.html",
         files: [
             { name: "index.html", language: "html" } as IFile,

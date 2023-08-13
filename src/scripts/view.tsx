@@ -33,7 +33,7 @@ interface IViewModeSelectProps {
     viewMode: ViewMode
 }
 
-export enum ViewMode {
+export const enum ViewMode {
     Full = 0,
     Horizontal = 1,
     Vertical = 2,

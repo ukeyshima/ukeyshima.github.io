@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useRecoilState } from "recoil"
 import { ImageList, ImageListItem, Box } from '@mui/material';
-import { Data, IData, IFile } from "./data"
+import { Data, IData, IFile, PageType } from "./data"
 import { fileListState, contentOpenState } from './atom';
 
 const size: number = 200;
@@ -28,24 +28,28 @@ const GetFileList = async (data: IData) => {
         return {
             name: e.name,
             language: e.language,
-            script: await fetch(`assets/contents/${data.type}/${data.title}/${e.name}`).then((result) => result.text()),
+            script: await fetch(`assets/contents/${PageType[data.pageType]}/${data.title}/${e.name}`).then((result) => result.text()),
         } as IFile
     }));
     return fileList;
 }
 
-export const ImageMatrix: React.FC = () => {
+interface IImageMatrixProps {
+    pageType: PageType
+}
+
+export const ImageMatrix: React.FC<IImageMatrixProps> = (props: IImageMatrixProps) => {
     const [fileList, setFileList] = useRecoilState<IFile[]>(fileListState);
     const [contentOpen, setContentOpen] = useRecoilState(contentOpenState);
 
     return (
         <Box onClick={e => { if (e.target == e.currentTarget) setContentOpen(false) }}>
             <ImageList sx={{ width: size * columnNum + gap * (columnNum), margin: "auto" }} cols={columnNum} gap={gap} variant={'standard'}>
-                {Data.map(data => (
+                {Data.filter(data => data.pageType == props.pageType).map(data => (
                     <ImageListItem key={data.title}>
                         <Image
                             name={data.title}
-                            type={data.type}
+                            type={PageType[data.pageType]}
                             size={size}
                             onClick={async () => {
                                 setFileList(await GetFileList(data));
